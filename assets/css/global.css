@@ -169,7 +169,7 @@ p {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background-size: 70%;          /* icono ~70px dentro del círculo */
+    background-size: 90%;          /* icono ~90px dentro del círculo */
     background-repeat: no-repeat;
     background-position: center;
     background-color: #232221;     /* mismo fondo que la web */
