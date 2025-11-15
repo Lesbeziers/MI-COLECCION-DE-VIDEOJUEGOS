@@ -151,8 +151,8 @@ p {
 
 /* Círculo grande placeholder (futuro icono) */
 .stat-circle {
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background-color: #ccc;   /* gris fantasma */
     opacity: 0.25;
