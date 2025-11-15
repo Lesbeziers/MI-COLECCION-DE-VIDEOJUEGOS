@@ -136,15 +136,17 @@ p {
 }
 
 /* ----------------------------------------------------
-   ICONO TEMPORAL (CÍRCULO RELLENO) — HERO
+   ICONO PORTADA
 ----------------------------------------------------- */
 .hero-icon {
     width: 110px;
     height: 110px;
-    background-color: #ccc;
-    border-radius: 50%;
-    margin: 20px auto 10px auto;  /* Subimos el círculo hacia arriba */
-    opacity: 0.25;
+    background-image: url('../icons/ic_portada.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 20px auto 10px auto;  /* alineado igual que antes */
+    opacity: 1; /* aseguramos que se vea al 100% */
 }
 
 /* ----------------------------------------------------
