@@ -125,17 +125,6 @@ p {
     border-color: #ff8800;
 }
 
-/* Círculo de la lupa (placeholder, luego irá el SVG) */
-.search-icon-circle {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid #aaa;
-    margin: 18px auto 0 auto;
-    opacity: 0.7;
-}
-
-
 /* ----------------------------------------------
    TITULAR — Ajuste especial para pantallas móviles
 ----------------------------------------------- */
