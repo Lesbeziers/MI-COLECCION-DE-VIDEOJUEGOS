@@ -22,12 +22,12 @@ html, body {
 ----------------------------------------------------- */
 
 body {
-    background-color: #111;      /* Fondo negro elegante */
-    color: #ddd;                 /* Texto gris suave */
+    background-color: #232221;   /* Gris oscuro del mockup */
+    color: #ddd;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 400;
     text-align: center;
-    padding-top: 60px;
+    padding-top: 80px;           /* Un poco más abajo para que respire */
 }
 
 /* ----------------------------------------------------
@@ -41,8 +41,11 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-    color: #ff8800;              /* Naranja como tu mockup */
-    font-size: 32px;
+    color: #ff8800;              /* Naranja mockup */
+    font-size: 30px;             /* Tamaño muy parecido al de tu captura */
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin-bottom: 20px;
 }
 
