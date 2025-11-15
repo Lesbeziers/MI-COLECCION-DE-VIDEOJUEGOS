@@ -42,7 +42,7 @@ h1, h2, h3, h4 {
 
 h1 {
     color: #ff8800;              /* Naranja mockup */
-    font-size: 20px;             /* Tamaño muy parecido al de tu captura */
+    font-size: 25px;             /* Tamaño muy parecido al de tu captura */
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -130,7 +130,7 @@ p {
 ----------------------------------------------- */
 @media (max-width: 600px) {
     h1 {
-        font-size: 42px;   /* Antes 30px → ahora 42px */
+        font-size: 30px;   /* Antes 30px → ahora 42px */
         margin-top: 10px;
     }
 }
