@@ -134,3 +134,40 @@ p {
     margin: 20px auto 10px auto;  /* Subimos el círculo hacia arriba */
     opacity: 0.25;
 }
+/* ----------------------------------------------------
+   BLOQUES DE ESTADÍSTICAS: PLATAFORMAS / COLECCIÓN
+----------------------------------------------------- */
+
+.stats {
+    display: flex;
+    justify-content: center;  /* los coloca en fila, centrados */
+    gap: 50px;                /* separación entre los dos bloques */
+    margin-top: 45px;         /* distancia desde el título naranja */
+}
+
+.stat-block {
+    text-align: center;
+}
+
+/* Círculo grande placeholder (futuro icono) */
+.stat-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #ccc;   /* gris fantasma */
+    opacity: 0.25;
+    margin: 0 auto 14px auto; /* centrado + espacio con el texto */
+}
+
+/* Texto PLATAFORMAS / COLECCIÓN */
+.stat-label {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+/* Número 16 / 3.767 */
+.stat-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #fff;
+}
