@@ -27,7 +27,7 @@ body {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 400;
     text-align: center;
-    padding-top: 20px;           /* Un poco más abajo para que respire */
+    padding-top: 0px;           /* Un poco más abajo para que respire */
 }
 
 /* ----------------------------------------------------
