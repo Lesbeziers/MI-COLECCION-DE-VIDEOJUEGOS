@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 103 103">
+  <!-- Generator: Adobe Illustrator 30.0.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 123)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #a5a5a5;
+      }
+
+      .st1, .st2 {
+        fill: #232221;
+      }
+
+      .st1, .st2, .st3, .st4 {
+        stroke: #a5a5a5;
+      }
+
+      .st1, .st2, .st4 {
+        stroke-miterlimit: 10;
+      }
+
+      .st1, .st3, .st4 {
+        stroke-width: 2px;
+      }
+
+      .st2 {
+        stroke-width: 3px;
+      }
+
+      .st3 {
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .st3, .st4 {
+        fill: none;
+      }
+    </style>
+  </defs>
+  <circle class="st2" cx="51.5" cy="51.5" r="50"/>
+  <g>
+    <path class="st1" d="M51.56,64.26h17.97c.78,0,1.42-.63,1.42-1.42v-7.08c0-.78.63-1.42,1.42-1.42h0c.78,0,1.42-.63,1.42-1.42V17.47c0-.78-.63-1.42-1.42-1.42h-20.8s-20.8,0-20.8,0c-.78,0-1.42.63-1.42,1.42v35.46c0,.78.63,1.42,1.42,1.42h0c.78,0,1.42.63,1.42,1.42v7.08c0,.78.63,1.42,1.42,1.42h17.97Z"/>
+    <path class="st4" d="M48.33,16.05v30.62c0,1.29,1.05,2.33,2.33,2.33h15.69c1.29,0,2.33-1.05,2.33-2.33v-30.62"/>
+    <g>
+      <line class="st3" x1="35.27" y1="19.76" x2="42.54" y2="19.76"/>
+      <line class="st3" x1="35.27" y1="23.94" x2="42.54" y2="23.94"/>
+      <line class="st3" x1="35.27" y1="28.13" x2="42.54" y2="28.13"/>
+      <line class="st3" x1="35.27" y1="32.31" x2="42.54" y2="32.31"/>
+      <line class="st3" x1="35.27" y1="36.49" x2="42.54" y2="36.49"/>
+      <line class="st3" x1="35.27" y1="40.68" x2="42.54" y2="40.68"/>
+      <line class="st3" x1="35.27" y1="44.86" x2="42.54" y2="44.86"/>
+      <line class="st3" x1="35.27" y1="49.05" x2="42.54" y2="49.05"/>
+      <line class="st3" x1="35.27" y1="53.23" x2="42.54" y2="53.23"/>
+      <line class="st3" x1="35.27" y1="57.41" x2="42.54" y2="57.41"/>
+    </g>
+  </g>
+  <g>
+    <rect class="st1" x="17.43" y="44.22" width="46.28" height="32.17" rx="3.14" ry="3.14"/>
+    <g>
+      <path class="st4" d="M24.45,76.39l2.57-6.88c.25-.66.88-1.11,1.59-1.11h11.96"/>
+      <path class="st4" d="M55.49,68.41h-14.92"/>
+      <path class="st4" d="M56.7,76.39"/>
+    </g>
+    <g>
+      <circle class="st4" cx="29.58" cy="58.79" r="3.93"/>
+      <circle class="st4" cx="51.56" cy="58.79" r="3.93"/>
+    </g>
+    <line class="st4" x1="29.58" y1="54.86" x2="51.56" y2="54.86"/>
+    <line class="st4" x1="29.58" y1="62.72" x2="51.56" y2="62.72"/>
+  </g>
+  <g>
+    <circle class="st1" cx="70.81" cy="68.41" r="15.32"/>
+    <circle class="st4" cx="70.81" cy="68.41" r="3.93"/>
+    <circle class="st0" cx="70.81" cy="68.41" r=".98"/>
+    <g>
+      <path class="st3" d="M71.02,59c-.07,0-.14-.01-.21-.01-5.2,0-9.42,4.22-9.42,9.42,0,.18.02.36.03.54"/>
+      <path class="st3" d="M70.52,77.81c.1,0,.19.01.29.01,5.1,0,9.24-4.06,9.4-9.12"/>
+    </g>
+  </g>
+</svg>
