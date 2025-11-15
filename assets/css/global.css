@@ -179,7 +179,7 @@ p {
 
 /* Icono de PLATAFORMAS */
 .stat-block:nth-child(1) .stat-circle {
-    background-image: url('../icons/ic_Plataformas.svg');
+    background-image: url('../icons/ic_plataformas.svg');
 }
 
 /* Icono de COLECCIÓN */
