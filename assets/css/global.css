@@ -127,10 +127,10 @@ p {
    ICONO TEMPORAL (CÍRCULO RELLENO) — HERO
 ----------------------------------------------------- */
 .hero-icon {
-    width: 110px;        /* tamaño aproximado al icono del mockup */
+    width: 110px;
     height: 110px;
-    background-color: #ccc;   /* gris claro provisional */
-    border-radius: 50%;        /* círculo perfecto */
-    margin: 0 auto 25px auto; /* centrado + espacio debajo */
-    opacity: 0.25;            /* más suave, estilo icono fantasma */
+    background-color: #ccc;
+    border-radius: 50%;
+    margin: 20px auto 10px auto;  /* Subimos el círculo hacia arriba */
+    opacity: 0.25;
 }
