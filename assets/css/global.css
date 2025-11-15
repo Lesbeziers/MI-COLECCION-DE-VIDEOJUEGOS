@@ -1,7 +1,7 @@
 /* ----------------------------------------------------
-   TIPOGRAFÍA RAJDHANI (Google Fonts)
+   TIPOGRAFÍA ROBOTO CONDENSED (Google Fonts)
 ----------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700&display=swap');
 
 /* ----------------------------------------------------
    RESET MODERNO (evita comportamientos raros)
@@ -24,7 +24,7 @@ html, body {
 body {
     background-color: #232221;   /* Gris oscuro del mockup */
     color: #ddd;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Roboto Condensed', sans-serif;
     font-weight: 400;
     text-align: center;
     padding-top: 0px;           /* Un poco más abajo para que respire */
@@ -134,6 +134,7 @@ p {
         margin-top: 10px;
     }
 }
+
 /* ----------------------------------------------------
    ICONO TEMPORAL (CÍRCULO RELLENO) — HERO
 ----------------------------------------------------- */
@@ -145,6 +146,7 @@ p {
     margin: 20px auto 10px auto;  /* Subimos el círculo hacia arriba */
     opacity: 0.25;
 }
+
 /* ----------------------------------------------------
    BLOQUES DE ESTADÍSTICAS: PLATAFORMAS / COLECCIÓN
 ----------------------------------------------------- */
