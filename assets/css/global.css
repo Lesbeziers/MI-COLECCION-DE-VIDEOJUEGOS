@@ -27,7 +27,7 @@ body {
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 400;
     text-align: center;
-    padding-top: 0px;           /* Un poco más abajo para que respire */
+    padding-top: 0px;
 }
 
 /* ----------------------------------------------------
@@ -42,7 +42,7 @@ h1, h2, h3, h4 {
 
 h1 {
     color: #ff8800;              /* Naranja mockup */
-    font-size: 25px;             /* Tamaño muy parecido al de tu captura */
+    font-size: 25px;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -90,15 +90,15 @@ p {
 ----------------------------------------------------- */
 
 .search-section {
-    margin-top: 60px;       /* espacio desde los círculos */
+    margin-top: 60px;
     text-align: center;
 }
 
 .search-label {
     font-size: 18px;
     letter-spacing: 1px;
-    font-weight: 600;       /* en negrita, como PLATAFORMAS/COLECCIÓN */
-    margin-bottom: 10px;    /* pegadito a la caja */
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
 .search-box {
@@ -130,7 +130,7 @@ p {
 ----------------------------------------------- */
 @media (max-width: 600px) {
     h1 {
-        font-size: 30px;   /* Antes 30px → ahora 42px */
+        font-size: 30px;
         margin-top: 10px;
     }
 }
@@ -145,8 +145,8 @@ p {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    margin: 20px auto 10px auto;  /* alineado igual que antes */
-    opacity: 1; /* aseguramos que se vea al 100% */
+    margin: 20px auto 10px auto;
+    opacity: 1;
 }
 
 /* ----------------------------------------------------
@@ -155,23 +155,36 @@ p {
 
 .stats {
     display: flex;
-    justify-content: center;  /* los coloca en fila, centrados */
-    gap: 50px;                /* separación entre los dos bloques */
-    margin-top: 45px;         /* distancia desde el título naranja */
+    justify-content: center;
+    gap: 50px;
+    margin-top: 45px;
 }
 
 .stat-block {
     text-align: center;
 }
 
-/* Círculo grande placeholder (futuro icono) */
+/* Círculos con iconos reales */
 .stat-circle {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background-color: #ccc;   /* gris fantasma */
-    opacity: 0.25;
-    margin: 0 auto 14px auto; /* centrado + espacio con el texto */
+    background-size: 70%;          /* icono ~70px dentro del círculo */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #232221;     /* mismo fondo que la web */
+    margin: 0 auto 14px auto;
+    opacity: 1;
+}
+
+/* Icono de PLATAFORMAS */
+.stat-block:nth-child(1) .stat-circle {
+    background-image: url('../icons/ic_Plataformas.svg');
+}
+
+/* Icono de COLECCIÓN */
+.stat-block:nth-child(2) .stat-circle {
+    background-image: url('../icons/ic_coleccion.svg');
 }
 
 /* Texto PLATAFORMAS / COLECCIÓN */
@@ -180,7 +193,6 @@ p {
     margin-bottom: 4px;
 }
 
-/* Número 16 / 3.767 */
 .stat-value {
     font-size: 16px;
     font-weight: 500;
