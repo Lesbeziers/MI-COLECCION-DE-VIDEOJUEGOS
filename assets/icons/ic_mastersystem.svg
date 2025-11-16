@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 103 103">
+  <!-- Generator: Adobe Illustrator 29.0.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 186)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #232221;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .st0, .st1 {
+        stroke: #a5a4a4;
+      }
+
+      .st2 {
+        fill: #a5a4a4;
+      }
+
+      .st1 {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <circle class="st0" cx="51.5" cy="51.5" r="50"/>
+  <g>
+    <rect class="st1" x="18" y="29.9" width="67" height="43.2" rx="2.3" ry="2.3"/>
+    <polyline class="st1" points="19.1 30.4 28 34 28 40.8 18 65.9 85 65.9 75.4 41.2 75.4 34 83.9 30.4"/>
+    <line class="st1" x1="28" y1="34" x2="75.4" y2="34"/>
+    <line class="st1" x1="28" y1="40.8" x2="75.4" y2="40.8"/>
+    <rect class="st1" x="53.5" y="47.3" width="19.1" height="9.3"/>
+    <line class="st1" x1="53.5" y1="37.3" x2="72.7" y2="37.3"/>
+    <line class="st1" x1="28.6" y1="62.1" x2="35.6" y2="62.1"/>
+    <line class="st1" x1="44.3" y1="62.1" x2="58.6" y2="62.1"/>
+    <rect class="st1" x="64.1" y="62.1" width="9.6" height="7.2"/>
+    <line class="st1" x1="44.7" y1="69.3" x2="50.1" y2="69.3"/>
+    <line class="st1" x1="64.8" y1="51.8" x2="69.3" y2="51.8"/>
+    <polygon class="st2" points="55.8 49.4 60.7 52 55.8 54.5 55.8 49.4"/>
+  </g>
+</svg>
