@@ -611,3 +611,49 @@ PAGINA ZX SPECTRUM
     padding: 0;               /* sin altura extra mientras no haya contenido */
     box-sizing: border-box;
 }
+
+/* =========================================================
+   ZX SPECTRUM — BUSCADOR
+========================================================= */
+
+.spectrum-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 0 16px;
+}
+
+.spectrum-search-input {
+    flex: 1;
+    height: 46px;                 /* como el buscador de landing */
+    background: none;
+    border: 2px solid #fff;       /* borde blanco grueso */
+    color: #fff;
+    font-size: 16px;
+    padding: 0 14px;
+    border-radius: 0;             /* SIN redondeos, estilo mockup ZX */
+}
+
+.spectrum-search-input::placeholder {
+    color: #888;
+}
+
+.spectrum-search-button {
+    width: 46px;
+    height: 46px;
+    background: none;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.spectrum-search-button img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+}
+
