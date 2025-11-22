@@ -341,7 +341,7 @@ p {
 .platforms-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px;
+    gap: 0px;
     padding: 0 12px 24px;   /* sin espacio extra arriba */
 }
 
