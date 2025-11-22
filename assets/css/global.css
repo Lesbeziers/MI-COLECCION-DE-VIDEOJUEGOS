@@ -607,8 +607,8 @@ PAGINA ZX SPECTRUM
 ========================================================= */
 .spectrum-header-box {
     width: 100%;
-    background: transparent;  /* sin color propio */
-    padding: 0;               /* sin altura extra mientras no haya contenido */
+    background: #101010;   /* mismo fondo que la top-bar */
+    padding: 16px 0 20px;  /* arriba + abajo, laterales los gestionará el buscador */
     box-sizing: border-box;
 }
 
