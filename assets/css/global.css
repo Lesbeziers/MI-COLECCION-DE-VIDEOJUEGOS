@@ -342,7 +342,7 @@ p {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
-    padding: 16px 12px 24px;
+    padding: 8px 12px 24px;
 }
 
 .platform-card {
