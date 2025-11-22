@@ -10,42 +10,43 @@
 <body>
 
     <!-- BANDA SUPERIOR -->
-    <header class="top-bar">
-        <img src="assets/img/ic_back.svg"
-             class="top-bar-back"
-             alt="Atrás"
-             onclick="history.back()">
+    <header class="top-bar top-bar--spectrum">
 
-        <h1 class="top-bar-title">ZX SPECTRUM</h1>
+        <!-- FILA 1: ATRÁS + TÍTULO + HOME -->
+        <div class="top-bar-row">
+            <img src="assets/img/ic_back.svg"
+                 class="top-bar-back"
+                 alt="Atrás"
+                 onclick="history.back()">
 
-        <img src="assets/img/ic_home.svg"
-             class="top-bar-home"
-             alt="Home"
-             onclick="window.location.href='index.html'">
+            <h1 class="top-bar-title">ZX SPECTRUM</h1>
+
+            <img src="assets/img/ic_home.svg"
+                 class="top-bar-home"
+                 alt="Home"
+                 onclick="window.location.href='index.html'">
+        </div>
+
+        <!-- FILA 2: BUSCADOR -->
+        <div class="spectrum-header-box">
+            <div class="spectrum-search-wrapper">
+                <input type="text"
+                       class="spectrum-search-input"
+                       placeholder="Buscar">
+
+                <button class="spectrum-search-button">
+                    <img src="assets/img/ic_search.svg" alt="Buscar">
+                </button>
+            </div>
+        </div>
+
     </header>
 
     <!-- CONTENIDO DE LA PÁGINA ZX SPECTRUM -->
     <main class="platforms-content">
-        <!-- CAJA SUPERIOR DE TRABAJO (TEMPORAL) -->
-<div class="spectrum-header-box">
-
-    <!-- BLOQUE DEL BUSCADOR -->
-    <div class="spectrum-search-wrapper">
-
-        <!-- INPUT DE BÚSQUEDA -->
-        <input type="text"
-               class="spectrum-search-input"
-               placeholder="Buscar">
-
-        <!-- BOTÓN LUPA -->
-        <button class="spectrum-search-button">
-            <img src="assets/img/ic_search.svg" alt="Buscar">
-        </button>
-
-    </div>
-
-</div>
+        <!-- Aquí más adelante irá la lista de juegos -->
     </main>
+
 
 </body>
 </html>
