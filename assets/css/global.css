@@ -603,11 +603,11 @@ PAGINA ZX SPECTRUM
 /* =========================================================
 
 /* =========================================================
-   CABECERA ZX SPECTRUM (crecerá según el contenido)
+   CABECERA ZX SPECTRUM (de momento invisible)
 ========================================================= */
 .spectrum-header-box {
     width: 100%;
-    background: #0e0e0e;   /* fondo oscuro coherente */
-    padding: 20px;
+    background: transparent;  /* sin color propio */
+    padding: 0;               /* sin altura extra mientras no haya contenido */
     box-sizing: border-box;
 }
