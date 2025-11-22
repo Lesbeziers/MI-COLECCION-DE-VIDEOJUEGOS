@@ -257,3 +257,17 @@ p {
     opacity: 1;
     transition: all 0.25s ease;
 }
+
+/* =========================================================
+   BANDA SUPERIOR — Paso 2 (solo pintar la franja)
+========================================================= */
+
+.top-bar {
+    width: 100%;
+    height: 56px;                 /* altura exacta */
+    background-color: #232221;    /* gris oscuro del mockup */
+    border-bottom: 1px solid #555;/* línea inferior fina */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
