@@ -334,3 +334,27 @@ p {
     margin: 0 auto 20px;              /* centrada, y 20px debajo */
     opacity: 0.5;                     /* estilo elegante y suave */
 }
+
+/* =========================================
+   PLATAFORMAS – Grid de MICROORDENADORES
+========================================= */
+.platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px 12px 24px;
+}
+
+.platform-card {
+    background: #11141a;
+    border-radius: 12px;
+    border: 1px solid #2a2d36;
+    padding: 10px 6px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    cursor: default;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
