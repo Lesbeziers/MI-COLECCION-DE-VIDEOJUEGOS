@@ -545,3 +545,36 @@ p {
 .platform-card--gamegear .platform-icon-circle {
     background-image: url('../icons/ic_gamegear.svg');
 }
+
+/* =========================================================
+   ICONOS ATARI (asignación SVG)
+========================================================= */
+
+.platform-card--atari2600 .platform-icon-circle {
+    background-image: url('../icons/ic_atari2600.svg');
+}
+
+.platform-card--atari5200 .platform-icon-circle {
+    background-image: url('../icons/ic_atari5200.svg');
+}
+
+.platform-card--atari7800 .platform-icon-circle {
+    background-image: url('../icons/ic_atari7800.svg');
+}
+
+.platform-card--atarijaguar .platform-icon-circle {
+    background-image: url('../icons/ic_atarijaguar.svg');
+}
+
+/* =========================================================
+   ICONOS OTROS (asignación SVG)
+========================================================= */
+
+.platform-card--pc .platform-icon-circle {
+    background-image: url('../icons/ic_pc.svg');
+}
+
+.platform-card--arcade .platform-icon-circle {
+    background-image: url('../icons/ic_arcade.svg');
+}
+
