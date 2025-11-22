@@ -358,3 +358,39 @@ p {
     cursor: default;
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
+
+/* Círculo para los iconos de plataformas (similar a stat-circle) */
+.platform-icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-size: 80%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #232221;
+    margin: 0 auto;
+}
+
+/* Asignación de SVG a cada plataforma */
+.platform-card--zxspectrum .platform-icon-circle {
+    background-image: url('../icons/ic_zxspectrum.svg');
+}
+.platform-card--commodore64 .platform-icon-circle {
+    background-image: url('../icons/ic_commodore64.svg');
+}
+.platform-card--amiga .platform-icon-circle {
+    background-image: url('../icons/ic_amiga.svg');
+}
+.platform-card--amstrad .platform-icon-circle {
+    background-image: url('../icons/ic_amstrad.svg');
+}
+.platform-card--msx .platform-icon-circle {
+    background-image: url('../icons/ic_msx.svg');
+}
+
+/* Hover (estilo similar a la landing) */
+.platform-card:hover {
+    transform: translateY(-3px);
+    border-color: #ff8800;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
