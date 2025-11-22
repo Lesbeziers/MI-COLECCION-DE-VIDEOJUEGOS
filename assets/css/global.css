@@ -397,6 +397,6 @@ p {
 
 /* Ajuste del tamaño de texto SOLO en la pantalla PLATAFORMAS */
 .platform-card .stat-label {
-    font-size: 12px;   /* antes 18px */
+    font-size: 14px;   /* antes 18px */
     white-space: nowrap;   /* ← EVITA QUE HAGA 2 LÍNEAS */
 }
