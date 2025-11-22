@@ -331,7 +331,7 @@ p {
     width: 80%;                       /* un poco de margen a los lados */
     height: 1px;
     background-color: #aaaaaa;        /* gris claro suave */
-    margin: 0 auto 20px;              /* centrada, y 20px debajo */
+    margin: 0 auto 10px;              /* centrada, y 20px debajo */
     opacity: 0.5;                     /* estilo elegante y suave */
 }
 
