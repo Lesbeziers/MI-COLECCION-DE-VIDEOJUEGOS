@@ -389,3 +389,8 @@ p {
     border-color: #ff8800;
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
+
+/* Ajuste específico: distancia icono–texto en PLATAFORMAS */
+.platform-card .stat-circle {
+    margin: 0 auto 4px auto;   /* antes 14px → ahora 4px (ajusta a gusto) */
+}
