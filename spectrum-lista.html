@@ -49,11 +49,158 @@
 
 </header>
 
-    <!-- CONTENIDO DE LA PÁGINA ZX SPECTRUM -->
-    <main class="platforms-content">
-        <!-- Aquí más adelante irá la lista de juegos -->
-    </main>
+<!-- CONTENIDO DE LA PÁGINA ZX SPECTRUM -->
+<main class="platforms-content">
 
+    <!-- =========================================
+         LISTA ZX SPECTRUM
+    ========================================== -->
+    <section class="zx-list-wrapper">
+        <!-- Cabecera de la sección (título, filtros, etc.) -->
+        <div class="zx-list-header">
+            <h2 class="zx-list-title">ZX Spectrum</h2>
+            <!-- Más adelante aquí podemos poner: nº de juegos, filtros, etc. -->
+        </div>
+
+        <!-- Contenedor donde se inyectarán las tarjetas vía JS -->
+        <div id="zx-spectrum-list" class="zx-list-grid">
+            <p class="zx-list-loading">Cargando lista de juegos…</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+  // =========================================
+  // URL DEL FEED CSV ZX_LISTA
+  // =========================================
+  const ZX_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
+
+  // =========================================
+  // UTILIDAD SIMPLE PARA PARSEAR EL CSV
+  // =========================================
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length === 0) return [];
+
+    const header = lines[0].split(",");
+    const rows = [];
+
+    const idxID      = header.indexOf("ID");
+    const idxTitulo  = header.indexOf("TITULO_MOSTRAR");
+    const idxPub     = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio    = header.indexOf("AÑO_MOSTRAR");
+    const idxThumb   = header.indexOf("THUMB_URL");
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+
+      const cols = line.split(",");
+
+      const id     = cols[idxID]     !== undefined ? cols[idxID].trim()     : "";
+      const titulo = cols[idxTitulo] !== undefined ? cols[idxTitulo].trim() : "";
+      const pub    = cols[idxPub]    !== undefined ? cols[idxPub].trim()    : "";
+      const anio   = cols[idxAnio]   !== undefined ? cols[idxAnio].trim()   : "";
+      const thumb  = cols[idxThumb]  !== undefined ? cols[idxThumb].trim()  : "";
+
+      // Si no hay título, descartamos la fila
+      if (!titulo) continue;
+
+      rows.push({ id, titulo, pub, anio, thumb });
+    }
+
+    return rows;
+  }
+
+  // =========================================
+  // CREACIÓN DE UNA TARJETA DE JUEGO
+  // =========================================
+  function createGameCard(game) {
+    const card = document.createElement("article");
+    card.className = "zx-card";
+
+    // --- Thumb ---
+    const thumbWrapper = document.createElement("div");
+    thumbWrapper.className = "zx-thumb-wrapper";
+
+    if (game.thumb) {
+      const img = document.createElement("img");
+      img.className = "zx-thumb-img";
+      img.src = game.thumb;
+      img.alt = game.titulo || "Screenshot";
+      thumbWrapper.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "zx-thumb-placeholder";
+      placeholder.textContent = "SIN SCREENSHOT";
+      thumbWrapper.appendChild(placeholder);
+    }
+
+    // --- Meta (textos) ---
+    const meta = document.createElement("div");
+    meta.className = "zx-meta";
+
+    const titleEl = document.createElement("h3");
+    titleEl.className = "zx-title";
+    titleEl.textContent = game.titulo;
+    meta.appendChild(titleEl);
+
+    const infoParts = [];
+    if (game.pub)  infoParts.push(game.pub);
+    if (game.anio) infoParts.push(game.anio);
+
+    if (infoParts.length > 0) {
+      const subtitle = document.createElement("p");
+      subtitle.className = "zx-subtitle";
+      subtitle.textContent = infoParts.join(" · ");
+      meta.appendChild(subtitle);
+    }
+
+    card.appendChild(thumbWrapper);
+    card.appendChild(meta);
+
+    return card;
+  }
+
+  // =========================================
+  // CARGA INICIAL DE LA LISTA
+  // =========================================
+  async function loadZXList() {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    try {
+      container.innerHTML = '<p class="zx-list-loading">Cargando lista de juegos…</p>';
+
+      const response = await fetch(ZX_LISTA_CSV_URL);
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el CSV");
+      }
+
+      const text = await response.text();
+      const games = parseCSV(text);
+
+      container.innerHTML = "";
+
+      if (!games.length) {
+        container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos en la lista.</p>';
+        return;
+      }
+
+      games.forEach(game => {
+        const card = createGameCard(game);
+        container.appendChild(card);
+      });
+
+    } catch (err) {
+      console.error("Error al cargar la lista ZX:", err);
+      container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadZXList);
+</script>
 
 </body>
 </html>
