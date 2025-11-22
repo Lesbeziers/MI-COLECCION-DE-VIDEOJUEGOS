@@ -429,58 +429,61 @@ p {
 }
 
 /* =========================================================
-   ICONOS NINTENDO (asignación PNG)
+   ICONOS NINTENDO (asignación SVG)
 ========================================================= */
 
 .platform-card--nes .platform-icon-circle {
-    background-image: url('../icons/ic_nes.png');
+    background-image: url('../icons/ic_nes.svg');
 }
 
 .platform-card--snes .platform-icon-circle {
-    background-image: url('../icons/ic_snes.png');
+    background-image: url('../icons/ic_snes.svg');
 }
 
 .platform-card--nintendo64 .platform-icon-circle {
-    background-image: url('../icons/ic_nintendo64.png');
+    background-image: url('../icons/ic_nintendo64.svg');
 }
 
 .platform-card--gamecube .platform-icon-circle {
-    background-image: url('../icons/ic_gamecube.png');
+    background-image: url('../icons/ic_gamecube.svg');
 }
 
 .platform-card--wii .platform-icon-circle {
-    background-image: url('../icons/ic_wii.png');
+    background-image: url('../icons/ic_wii.svg');
 }
 
 .platform-card--wiiu .platform-icon-circle {
-    background-image: url('../icons/ic_wiiu.png');
+    /* cuando tengas el icono, pon el nombre real aquí */
+    background-image: url('../icons/ic_wiiu.svg');
 }
 
 .platform-card--switch .platform-icon-circle {
-    background-image: url('../icons/ic_switch.png');
+    background-image: url('../icons/ic_Switch.svg');   /* S mayúscula */
 }
 
 .platform-card--switch2 .platform-icon-circle {
-    background-image: url('../icons/ic_switch2.png');
+    background-image: url('../icons/ic_switch2.svg');
 }
 
 .platform-card--gameboy .platform-icon-circle {
-    background-image: url('../icons/ic_gameboy.png');
+    background-image: url('../icons/ic_gameboy.svg');
 }
 
 .platform-card--gbcolor .platform-icon-circle {
-    background-image: url('../icons/ic_gbcolor.png');
+    background-image: url('../icons/ic_gbcolor.svg');
 }
 
 .platform-card--gbadvance .platform-icon-circle {
-    background-image: url('../icons/ic_gbadvance.png');
+    background-image: url('../icons/ic_gbadvance.svg');
 }
 
+/* OJO: el archivo se llama ic_nitendods.svg, con la n cambiada */
 .platform-card--nintendods .platform-icon-circle {
-    background-image: url('../icons/ic_nintendods.png');
+    background-image: url('../icons/ic_nitendods.svg');
 }
 
 .platform-card--nintendo3ds .platform-icon-circle {
-    background-image: url('../icons/ic_nintendo3ds.png');
+    background-image: url('../icons/ic_nintendo3ds.svg');
 }
+
 
