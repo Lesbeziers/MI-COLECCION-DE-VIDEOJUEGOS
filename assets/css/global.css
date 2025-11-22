@@ -274,3 +274,28 @@ p {
     padding: 0 20px;
     margin-top: 10px;
 }
+
+/* ================================================
+   HOVER PARA EL BLOQUE "PLATAFORMAS" EN LA LANDING
+================================================ */
+
+.stat-block:hover .stat-circle {
+    border-color: #ff8800;      /* Borde naranja */
+    opacity: 1;                 /* Icono + visible */
+    transition: all 0.25s ease;
+}
+
+.stat-block:hover .stat-label {
+    color: #ff8800;             /* Texto en naranja */
+    transition: color 0.25s ease;
+}
+
+.stat-block:hover .stat-value {
+    color: #fff;                /* Un pelín más blanco */
+    transition: color 0.25s ease;
+}
+
+.stat-block:hover {
+    transform: translateY(-3px);  /* pequeño levantamiento */
+    transition: transform 0.25s ease;
+}
