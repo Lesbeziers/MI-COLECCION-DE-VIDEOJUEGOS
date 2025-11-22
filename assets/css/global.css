@@ -629,13 +629,13 @@ PAGINA ZX SPECTRUM
 
 .spectrum-search-input {
     flex: 1;
-    height: 46px;
+    height: 38px;
     background: none;
     border: 2px solid #dddddd;   /* gris claro como la tipografía */
     color: #dddddd;
     font-size: 16px;
     padding: 0 14px;
-    border-radius: 0;
+    border-radius: 6px;
 }
 
 .spectrum-search-input::placeholder {
