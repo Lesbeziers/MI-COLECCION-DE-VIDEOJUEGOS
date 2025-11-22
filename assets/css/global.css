@@ -383,12 +383,6 @@ p {
     background-image: url('../icons/ic_msx.svg');
 }
 
-/* Hover (estilo similar a la landing) */
-.platform-card:hover {
-    transform: translateY(-3px);
-    border-color: #ff8800;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
-}
 
 /* Ajuste específico: distancia icono–texto en PLATAFORMAS */
 .platform-card .stat-circle {
@@ -400,3 +394,21 @@ p {
     font-size: 14px;   /* antes 18px */
     white-space: nowrap;   /* ← EVITA QUE HAGA 2 LÍNEAS */
 }
+
+/* HOVER – Igual que en la landing, pero para las plataformas */
+.platform-card:hover .stat-circle {
+    border-color: #ff8800;      /* borde naranja en el círculo */
+    opacity: 1;
+    transition: all 0.25s ease;
+}
+
+.platform-card:hover .stat-label {
+    color: #ff8800;             /* texto en naranja */
+    transition: color 0.25s ease;
+}
+
+.platform-card:hover {
+    transform: translateY(-3px);  /* pequeño levantamiento, como en la landing */
+    transition: transform 0.25s ease;
+}
+
