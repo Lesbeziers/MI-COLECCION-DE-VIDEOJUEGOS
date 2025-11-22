@@ -620,30 +620,32 @@ PAGINA ZX SPECTRUM
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 20px;
-    padding: 0 16px;
+    margin-top: 10px;
+    max-width: 85%;           /* 15% más estrecho que el ancho total */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .spectrum-search-input {
     flex: 1;
-    height: 46px;                 /* como el buscador de landing */
+    height: 46px;
     background: none;
-    border: 2px solid #fff;       /* borde blanco grueso */
-    color: #fff;
+    border: 2px solid #dddddd;   /* gris claro como la tipografía */
+    color: #dddddd;
     font-size: 16px;
     padding: 0 14px;
-    border-radius: 0;             /* SIN redondeos, estilo mockup ZX */
+    border-radius: 0;
 }
 
 .spectrum-search-input::placeholder {
-    color: #888;
+    color: #777777;
 }
 
 .spectrum-search-button {
     width: 46px;
     height: 46px;
     background: none;
-    border: 2px solid #fff;
+    border: none;                /* SIN marco blanco alrededor de la lupa */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -656,4 +658,5 @@ PAGINA ZX SPECTRUM
     height: 20px;
     opacity: 0.9;
 }
+
 
