@@ -411,4 +411,76 @@ p {
     transform: translateY(-3px);  /* pequeño levantamiento, como en la landing */
     transition: transform 0.25s ease;
 }
+/* HOVER – Igual que en la landing, pero para las plataformas */
+.platform-card:hover .stat-circle {
+    border-color: #ff8800;
+    opacity: 1;
+    transition: all 0.25s ease;
+}
+
+.platform-card:hover .stat-label {
+    color: #ff8800;
+    transition: color 0.25s ease;
+}
+
+.platform-card:hover {
+    transform: translateY(-3px);
+    transition: transform 0.25s ease;
+}
+
+/* =========================================================
+   ICONOS NINTENDO (asignación PNG)
+========================================================= */
+
+.platform-card--nes .platform-icon-circle {
+    background-image: url('../icons/ic_nes.png');
+}
+
+.platform-card--snes .platform-icon-circle {
+    background-image: url('../icons/ic_snes.png');
+}
+
+.platform-card--nintendo64 .platform-icon-circle {
+    background-image: url('../icons/ic_nintendo64.png');
+}
+
+.platform-card--gamecube .platform-icon-circle {
+    background-image: url('../icons/ic_gamecube.png');
+}
+
+.platform-card--wii .platform-icon-circle {
+    background-image: url('../icons/ic_wii.png');
+}
+
+.platform-card--wiiu .platform-icon-circle {
+    background-image: url('../icons/ic_wiiu.png');
+}
+
+.platform-card--switch .platform-icon-circle {
+    background-image: url('../icons/ic_switch.png');
+}
+
+.platform-card--switch2 .platform-icon-circle {
+    background-image: url('../icons/ic_switch2.png');
+}
+
+.platform-card--gameboy .platform-icon-circle {
+    background-image: url('../icons/ic_gameboy.png');
+}
+
+.platform-card--gbcolor .platform-icon-circle {
+    background-image: url('../icons/ic_gbcolor.png');
+}
+
+.platform-card--gbadvance .platform-icon-circle {
+    background-image: url('../icons/ic_gbadvance.png');
+}
+
+.platform-card--nintendods .platform-icon-circle {
+    background-image: url('../icons/ic_nintendods.png');
+}
+
+.platform-card--nintendo3ds .platform-icon-circle {
+    background-image: url('../icons/ic_nintendo3ds.png');
+}
 
