@@ -392,5 +392,5 @@ p {
 
 /* Ajuste específico: distancia icono–texto en PLATAFORMAS */
 .platform-card .stat-circle {
-    margin: 0 auto 2px auto;   /* antes 14px → ahora 4px (ajusta a gusto) */
+    margin: 0 auto 0px auto;   /* antes 14px → ahora 4px (ajusta a gusto) */
 }
