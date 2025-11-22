@@ -324,7 +324,7 @@ p {
     font-size: 20px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin: 24px 0 6px;   /* antes 8px → ahora 2px */
+    margin: 24px 0 8px;
 }
 /* Línea bajo el título de sección */
 .platform-section-line {
