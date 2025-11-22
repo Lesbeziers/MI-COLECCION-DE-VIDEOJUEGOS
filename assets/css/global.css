@@ -522,3 +522,26 @@ p {
     background-image: url('../icons/ic_psvita.svg');
 }
 
+/* =========================================================
+   ICONOS SEGA (asignación SVG)
+========================================================= */
+
+.platform-card--mastersystem .platform-icon-circle {
+    background-image: url('../icons/ic_mastersystem.svg');
+}
+
+.platform-card--megadrive .platform-icon-circle {
+    background-image: url('../icons/ic_megadrive.svg');
+}
+
+.platform-card--saturn .platform-icon-circle {
+    background-image: url('../icons/ic_saturn.svg');
+}
+
+.platform-card--dreamcast .platform-icon-circle {
+    background-image: url('../icons/ic_dreamcast.svg');
+}
+
+.platform-card--gamegear .platform-icon-circle {
+    background-image: url('../icons/ic_gamegear.svg');
+}
