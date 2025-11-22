@@ -1,59 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 103 103">
-  <!-- Generator: Adobe Illustrator 30.0.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 123)  -->
+  <!-- Generator: Adobe Illustrator 29.0.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 186)  -->
   <defs>
     <style>
       .st0 {
+        stroke-width: 3px;
+      }
+
+      .st0, .st1 {
+        fill: none;
+        stroke: #a5a5a5;
+        stroke-miterlimit: 10;
+      }
+
+      .st2 {
+        fill: #fff;
+      }
+
+      .st3 {
         fill: #a5a5a5;
       }
 
       .st1 {
         stroke-width: 2px;
       }
-
-      .st1, .st2 {
-        fill: #232221;
-        stroke: #a5a5a5;
-        stroke-miterlimit: 10;
-      }
-
-      .st2 {
-        stroke-width: 3px;
-      }
     </style>
   </defs>
-  <circle class="st2" cx="51.5" cy="51.5" r="50"/>
+  <circle class="st0" cx="51.5" cy="51.5" r="50"/>
+  <circle class="st1" cx="71.9" cy="42.7" r="4.1"/>
+  <line class="st1" x1="41.4" y1="52.7" x2="79.2" y2="52.7"/>
+  <rect class="st1" x="50.6" y="73.9" width="28.6" height="11.2" rx="3.5" ry="3.5"/>
+  <circle class="st2" cx="64.9" cy="57.6" r="6.3"/>
+  <rect class="st1" x="61.1" y="70.9" width="7.5" height="2.9"/>
+  <path class="st1" d="M64.9,63.9c-.7,0-1.3-.1-1.9-.3v7.4h3.8v-7.3c-.6.2-1.2.3-1.9.3Z"/>
   <g>
-    <rect class="st1" x="23.85" y="17.36" width="55.31" height="45.34" rx="4.18" ry="4.18"/>
-    <circle class="st1" cx="51.5" cy="35.97" r="13.56"/>
-    <g>
-      <circle class="st1" cx="31.12" cy="42.66" r="4.07"/>
-      <circle class="st1" cx="71.88" cy="42.66" r="4.07"/>
-    </g>
-    <line class="st1" x1="23.85" y1="52.67" x2="79.15" y2="52.67"/>
-  </g>
-  <g>
-    <rect class="st1" x="50.58" y="73.89" width="28.57" height="11.15" rx="3.5" ry="3.5"/>
-    <g>
-      <circle class="st1" cx="64.87" cy="57.56" r="6.34"/>
-      <rect class="st1" x="61.12" y="70.95" width="7.5" height="2.95"/>
-      <path class="st1" d="M64.87,63.9c-.67,0-1.32-.11-1.92-.3v7.35h3.84v-7.35c-.61.19-1.25.3-1.92.3Z"/>
-    </g>
-  </g>
-  <g>
-    <rect class="st1" x="17.31" y="36.84" width="24.05" height="34.29" rx="2.41" ry="2.41"/>
-    <rect class="st1" x="20.98" y="40.15" width="16.71" height="12.85" rx="1.5" ry="1.5"/>
+    <rect class="st1" x="17.3" y="36.8" width="24.1" height="34.3" rx="2.4" ry="2.4"/>
+    <rect class="st1" x="21" y="40.2" width="16.7" height="12.8" rx="1.5" ry="1.5"/>
     <g>
       <g>
-        <circle class="st0" cx="35.93" cy="60.03" r=".57"/>
-        <circle class="st0" cx="35.93" cy="62.93" r=".57"/>
+        <circle class="st3" cx="35.9" cy="60" r=".6"/>
+        <circle class="st3" cx="35.9" cy="62.9" r=".6"/>
       </g>
       <g>
-        <circle class="st0" cx="34.48" cy="61.48" r=".57"/>
-        <circle class="st0" cx="37.39" cy="61.48" r=".57"/>
+        <circle class="st3" cx="34.5" cy="61.5" r=".6"/>
+        <circle class="st3" cx="37.4" cy="61.5" r=".6"/>
       </g>
     </g>
-    <path class="st0" d="M25.24,60.68h-.95v-.95c0-.43-.35-.79-.79-.79s-.79.35-.79.79v.95h-.95c-.43,0-.79.35-.79.79s.35.79.79.79h.95v.95c0,.43.35.79.79.79s.79-.35.79-.79v-.95h.95c.43,0,.79-.35.79-.79s-.35-.79-.79-.79Z"/>
-    <rect class="st0" x="27.46" y="66.89" width="3.75" height="1" rx=".5" ry=".5"/>
+    <path class="st3" d="M25.2,60.7h-1v-1c0-.4-.4-.8-.8-.8s-.8.3-.8.8v1h-1c-.4,0-.8.3-.8.8s.4.8.8.8h1v1c0,.4.4.8.8.8s.8-.3.8-.8v-1h1c.4,0,.8-.3.8-.8s-.4-.8-.8-.8Z"/>
+    <path class="st3" d="M28,66.9h2.8c.3,0,.5.2.5.5h0c0,.3-.2.5-.5.5h-2.8c-.3,0-.5-.2-.5-.5h0c0-.3.2-.5.5-.5Z"/>
   </g>
+  <path class="st1" d="M51.5,22.4c-7.5,0-13.6,6.1-13.6,13.6s0,.6,0,.9h1c1.3,0,2.4,1.1,2.4,2.4v5.7c2.5,2.8,6.1,4.6,10.1,4.6,7.5,0,13.6-6.1,13.6-13.6s-6.1-13.6-13.6-13.6Z"/>
+  <path class="st1" d="M75,17.4H28c-2.3,0-4.2,1.9-4.2,4.2v15.3h15.1c1.3,0,2.4,1.1,2.4,2.4v23.5h19.8c-1.6-1.2-2.6-3-2.6-5.1,0-3.5,2.8-6.3,6.3-6.3s6.3,2.8,6.3,6.3-1,4-2.6,5.1h6.4c2.3,0,4.2-1.9,4.2-4.2V21.5c0-2.3-1.9-4.2-4.2-4.2Z"/>
 </svg>
