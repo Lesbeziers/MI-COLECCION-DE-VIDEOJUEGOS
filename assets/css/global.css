@@ -271,3 +271,19 @@ p {
     top: 0;
     z-index: 1000;
 }
+
+/* =========================================================
+   BANDA SUPERIOR — Paso 3 (título dentro de la banda)
+========================================================= */
+
+.top-bar-title {
+    color: #ff8800;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    line-height: 56px;     /* centrado vertical */
+    padding-left: 16px;    /* alineado a la izquierda */
+    text-align: left;
+}
