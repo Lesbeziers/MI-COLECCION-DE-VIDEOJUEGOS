@@ -595,3 +595,20 @@ p {
 main.platforms-content {
     margin-top: 90px;   /* hueco bajo la top-bar fija */
 }
+
+/* =========================================================
+/* =========================================================
+PAGINA ZX SPECTRUM
+/* =========================================================
+/* =========================================================
+
+/* =========================================================
+   CAJA SUPERIOR TEMPORAL PARA LA LISTA DE SPECTRUM
+========================================================= */
+.spectrum-header-box {
+    width: 100%;
+    min-height: 260px;      /* ALTURA GRANDE PARA TRABAJAR */
+    background: #0e0e0e;    /* Fondo oscuro consistente */
+    padding: 20px;          /* Margen interior */
+    box-sizing: border-box; 
+}
