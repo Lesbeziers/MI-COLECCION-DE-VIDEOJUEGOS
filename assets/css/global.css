@@ -299,3 +299,13 @@ p {
     transform: translateY(-3px);  /* pequeño levantamiento */
     transition: transform 0.25s ease;
 }
+
+/* ======================================
+   TODOS LOS TEXTOS DEBAJO DE LOS ICONOS
+   (PLATAFORMAS, COLECCIÓN, etc.)
+   EN BOLD
+====================================== */
+.stat-label,
+.stat-value {
+    font-weight: 600;
+}
