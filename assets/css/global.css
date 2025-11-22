@@ -626,7 +626,7 @@ PAGINA ZX SPECTRUM
 
 .spectrum-search-box {
     position: relative;          /* referencia para la lupa absoluta */
-    width: 75%                /* 15% más estrecha que el ancho total */
+    width: 80%               /* 15% más estrecha que el ancho total */
     max-width: 420px;            /* límite elegante */
 }
 
