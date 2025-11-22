@@ -603,14 +603,15 @@ PAGINA ZX SPECTRUM
 /* =========================================================
 
 /* =========================================================
-   CABECERA ZX SPECTRUM (de momento invisible)
+   CABECERA ZX SPECTRUM (contenedor del buscador)
 ========================================================= */
 .spectrum-header-box {
     width: 100%;
-    background: #101010;   /* mismo fondo que la top-bar */
-    padding: 16px 0 20px;  /* arriba + abajo, laterales los gestionará el buscador */
+    background: transparent;   /* el fondo lo pone la top-bar */
+    padding-top: 8px;          /* separación entre título y buscador */
     box-sizing: border-box;
 }
+
 
 /* =========================================================
    ZX SPECTRUM — BUSCADOR
@@ -659,4 +660,19 @@ PAGINA ZX SPECTRUM
     opacity: 0.9;
 }
 
+/* =========================================================
+   ZX SPECTRUM — CABECERA CON BUSCADOR
+========================================================= */
+
+.top-bar--spectrum {
+    height: auto;                /* deja que crezca por contenido */
+    flex-direction: column;      /* dos filas: fila título + fila buscador */
+    align-items: stretch;
+    padding: 6px 16px 10px;      /* arriba, laterales y abajo */
+}
+
+.top-bar-row {
+    display: flex;
+    align-items: center;
+}
 
