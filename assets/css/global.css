@@ -328,11 +328,11 @@ p {
 }
 /* Línea bajo el título de sección */
 .platform-section-line {
-    width: 80%;                       /* un poco de margen a los lados */
+    width: 80%;
     height: 1px;
-    background-color: #aaaaaa;        /* gris claro suave */
-    margin: 0 auto 10px;              /* centrada, y 20px debajo */
-    opacity: 0.5;                     /* estilo elegante y suave */
+    background-color: #aaaaaa;
+    margin: 0 auto 6px;   /* antes seguramente 20px → muy grande */
+    opacity: 0.5;
 }
 
 /* =========================================
@@ -341,8 +341,8 @@ p {
 .platforms-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    padding: 8px 12px 24px;
+    gap: 10px;            /* antes 16px → filas más juntas */
+    padding: 4px 12px 24px;  /* antes 8px arriba → menos aire arriba */
 }
 
 .platform-card {
