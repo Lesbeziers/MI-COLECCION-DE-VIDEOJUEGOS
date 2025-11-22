@@ -312,3 +312,17 @@ p {
     flex-shrink: 0;
     margin-left: 12px;
 }
+
+/* =========================================
+   PLATAFORMAS – Título de sección
+========================================= */
+.platform-section-title {
+    text-align: center;
+    color: #ff8800;                  /* mismo naranja que usas en la app */
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 24px 0 8px;              /* espacio arriba y abajo */
+}
