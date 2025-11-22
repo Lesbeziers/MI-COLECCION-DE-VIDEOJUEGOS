@@ -214,36 +214,33 @@ p {
 }
 
 /* =========================================================
-   BANDA SUPERIOR — PÁGINA DE PLATAFORMAS
+   BANDA SUPERIOR — PÁGINAS INTERNAS (PLATAFORMAS, ETC.)
 ========================================================= */
 
 .top-bar {
     width: 100%;
-    height: 70px;
+    height: 56px;
     background-color: #232221;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 18px;
+    padding: 0 16px;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-.top-bar__title {
-    color: #ff8800;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0;
-    flex-grow: 1;
-    text-align: center;
+/* Grupo IZQUIERDA: flecha + título "CONSOLAS" */
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
+/* Iconos de back / home */
 .top-bar__button {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -262,18 +259,30 @@ p {
     object-fit: contain;
 }
 
+/* Título "CONSOLAS" estilo mockup */
+.top-bar__title {
+    color: #ff8800;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* Línea separadora bajo la banda */
 .top-bar-separator {
     width: 100%;
     height: 1px;
-    background-color: #444;
-    margin-bottom: 25px;
+    background-color: #555;
+    margin-bottom: 20px;
 }
 
-/* Contenedor general del contenido de plataformas */
+/* Contenido general de la página de plataformas */
 .platforms-content {
     padding: 0 20px;
-    margin-top: 10px;
+    margin-top: 15px;
 }
+
 
 /* ================================================
    HOVER PARA EL BLOQUE "PLATAFORMAS" EN LA LANDING
