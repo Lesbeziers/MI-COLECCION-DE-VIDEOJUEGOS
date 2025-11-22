@@ -304,3 +304,11 @@ p {
     flex-shrink: 0;     /* no se deforma en flex */
     margin-right: 12px; /* pequeño espacio antes del título */
 }
+
+.top-bar-home {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
