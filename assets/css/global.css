@@ -44,7 +44,7 @@ h1 {
     color: #ff8800;              /* Naranja mockup */
     font-size: 25px;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     margin-bottom: 20px;
 }
@@ -288,7 +288,7 @@ p {
     font-size: 30px;        /* tamaño fuerte tipo mockup CONSOLAS */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 0.5px; 
     margin: 0;
     line-height: 1.2;       /* dejamos que el flex centre verticalmente */
     text-align: center;
@@ -325,7 +325,7 @@ p {
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 700;
     font-size: 20px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     margin: 12px 0 8px;
 }
