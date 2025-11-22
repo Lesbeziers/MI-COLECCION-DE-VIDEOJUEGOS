@@ -270,6 +270,10 @@ p {
     position: sticky;
     top: 0;
     z-index: 1000;
+
+    display: flex;                /* NUEVO: colocamos flecha + título en fila */
+    align-items: center;          /* NUEVO: centrados verticalmente */
+    padding: 0 16px;              /* NUEVO: margen lateral como en el mockup */
 }
 
 /* =========================================================
