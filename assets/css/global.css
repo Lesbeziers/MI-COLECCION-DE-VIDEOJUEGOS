@@ -317,6 +317,5 @@ p {
 .stat-block:hover .stat-circle {
     border-color: #ff8800;
     opacity: 1;
-    filter: brightness(0) saturate(100%) invert(55%) sepia(89%) saturate(1771%) hue-rotate(360deg) brightness(101%) contrast(104%);
     transition: all 0.25s ease;
 }
