@@ -287,3 +287,16 @@ p {
     padding-left: 16px;    /* alineado a la izquierda */
     text-align: left;
 }
+
+/* =========================================================
+   BANDA SUPERIOR — Paso 4 (icono ATRÁS)
+========================================================= */
+
+.top-bar-back {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    cursor: pointer;
+}
