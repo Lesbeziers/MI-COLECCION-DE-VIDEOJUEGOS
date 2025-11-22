@@ -603,12 +603,11 @@ PAGINA ZX SPECTRUM
 /* =========================================================
 
 /* =========================================================
-   CAJA SUPERIOR TEMPORAL PARA LA LISTA DE SPECTRUM
+   CABECERA ZX SPECTRUM (crecerá según el contenido)
 ========================================================= */
 .spectrum-header-box {
     width: 100%;
-    min-height: calc(100vh - 60px);  /* ocupa CASI toda la pantalla bajo la barra */
-    background: #0e0e0e;
+    background: #0e0e0e;   /* fondo oscuro coherente */
     padding: 20px;
     box-sizing: border-box;
 }
