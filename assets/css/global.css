@@ -282,15 +282,15 @@ p {
 
 .top-bar-title {
     color: #ff8800;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 24px;        /* MÁS GRANDE para móvil 1080 */
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     margin: 0;
-    line-height: 56px;
-    text-align: center;     /* centramos el texto */
-    width: 100%;            /* el título ocupa todo el ancho */
-    pointer-events: none;   /* evita que moleste al click de la flecha */
+    line-height: 56px;      /* centrado vertical en la banda */
+    text-align: center;
+    flex: 1;                /* ocupa todo el espacio entre flecha y (futuro) botón derecho */
+    pointer-events: none;
 }
 
 /* =========================================================
