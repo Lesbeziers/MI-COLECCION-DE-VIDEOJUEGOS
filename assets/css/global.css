@@ -586,3 +586,10 @@ p {
 .platforms-grid > .platform-card:nth-child(3n+1):last-child {
     grid-column: 2;   /* Columna central del grid de 3 columnas */
 }
+
+/* =================================================
+   DESPLOZAMIENTO DEL CONTENIDO BAJO LA CABECERA FIJA
+================================================= */
+.platforms-content {
+    padding-top: 100px;    /* evita que el primer bloque quede tapado */
+}
