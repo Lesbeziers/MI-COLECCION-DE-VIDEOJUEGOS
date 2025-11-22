@@ -282,14 +282,14 @@ p {
 
 .top-bar-title {
     color: #ff8800;
-    font-size: 30px !important;
+    font-size: 42px;        /* tamaño fuerte tipo mockup CONSOLAS */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     margin: 0;
-    line-height: 56px;
+    line-height: 1.2;       /* dejamos que el flex centre verticalmente */
     text-align: center;
-    flex: 1;
+    flex: 1;                /* ocupa todo el espacio entre la flecha y el lado derecho */
     pointer-events: none;
 }
 
