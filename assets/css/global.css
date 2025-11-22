@@ -349,14 +349,14 @@ p {
     background: transparent;
     border: none;
     border-radius: 0;
-    padding: 12px 4px 8px;
+    padding: 0 4px 8px;   /* antes 12px 4px 8px → quitamos espacio arriba */
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
 
-    gap: 1px;   /* ← AJUSTE DEL ESPACIADO ICONO–TEXTO */
+    gap: 1px;
 
     cursor: default;
 }
