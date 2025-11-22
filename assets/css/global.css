@@ -607,8 +607,8 @@ PAGINA ZX SPECTRUM
 ========================================================= */
 .spectrum-header-box {
     width: 100%;
-    min-height: 260px;      /* ALTURA GRANDE PARA TRABAJAR */
+    min-height: 520px;      /* MUCHÍSIMO MÁS ALTA PARA TENER LIENZO LIMPIO */
     background: #0e0e0e;    /* Fondo oscuro consistente */
     padding: 20px;          /* Margen interior */
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
