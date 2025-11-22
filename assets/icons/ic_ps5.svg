@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 103 103">
+  <!-- Generator: Adobe Illustrator 30.0.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 123)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #232221;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .st0, .st1 {
+        stroke: #a5a5a5;
+      }
+
+      .st1 {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <circle class="st0" cx="51.5" cy="51.5" r="50"/>
+  <g>
+    <path class="st1" d="M46.16,88.7c.16-1.15-2.34-63.51-4.32-71.81l-4.93-3.73s4.03,21.81,4.03,37.64-2.52,36.34-2.52,36.34c0,0,2.92,3.14,7.74,1.56h7.33"/>
+    <path class="st1" d="M63.13,13.15l-5.47,4.09s-4.52,43.84-4.16,72.61c0,0,9.15-.35,13.43-2.01-.36,0,0-22.34,0-22.34,0,0-.12-2.85-1.9-8.44s-4.52-16.64-3.92-27.33,2.02-16.57,2.02-16.57Z"/>
+    <line class="st1" x1="59.21" y1="63.4" x2="59.21" y2="82.43"/>
+    <line class="st1" x1="50.06" y1="48.74" x2="50.06" y2="51.5"/>
+    <line class="st1" x1="50.06" y1="54.92" x2="50.06" y2="57.68"/>
+    <line class="st1" x1="50.06" y1="78.09" x2="50.06" y2="80.85"/>
+    <path class="st1" d="M41.84,16.88"/>
+    <line class="st1" x1="42.24" y1="16.88" x2="57.66" y2="16.88"/>
+  </g>
+</svg>
