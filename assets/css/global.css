@@ -346,16 +346,17 @@ p {
 }
 
 .platform-card {
-    background: transparent;      /* SIN fondo */
-    border: none;                 /* SIN borde */
-    border-radius: 0;             /* SIN esquinas */
-    padding: 12px 4px 8px;        /* margen superior/inferior suave */
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 12px 4px 8px;
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 4px;
+
+    gap: 1px;   /* ← AJUSTE DEL ESPACIADO ICONO–TEXTO */
 
     cursor: default;
 }
