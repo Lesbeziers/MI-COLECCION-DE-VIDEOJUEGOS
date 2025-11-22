@@ -490,4 +490,35 @@ p {
     background-image: url('../icons/ic_nintendo3ds.svg');
 }
 
+/* =========================================================
+   ICONOS SONY (asignación SVG)
+========================================================= */
+
+.platform-card--psx .platform-icon-circle {
+    background-image: url('../icons/ic_psx.svg');
+}
+
+.platform-card--ps2 .platform-icon-circle {
+    background-image: url('../icons/ic_ps2.svg');
+}
+
+.platform-card--ps3 .platform-icon-circle {
+    background-image: url('../icons/ic_ps3.svg');
+}
+
+.platform-card--ps4 .platform-icon-circle {
+    background-image: url('../icons/ic_ps4.svg');
+}
+
+.platform-card--ps5 .platform-icon-circle {
+    background-image: url('../icons/ic_ps5.svg');
+}
+
+.platform-card--psp .platform-icon-circle {
+    background-image: url('../icons/ic_psp.svg');
+}
+
+.platform-card--psvita .platform-icon-circle {
+    background-image: url('../icons/ic_psvita.svg');
+}
 
