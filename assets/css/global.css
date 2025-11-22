@@ -578,3 +578,9 @@ p {
     background-image: url('../icons/ic_arcade.svg');
 }
 
+/* =========================================================
+   CENTRAR ICONOS CUANDO SE QUEDEN HUERFANOS
+========================================================= */
+.platforms-grid > .platform-card:nth-child(3n+1):last-child {
+    grid-column: 2;   /* Columna central del grid de 3 columnas */
+}
