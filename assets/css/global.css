@@ -318,13 +318,13 @@ p {
 ========================================= */
 .platform-section-title {
     text-align: center;
-    color: #ff8800;                  /* mismo naranja que usas en la app */
+    color: #ff8800;
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 700;
     font-size: 20px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin: 24px 0 8px;              /* espacio arriba y abajo */
+    margin: 24px 0 2px;   /* antes 8px → ahora 2px */
 }
 /* Línea bajo el título de sección */
 .platform-section-line {
