@@ -264,17 +264,19 @@ p {
 
 .top-bar {
     width: 100%;
-    height: 80px;                 /* altura exacta */
-    background-color: #232221;    /* gris oscuro del mockup */
-    border-bottom: 3px solid #555;/* línea inferior fina */
-    position: sticky;
+    height: 73px;
+    background-color: #232221;
+    border-bottom: 3px solid #555;
+    position: fixed;   /* SIEMPRE fija en el viewport */
     top: 0;
+    left: 0;
     z-index: 1000;
 
-    display: flex;                /* NUEVO: colocamos flecha + título en fila */
-    align-items: center;          /* NUEVO: centrados verticalmente */
-    padding: 0 16px;              /* NUEVO: margen lateral como en el mockup */
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
 }
+
 
 /* =========================================================
    BANDA SUPERIOR — Paso 3 (título dentro de la banda)
