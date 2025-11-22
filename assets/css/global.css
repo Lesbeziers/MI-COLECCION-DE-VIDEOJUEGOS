@@ -341,8 +341,8 @@ p {
 .platforms-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;            /* antes 16px → filas más juntas */
-    padding: 4px 12px 24px;  /* antes 8px arriba → menos aire arriba */
+    gap: 10px;
+    padding: 0 12px 24px;   /* sin espacio extra arriba */
 }
 
 .platform-card {
