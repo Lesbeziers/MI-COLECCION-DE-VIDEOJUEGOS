@@ -602,6 +602,9 @@ p {
     flex: 1;
     display: flex;
     flex-direction: column;
+
+    /* 👇 clave para que los textos largos puedan encoger y usar "..." */
+    min-width: 0;
 }
 
 .zx-title {
@@ -610,6 +613,7 @@ p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;   /* 👈 que no crezca más allá del contenedor */
 }
 
 .zx-subtitle {
@@ -618,6 +622,7 @@ p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+   max-width: 100%;   /* 👈 idem */
 }
 
 /* =====================================================
