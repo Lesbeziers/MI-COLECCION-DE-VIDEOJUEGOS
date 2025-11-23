@@ -291,13 +291,14 @@ p {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    border: 2px solid #aaa;
-    background-color: #232221;
+    border: none;                   /* sin aro */
+    background-color: transparent;  /* sin fondo gris */
     background-size: 80%;
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 auto 4px auto;
 }
+
 
 /* Texto bajo cada icono en PLATAFORMAS */
 .platform-card .stat-label {
