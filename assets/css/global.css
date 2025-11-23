@@ -754,3 +754,8 @@ body.ficha-final .game-nav-bar {
 body.ficha-final main.platforms-content {
     margin-top: 120px;   /* un poco más de aire respecto a la cabecera completa */
 }
+
+body.spectrum-lista main.platforms-content {
+    margin-top: 160px;   /* 🔥 suficiente para la cabecera + buscador */
+}
+
