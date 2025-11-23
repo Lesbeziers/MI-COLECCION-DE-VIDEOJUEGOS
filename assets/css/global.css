@@ -759,3 +759,9 @@ body.spectrum-lista main.platforms-content {
     margin-top: 160px;   /* 🔥 suficiente para la cabecera + buscador */
 }
 
+/* ============================
+   PÁGINA PLATAFORMAS — margen bajo cabecera
+============================ */
+body:not(.spectrum-lista):not(.ficha-final) main.platforms-content {
+    margin-top: 120px;   /* puedes subir/bajar este valor */
+}
