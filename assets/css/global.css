@@ -824,3 +824,72 @@ PAGINA ZX SPECTRUM
     padding: 0 16px;            /* mismos laterales que PLATAFORMAS */
     margin-bottom: 0px;        /* espacio limpio antes del buscador */
 }
+
+/* ----------------------------------------------------
+   FICHA FINAL – CABECERA (título truncado)
+----------------------------------------------------- */
+.top-bar-title--ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 12px; /* separación respecto al botón BACK */
+    flex: 1;
+}
+
+
+/* ----------------------------------------------------
+   FICHA FINAL – NAVEGACIÓN ENTRE FICHAS
+----------------------------------------------------- */
+
+/* Contenedor general debajo del header */
+.game-nav-bar {
+    position: relative;
+    width: 100%;
+    padding: 12px 0 20px; /* espacio arriba y abajo */
+}
+
+/* Línea gris horizontal */
+.game-nav-line {
+    position: absolute;
+    top: 50%;              /* centramos verticalmente */
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #555;      /* gris suave como el mockup */
+    transform: translateY(-50%);
+    opacity: 0.4;          /* más elegante */
+}
+
+/* Bloque centrado (flecha – texto – flecha) */
+.game-nav-center {
+    position: relative;    /* se coloca encima de la línea */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+/* Flechas cuadradas (usamos ic_back, comprimido a 20x20) */
+.game-nav-arrow {
+    width: 20px;
+    height: 20px;          /* fuerza a cuadrado, como pedías */
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.game-nav-arrow:hover {
+    opacity: 1;
+}
+
+/* Flecha derecha en espejo */
+.game-nav-arrow--next {
+    transform: scaleX(-1);
+}
+
+/* Texto central "10 / 7.800" */
+.game-nav-counter {
+    font-size: 18px;
+    color: #ddd;
+    font-weight: 400;
+}
