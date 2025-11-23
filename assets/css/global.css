@@ -600,7 +600,7 @@ p {
 
 /* Caso específico: cabecera extendida ZX SPECTRUM */
 .top-bar--spectrum + main.platforms-content {
-    margin-top: 140px;  /* más hueco porque la cabecera crece con buscador + contador */
+    margin-top: 200px;  /* más hueco porque la cabecera crece con buscador + contador */
 }
 
 
