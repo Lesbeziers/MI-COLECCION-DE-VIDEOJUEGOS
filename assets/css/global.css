@@ -688,5 +688,5 @@ p {
 
 .top-bar-inner > .top-bar-title {
     position: relative !important;
-    transform: translateY(6px) !important;
+    transform: translateY(8px) !important;
 }
