@@ -76,7 +76,9 @@
   // =========================================
   const ZX_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
 
-// Parser sencillo de una línea CSV que respeta comillas
+  // =========================================
+  // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
+  // =========================================
   function parseCSVLine(line) {
     const result = [];
     let current = "";
@@ -86,15 +88,15 @@
       const ch = line[i];
 
       if (ch === '"') {
-        // Si estamos dentro de comillas y vemos "" → es una comilla literal
+        // Si estamos dentro de comillas y vemos "" → comilla escapada
         if (inQuotes && line[i + 1] === '"') {
           current += '"';
           i++; // saltamos la segunda
         } else {
-          inQuotes = !inQuotes; // abrimos / cerramos comillas
+          inQuotes = !inQuotes; // abrir/cerrar bloque de comillas
         }
       } else if (ch === "," && !inQuotes) {
-        // Separador real de campo
+        // Separador de campo real
         result.push(current.trim());
         current = "";
       } else {
@@ -106,15 +108,15 @@
     result.push(current.trim());
     return result;
   }
-    
+
   // =========================================
-  // UTILIDAD SIMPLE PARA PARSEAR EL CSV
+  // UTILIDAD PARA PARSEAR EL CSV COMPLETO
   // =========================================
   function parseCSV(text) {
     const lines = text.trim().split(/\r?\n/);
     if (lines.length === 0) return [];
 
-    cconst header = parseCSVLine(lines[0]);
+    const header = parseCSVLine(lines[0]);
     const rows = [];
 
     const idxID      = header.indexOf("ID");
@@ -129,11 +131,11 @@
 
       const cols = parseCSVLine(line);
 
-      const id     = cols[idxID]     !== undefined ? cols[idxID].trim()     : "";
-      const titulo = cols[idxTitulo] !== undefined ? cols[idxTitulo].trim() : "";
-      const pub    = cols[idxPub]    !== undefined ? cols[idxPub].trim()    : "";
-      const anio   = cols[idxAnio]   !== undefined ? cols[idxAnio].trim()   : "";
-      const thumb  = cols[idxThumb]  !== undefined ? cols[idxThumb].trim()  : "";
+      const id     = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
+      const titulo = (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
+      const pub    = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
+      const anio   = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
+      const thumb  = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
 
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
@@ -178,60 +180,13 @@
     meta.appendChild(titleEl);
 
     const infoParts = [];
-    if (game.pub)  infoParts.push(game.pub);
+    if (game.pub)  infoParts.push(game.pub);   // aquí ya viene "Amstrad, James Bond 007 Action Pack"
     if (game.anio) infoParts.push(game.anio);
 
     if (infoParts.length > 0) {
       const subtitle = document.createElement("p");
       subtitle.className = "zx-subtitle";
-      subtitle.textContent = infoParts.join(" · ");
-      meta.appendChild(subtitle);
-    }
 
-    card.appendChild(thumbWrapper);
-    card.appendChild(meta);
-
-    return card;
-  }
-
-  // =========================================
-  // CARGA INICIAL DE LA LISTA
-  // =========================================
-  async function loadZXList() {
-    const container = document.getElementById("zx-spectrum-list");
-    if (!container) return;
-
-    try {
-      container.innerHTML = '<p class="zx-list-loading">Cargando lista de juegos…</p>';
-
-      const response = await fetch(ZX_LISTA_CSV_URL);
-      if (!response.ok) {
-        throw new Error("No se pudo cargar el CSV");
-      }
-
-      const text = await response.text();
-      const games = parseCSV(text);
-
-      container.innerHTML = "";
-
-      if (!games.length) {
-        container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos en la lista.</p>';
-        return;
-      }
-
-      games.forEach(game => {
-        const card = createGameCard(game);
-        container.appendChild(card);
-      });
-
-    } catch (err) {
-      console.error("Error al cargar la lista ZX:", err);
-      container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", loadZXList);
-</script>
 
 </body>
 </html>
