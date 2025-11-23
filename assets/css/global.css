@@ -690,3 +690,14 @@ p {
     position: relative !important;
     transform: translateY(8px) !important;
 }
+
+/* =====================================================
+   AJUSTE ESPECÍFICO PARA FICHA (título truncado)
+===================================================== */
+
+.top-bar-title--ellipsis {
+    line-height: 30px !important;
+    height: 30px !important;
+    display: block;
+}
+
