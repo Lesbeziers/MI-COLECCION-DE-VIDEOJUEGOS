@@ -666,6 +666,11 @@ body.ficha-final .game-nav-bar {
     gap: 14px;
 }
 
+/* Subir el bloque 10/7.800 con flechas */
+.game-nav-center {
+    margin-top: -20px;   /* 🔥 Sube todo el bloque 20px */
+}
+
 /* Flechas */
 .game-nav-arrow {
     width: 20px;
