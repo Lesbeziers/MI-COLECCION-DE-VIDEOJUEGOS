@@ -753,10 +753,10 @@ PAGINA ZX SPECTRUM
 ========================================= */
 .zx-card {
     display: flex;
-    align-items: center;
-    gap: 14px;              /* separación thumb ↔ texto */
-    padding: 10px 16px;     /* respirito lateral */
-    text-align: left;       /* que el texto no herede el centrado del body */
+    align-items: flex-start;   /* ← ARRIBA, alineado al borde superior del thumb */
+    gap: 14px;
+    padding: 10px 16px;
+    text-align: left;
 }
 
 .zx-meta {
