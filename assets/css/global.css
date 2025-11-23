@@ -692,6 +692,14 @@ p {
 }
 
 /* =====================================================
+   AJUSTE EXTRA PARA FICHA (título truncado)
+===================================================== */
+
+.top-bar-inner > .top-bar-title.top-bar-title--ellipsis {
+    transform: translateY(10px) !important;
+}
+
+/* =====================================================
    AJUSTE ESPECÍFICO PARA FICHA (título truncado)
 ===================================================== */
 
