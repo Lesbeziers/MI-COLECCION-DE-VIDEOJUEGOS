@@ -159,9 +159,11 @@ p {
     background-size: 90%;
     background-repeat: no-repeat;
     background-position: center;
-    background-color: #232221;
+    background-color: transparent; /* sin fondo */
+    border: none;                  /* sin aro extra */
     margin: 0 auto 14px auto;
 }
+
 
 /* Icono de PLATAFORMAS (landing) */
 .stat-block:nth-child(1) .stat-circle {
