@@ -126,7 +126,7 @@
 
       const cols = parseCSVLine(line);
 
-      const id     = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
+            const id     = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
       const titulo = (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
       const pub    = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
       const anio   = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
@@ -135,11 +135,38 @@
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
 
-      rows.push({ id, titulo, pub, anio, thumb });
+      // Título SOLO para mostrar (con artículo al final)
+      const displayTitulo = formatTitleWithArticle(titulo);
+
+      rows.push({ id, titulo, displayTitulo, pub, anio, thumb });
+
     }
 
     return rows;
   }
+
+      // =========================================
+  // FORMATEO DE TÍTULOS CON ARTÍCULO AL FINAL
+  // Ej: "The Great Escape" → "Great Escape, The"
+  //     "La Abadía del Crimen" → "Abadía del Crimen, La"
+  // =========================================
+  function formatTitleWithArticle(title) {
+    if (!title) return "";
+    const t = title.trim();
+
+    // Artículos que queremos mover al final
+    const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+    const match = t.match(re);
+
+    if (!match) {
+      return t;  // Sin artículo al principio → se deja igual
+    }
+
+    const article = match[1]; // “The”, “La”, etc.
+    const rest    = match[2]; // El resto
+    return rest + ", " + article;
+  }
+
 
   // =========================================
   // CREACIÓN DE UNA TARJETA DE JUEGO
@@ -178,7 +205,7 @@ if (thumbUrl) {
 
     const titleEl = document.createElement("h3");
     titleEl.className = "zx-title";
-    titleEl.textContent = game.titulo;
+    titleEl.textContent = game.displayTitulo || game.titulo;
     meta.appendChild(titleEl);
 
       // Publisher en su propia línea
