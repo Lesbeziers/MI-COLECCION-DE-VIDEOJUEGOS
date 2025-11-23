@@ -181,28 +181,27 @@ if (thumbUrl) {
     titleEl.textContent = game.titulo;
     meta.appendChild(titleEl);
 
-    const infoParts = [];
-    if (game.pub)  infoParts.push(game.pub);   // aquí ya viene "Amstrad, James Bond 007 Action Pack"
-    if (game.anio) infoParts.push(game.anio);
+      // Publisher en su propia línea
+  if (game.pub) {
+    const pubEl = document.createElement("p");
+    pubEl.className = "zx-subtitle";
+    pubEl.textContent = game.pub.replace(/[\"“”«»„‟]+/g, "");
+    meta.appendChild(pubEl);
+  }
 
-    if (infoParts.length > 0) {
-      const subtitle = document.createElement("p");
-      subtitle.className = "zx-subtitle";
+  // Año en su propia línea
+  if (game.anio) {
+    const yearEl = document.createElement("p");
+    yearEl.className = "zx-subtitle";
+    yearEl.textContent = game.anio.replace(/[\"“”«»„‟]+/g, "");
+    meta.appendChild(yearEl);
+  }
 
-      // Texto base: "Publisher · Año"
-      const rawText = infoParts.join(" · ");
+  card.appendChild(thumbWrapper);
+  card.appendChild(meta);
 
-      // Limpieza: quitamos SOLO comillas dobles (normales y tipográficas)
-      const cleanText = rawText.replace(/[\"“”«»„‟]+/g, "");
+  return card;
 
-      subtitle.textContent = cleanText;
-      meta.appendChild(subtitle);
-    }
-
-    card.appendChild(thumbWrapper);
-    card.appendChild(meta);
-
-    return card;
   }
 
   // =========================================
