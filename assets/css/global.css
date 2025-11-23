@@ -245,11 +245,8 @@ p {
     pointer-events: none;
     line-height: 30px;
     height: 30px;
-
-    /* 👇 ajuste visual para alinearlo con los SVG */
-    position: relative;
-    top: 2px;   /* si aún lo ves un pelo alto, cambia a 3px */
 }
+
 
 
 .top-bar-back,
@@ -684,28 +681,23 @@ p {
 
 /* =====================================================
    PARCHE ALINEADO CABECERA (FORZADO)
+   (aplica a plataformas, lista y ficha)
 ===================================================== */
 
 .top-bar-inner > .top-bar-title {
-    position: relative !important;
-    transform: translateY(8px) !important;
+    position: relative;
+    transform: translateY(8px);
 }
 
 /* =====================================================
-   AJUSTE EXTRA PARA FICHA (título truncado)
-===================================================== */
-
-.top-bar-inner > .top-bar-title.top-bar-title--ellipsis {
-    transform: translateY(10px) !important;
-}
-
-/* =====================================================
-   AJUSTE ESPECÍFICO PARA FICHA (título truncado)
+   FICHA FINAL — CABECERA (título truncado)
+   (solo controla el truncado con “...”, no la altura)
 ===================================================== */
 
 .top-bar-title--ellipsis {
-    line-height: 30px !important;
-    height: 30px !important;
-    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 
