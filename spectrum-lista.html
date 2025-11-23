@@ -52,21 +52,16 @@
 <!-- CONTENIDO DE LA PÁGINA ZX SPECTRUM -->
 <main class="platforms-content">
 
-    <!-- =========================================
+        <!-- =========================================
          LISTA ZX SPECTRUM
     ========================================== -->
     <section class="zx-list-wrapper">
-        <!-- Cabecera de la sección (título, filtros, etc.) -->
-        <div class="zx-list-header">
-            <h2 class="zx-list-title">ZX Spectrum</h2>
-            <!-- Más adelante aquí podemos poner: nº de juegos, filtros, etc. -->
-        </div>
-
         <!-- Contenedor donde se inyectarán las tarjetas vía JS -->
         <div id="zx-spectrum-list" class="zx-list-grid">
-            <p class="zx-list-loading">Cargando lista de juegos…</p>
+            <p class="zx-list-loading">Cargando listado de juegos...</p>
         </div>
     </section>
+
 
 </main>
 
@@ -211,7 +206,7 @@
     if (!container) return;
 
     try {
-      container.innerHTML = '<p class="zx-list-loading">Cargando lista de juegos…</p>';
+            container.innerHTML = '<p class="zx-list-loading">Cargando listado de juegos...</p>';
 
       const response = await fetch(ZX_LISTA_CSV_URL);
       if (!response.ok) {
