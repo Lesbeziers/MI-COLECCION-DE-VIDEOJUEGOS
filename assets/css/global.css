@@ -801,3 +801,26 @@ PAGINA ZX SPECTRUM
     overflow: hidden;           /* Corta lo que se sale del ancho */
     text-overflow: ellipsis;    /* Añade "…" al final */
 }
+
+/* =========================================
+   Alineación precisa del título en ZX Spectrum
+   para que coincida EXACTAMENTE con PLATAFORMAS
+========================================= */
+
+/* 1. Ajustar la cabecera extendida de ZX Spectrum */
+.top-bar--spectrum {
+    height: auto;
+    flex-direction: column;     /* sigue teniendo 2 filas: título + buscador */
+    align-items: stretch;
+    padding: 0 0 10px;          /* SIN padding-top, como PLATAFORMAS */
+}
+
+/* 2. Hacer que la fila del título se comporte EXACTAMENTE
+   como la cabecera normal de 73px */
+.top-bar--spectrum .top-bar-row {
+    height: 73px;               /* misma altura que .top-bar estándar */
+    display: flex;
+    align-items: center;        /* centra verticalmente el título */
+    padding: 0 16px;            /* mismos laterales que PLATAFORMAS */
+    margin-bottom: 10px;        /* espacio limpio antes del buscador */
+}
