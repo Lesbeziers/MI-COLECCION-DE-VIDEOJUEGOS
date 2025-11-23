@@ -231,7 +231,7 @@ p {
     height: 73px;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    align-items: center;
+    align-items: center;      /* importante: centrado vertical real */
     column-gap: 12px;
     padding: 0 16px;
 }
@@ -243,11 +243,14 @@ p {
     letter-spacing: 0.5px;
     text-align: center;
     pointer-events: none;
-
-    /* 👇 FIJA ALTURA REAL DEL TEXTO PARA CENTRARLO */
     line-height: 30px;
     height: 30px;
+
+    /* 👇 ajuste visual para alinearlo con los SVG */
+    position: relative;
+    top: 2px;   /* si aún lo ves un pelo alto, cambia a 3px */
 }
+
 
 .top-bar-back,
 .top-bar-home {
