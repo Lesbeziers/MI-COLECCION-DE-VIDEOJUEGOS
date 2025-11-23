@@ -589,12 +589,20 @@ p {
 }
 
 /* =====================================
-   SEPARAR EL CONTENIDO DE PLATAFORMAS
-   DE LA CABECERA FIJA
+   SEPARAR EL CONTENIDO DEL HEADER FIJO
+   (AJUSTE GLOBAL + CASO ZX SPECTRUM)
 ===================================== */
-main.platforms-content {
-    margin-top: 140px;   /* hueco bajo la top-bar fija */
+
+/* Caso general: cabecera normal (PLATAFORMAS, etc.) */
+.top-bar + main.platforms-content {
+    margin-top: 90px;   /* hueco bajo la top-bar fija estándar (73px + aire) */
 }
+
+/* Caso específico: cabecera extendida ZX SPECTRUM */
+.top-bar--spectrum + main.platforms-content {
+    margin-top: 140px;  /* más hueco porque la cabecera crece con buscador + contador */
+}
+
 
 /* =========================================================
 /* =========================================================
