@@ -148,22 +148,29 @@
     const card = document.createElement("article");
     card.className = "zx-card";
 
-    // --- Thumb ---
-    const thumbWrapper = document.createElement("div");
-    thumbWrapper.className = "zx-thumb-wrapper";
+   // --- Thumb ---
+const thumbWrapper = document.createElement("div");
+thumbWrapper.className = "zx-thumb-wrapper";
 
-    if (game.thumb) {
-      const img = document.createElement("img");
-      img.className = "zx-thumb-img";
-      img.src = game.thumb;
-      img.alt = game.titulo || "Screenshot";
-      thumbWrapper.appendChild(img);
-    } else {
-      const placeholder = document.createElement("div");
-      placeholder.className = "zx-thumb-placeholder";
-      placeholder.textContent = "SIN SCREENSHOT";
-      thumbWrapper.appendChild(placeholder);
-    }
+// Normalizamos el thumb: si viene con varias URLs separadas por coma, usamos la primera
+let thumbUrl = (game.thumb || "").trim();
+if (thumbUrl.includes(",")) {
+  thumbUrl = thumbUrl.split(",")[0].trim();
+}
+
+if (thumbUrl) {
+  const img = document.createElement("img");
+  img.className = "zx-thumb-img";
+  img.src = thumbUrl;
+  img.alt = game.titulo || "Screenshot";
+  thumbWrapper.appendChild(img);
+} else {
+  const placeholder = document.createElement("div");
+  placeholder.className = "zx-thumb-placeholder";
+  placeholder.textContent = "SIN SCREENSHOT";
+  thumbWrapper.appendChild(placeholder);
+}
+
 
     // --- Meta (textos) ---
     const meta = document.createElement("div");
