@@ -6,6 +6,57 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+  <!-- CABECERA (misma que spectrum-lista) -->
+<header class="top-bar top-bar--spectrum">
+
+    <div class="top-bar-row">
+
+        <!-- BACK -->
+        <img src="assets/img/ic_back.svg"
+             class="top-bar-back"
+             alt="Atrás"
+             onclick="history.back()">
+
+        <!-- TÍTULO DEL JUEGO (se truncará con ...) -->
+        <h1 class="top-bar-title top-bar-title--ellipsis">
+            Nombre del juego muy largo que se truncará...
+        </h1>
+
+        <!-- HOME -->
+        <img src="assets/img/ic_home.svg"
+             class="top-bar-home"
+             alt="Home"
+             onclick="window.location.href='index.html'">
+    </div>
+
+</header>
+
+
+<!-- NAVEGACIÓN ENTRE FICHAS -->
+<div class="game-nav-bar">
+
+    <!-- Línea gris -->
+    <div class="game-nav-line"></div>
+
+    <!-- Bloque centrado con flechas + texto -->
+    <div class="game-nav-center">
+
+        <!-- Flecha anterior (ic_back, tamaño cuadrado) -->
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--prev"
+             alt="Anterior">
+
+        <!-- Texto central -->
+        <span class="game-nav-counter">10 / 7.800</span>
+
+        <!-- Flecha siguiente (ic_back en espejo horizontal) -->
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--next"
+             alt="Siguiente">
+
+    </div>
+</div>
+
   <h1>Ficha de juego · ZX Spectrum</h1>
   <p>Aquí montaremos la ficha completa con todos los datos de tu BBDD V 1.29.</p>
 
