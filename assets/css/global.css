@@ -752,5 +752,5 @@ body.ficha-final .game-nav-bar {
 
 /* Ficha Final — colocar correctamente el arranque del contenido debajo de la cabecera */
 body.ficha-final main.platforms-content {
-    margin-top: 130px;   /* un poco más de aire respecto a la cabecera completa */
+    margin-top: 120px;   /* un poco más de aire respecto a la cabecera completa */
 }
