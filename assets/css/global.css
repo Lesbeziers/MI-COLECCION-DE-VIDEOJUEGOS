@@ -822,5 +822,5 @@ PAGINA ZX SPECTRUM
     display: flex;
     align-items: center;        /* centra verticalmente el título */
     padding: 0 16px;            /* mismos laterales que PLATAFORMAS */
-    margin-bottom: 10px;        /* espacio limpio antes del buscador */
+    margin-bottom: 0px;        /* espacio limpio antes del buscador */
 }
