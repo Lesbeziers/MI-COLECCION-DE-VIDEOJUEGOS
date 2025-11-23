@@ -739,3 +739,8 @@ p {
     justify-content: center;    /* centra horizontalmente */
     line-height: 1;             /* evita que el texto abra más altura */
 }
+
+/* Ficha Final — colocar correctamente el arranque del contenido debajo de la cabecera */
+body.ficha-final main.platforms-content {
+    margin-top: 120px;   /* punto de partida — luego se ajusta si lo quieres más arriba o abajo */
+}
