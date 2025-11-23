@@ -187,6 +187,61 @@
       const subtitle = document.createElement("p");
       subtitle.className = "zx-subtitle";
 
+      // Texto base: "Publisher · Año"
+      const rawText = infoParts.join(" · ");
+
+      // Limpieza: quitamos SOLO comillas dobles (normales y tipográficas)
+      const cleanText = rawText.replace(/[\"“”«»„‟]+/g, "");
+
+      subtitle.textContent = cleanText;
+      meta.appendChild(subtitle);
+    }
+
+    card.appendChild(thumbWrapper);
+    card.appendChild(meta);
+
+    return card;
+  }
+
+  // =========================================
+  // CARGA INICIAL DE LA LISTA
+  // =========================================
+  async function loadZXList() {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    try {
+      container.innerHTML = '<p class="zx-list-loading">Cargando lista de juegos…</p>';
+
+      const response = await fetch(ZX_LISTA_CSV_URL);
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el CSV");
+      }
+
+      const text = await response.text();
+      const games = parseCSV(text);
+
+      container.innerHTML = "";
+
+      if (!games.length) {
+        container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos en la lista.</p>';
+        return;
+      }
+
+      games.forEach(game => {
+        const card = createGameCard(game);
+        container.appendChild(card);
+      });
+
+    } catch (err) {
+      console.error("Error al cargar la lista ZX:", err);
+      container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadZXList);
+</script>
+
 
 </body>
 </html>
