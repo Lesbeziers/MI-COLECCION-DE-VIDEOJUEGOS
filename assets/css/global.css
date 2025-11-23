@@ -616,7 +616,7 @@ PAGINA ZX SPECTRUM
 .spectrum-header-box {
     width: 100%;
     background: transparent;   /* el fondo lo pone la top-bar */
-    padding-top: 2px;          /* separación entre título y buscador */
+    padding-top: 0px;      /* antes 2px */
     box-sizing: border-box;
 }
 
@@ -628,7 +628,7 @@ PAGINA ZX SPECTRUM
 .spectrum-search-wrapper {
     display: flex;
     justify-content: center;     /* centra la caja */
-    margin-top: 10px;
+    margin-top: 0px;       /* antes 10px */
     width: 100%;
 }
 
