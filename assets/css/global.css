@@ -691,7 +691,9 @@ p {
 
 .top-bar-inner > .top-bar-title {
     position: relative;
-    transform: translateY(8px);
+    top: 0;          /* posición natural */
+    transform: none; /* sin desplazamientos */
+    line-height: 1;  /* altura de línea exacta */
 }
 
 /* =====================================================
