@@ -641,10 +641,10 @@ p {
 /* Barra completa entre dos líneas grises */
 .game-nav-bar {
     width: 100%;
-    border-top: 1px solid #555;
-    border-bottom: 1px solid #555;
+    border-top: 1px solid #555;   /* mantenemos la línea superior */
+    border-bottom: none;          /* quitamos la línea inferior */
     padding: 8px 0;
-    margin-bottom: 16px;
+    margin-bottom: 0;             /* para que no cree separación extra */
 }
 
 /* Bloque centrado */
