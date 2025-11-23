@@ -764,7 +764,10 @@ PAGINA ZX SPECTRUM
     flex-direction: column;
     justify-content: center;
     text-align: left;
+    flex: 1;        /* que ocupe todo el espacio disponible */
+    min-width: 0;   /* PERMITE que se encoja y funcione el ellipsis */
 }
+
 
 /* =========================================
    ZX SPECTRUM — TEXTOS DE LA CARD
