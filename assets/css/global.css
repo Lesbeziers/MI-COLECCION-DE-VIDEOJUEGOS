@@ -654,6 +654,12 @@ p {
     margin-bottom: 0;             /* para que no cree separación extra */
 }
 
+/* FICHA FINAL — acercar el bloque 10/7.800 al título */
+body.ficha-final .game-nav-bar {
+    padding-top: 2px;   /* menos aire arriba (antes 8px globales) */
+    margin-top: -4px;   /* lo subimos un poquito hacia el título */
+}
+
 /* Bloque centrado */
 .game-nav-center {
     display: flex;
@@ -742,5 +748,5 @@ p {
 
 /* Ficha Final — colocar correctamente el arranque del contenido debajo de la cabecera */
 body.ficha-final main.platforms-content {
-    margin-top: 120px;   /* punto de partida — luego se ajusta si lo quieres más arriba o abajo */
+    margin-top: 130px;   /* un poco más de aire respecto a la cabecera completa */
 }
