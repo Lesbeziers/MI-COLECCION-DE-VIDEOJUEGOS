@@ -41,6 +41,37 @@
     </div>
   </div>
   <div class="footer-note">LesBeziers, 2025</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // Elemento donde pondremos el número
+    const countEl = document.getElementById("platform-count");
+    if (!countEl) return;
+
+    try {
+        // Cargar plataformas.html como texto
+        const resp = await fetch("plataformas.html");
+        const html = await resp.text();
+
+        // Crear DOM temporal para analizarlo
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+
+        // Contar TODOS los iconos de plataformas
+        const total = temp.querySelectorAll(".platform-card").length;
+
+        // Pintar el número real
+        countEl.textContent = total;
+
+    } catch (err) {
+        console.error("Error contando plataformas:", err);
+        // Si falla, dejamos la X o no mostramos nada
+    }
+});
+</script>
+
+  
 </body>
 
 </html>
