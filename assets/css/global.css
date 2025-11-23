@@ -721,3 +721,12 @@ p {
 .ficha-content {
     margin-top: 12px !important;
 }
+
+/* PASO 4 — Ficha Final: compactar el bloque 10/7800 */
+.ficha-nav {
+    height: 32px;               /* altura compacta y limpia */
+    display: flex;
+    align-items: center;        /* centra verticalmente el 10/7800 */
+    justify-content: center;    /* centra horizontalmente */
+    line-height: 1;             /* evita que el texto abra más altura */
+}
