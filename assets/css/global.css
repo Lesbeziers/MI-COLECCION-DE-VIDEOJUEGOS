@@ -666,3 +666,8 @@ p {
     color: #ddd;
     font-weight: 400;
 }
+
+/* Activar cursor de “clic” SOLO en ZX Spectrum */
+.platform-card--zxspectrum {
+    cursor: pointer;
+}
