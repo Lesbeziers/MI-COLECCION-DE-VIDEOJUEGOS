@@ -662,7 +662,7 @@ PAGINA ZX SPECTRUM
     height: auto;                /* deja que crezca por contenido */
     flex-direction: column;      /* dos filas: fila título + fila buscador */
     align-items: stretch;
-    padding: 6px 16px 10px;      /* arriba, laterales y abajo */
+    padding: 20px 16px 10px;      /* arriba, laterales y abajo */
 }
 
 .top-bar-row {
