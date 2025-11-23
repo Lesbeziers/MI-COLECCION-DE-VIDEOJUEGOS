@@ -65,223 +65,298 @@
     </main>
 
     <script>
-        // =========================================
-        // URL DEL FEED CSV ZX_LISTA
-        // =========================================
-        const ZX_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
+  // =========================================
+  // URL DEL FEED CSV ZX_LISTA
+  // =========================================
+  const ZX_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
 
-        // =========================================
-        // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
-        // =========================================
-        function parseCSVLine(line) {
-            const result = [];
-            let current = "";
-            let inQuotes = false;
+  // Lista global con TODOS los juegos (para el buscador)
+  let allGames = [];
 
-            for (let i = 0; i < line.length; i++) {
-                const ch = line[i];
+  // =========================================
+  // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
+  // =========================================
+  function parseCSVLine(line) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
 
-                if (ch === '"') {
-                    // Si estamos dentro de comillas y vemos "" → comilla escapada
-                    if (inQuotes && line[i + 1] === '"') {
-                        current += '"';
-                        i++; // saltamos la segunda
-                    } else {
-                        inQuotes = !inQuotes; // abrir/cerrar bloque de comillas
-                    }
-                } else if (ch === "," && !inQuotes) {
-                    // Separador de campo real
-                    result.push(current.trim());
-                    current = "";
-                } else {
-                    current += ch;
-                }
-            }
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
 
-            // Último campo
-            result.push(current.trim());
-            return result;
+      if (ch === '"') {
+        // Si estamos dentro de comillas y vemos "" → comilla escapada
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // saltamos la segunda
+        } else {
+          inQuotes = !inQuotes; // abrir/cerrar bloque de comillas
         }
+      } else if (ch === "," && !inQuotes) {
+        // Separador de campo real
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
 
-        // =========================================
-        // UTILIDAD PARA PARSEAR EL CSV COMPLETO
-        // =========================================
-        function parseCSV(text) {
-            const lines = text.trim().split(/\r?\n/);
-            if (lines.length === 0) return [];
+    // Último campo
+    result.push(current.trim());
+    return result;
+  }
 
-            const header = parseCSVLine(lines[0]);
-            const rows = [];
+  // =========================================
+  // UTILIDAD PARA PARSEAR EL CSV COMPLETO
+  // =========================================
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length === 0) return [];
 
-            const idxID     = header.indexOf("ID");
-            const idxTitulo = header.indexOf("TITULO_MOSTRAR");
-            const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
-            const idxAnio   = header.indexOf("AÑO_MOSTRAR");
-            const idxThumb  = header.indexOf("THUMB_URL");
+    const header = parseCSVLine(lines[0]);
+    const rows = [];
 
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
+    const idxID     = header.indexOf("ID");
+    const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+    const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio   = header.indexOf("AÑO_MOSTRAR");
+    const idxThumb  = header.indexOf("THUMB_URL");
 
-                const cols = parseCSVLine(line);
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
 
-                const id    = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
-                const titulo= (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
-                const pub   = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
-                const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
-                const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
+      const cols = parseCSVLine(line);
 
-                // Si no hay título, descartamos la fila
-                if (!titulo) continue;
+      const id    = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
+      const titulo= (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
+      const pub   = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
+      const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
+      const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
 
-                // Título SOLO para mostrar (con artículo al final)
-                const displayTitulo = formatTitleWithArticle(titulo);
+      // Si no hay título, descartamos la fila
+      if (!titulo) continue;
 
-                rows.push({
-                    id,
-                    titulo,
-                    displayTitulo,
-                    pub,
-                    anio,
-                    thumb,
-                    sortKey: displayTitulo.toLowerCase()
-                });
-            }
+      // Título SOLO para mostrar (con artículo al final)
+      const displayTitulo = formatTitleWithArticle(titulo);
 
-            return rows;
-        }
+      rows.push({
+        id,
+        titulo,
+        displayTitulo,
+        pub,
+        anio,
+        thumb,
+        sortKey: displayTitulo.toLowerCase()
+      });
+    }
 
-        // =========================================
-        // FORMATEO DE TÍTULOS CON ARTÍCULO AL FINAL
-        // Ej: "The Great Escape" → "Great Escape, The"
-        //     "La Abadía del Crimen" → "Abadía del Crimen, La"
-        // =========================================
-        function formatTitleWithArticle(title) {
-            if (!title) return "";
-            const t = title.trim();
+    return rows;
+  }
 
-            // Artículos que queremos mover al final
-            const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
-            const match = t.match(re);
+  // =========================================
+  // FORMATEO DE TÍTULOS CON ARTÍCULO AL FINAL
+  // Ej: "The Great Escape" → "Great Escape, The"
+  //     "La Abadía del Crimen" → "Abadía del Crimen, La"
+  // =========================================
+  function formatTitleWithArticle(title) {
+    if (!title) return "";
+    const t = title.trim();
 
-            if (!match) {
-                return t;  // Sin artículo al principio → se deja igual
-            }
+    // Artículos que queremos mover al final
+    const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+    const match = t.match(re);
 
-            const article = match[1]; // “The”, “La”, etc.
-            const rest    = match[2]; // El resto
-            return rest + ", " + article;
-        }
+    if (!match) {
+      return t;  // Sin artículo al principio → se deja igual
+    }
 
-        // =========================================
-        // CREACIÓN DE UNA TARJETA DE JUEGO
-        // =========================================
-        function createGameCard(game) {
-            const card = document.createElement("article");
-            card.className = "zx-card";
+    const article = match[1]; // “The”, “La”, etc.
+    const rest    = match[2]; // El resto
+    return rest + ", " + article;
+  }
 
-            // --- Thumb ---
-            const thumbWrapper = document.createElement("div");
-            thumbWrapper.className = "zx-thumb-wrapper";
+  // =========================================
+  // NORMALIZAR TEXTO (minúsculas + sin tildes)
+  // para que el buscador sea más amable
+  // =========================================
+  function normalizeText(str) {
+    return (str || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // quita acentos
+  }
 
-            // Normalizamos el thumb: si viene con varias URLs separadas por coma, usamos la primera
-            let thumbUrl = (game.thumb || "").trim();
-            if (thumbUrl.includes(",")) {
-                thumbUrl = thumbUrl.split(",")[0].trim();
-            }
+  // =========================================
+  // CREACIÓN DE UNA TARJETA DE JUEGO
+  // =========================================
+  function createGameCard(game) {
+    const card = document.createElement("article");
+    card.className = "zx-card";
 
-            if (thumbUrl) {
-                const img = document.createElement("img");
-                img.className = "zx-thumb-img";
-                img.src = thumbUrl;
-                img.alt = game.titulo || "Screenshot";
-                thumbWrapper.appendChild(img);
-            } else {
-                const placeholder = document.createElement("div");
-                placeholder.className = "zx-thumb-placeholder";
-                placeholder.textContent = "SIN SCREENSHOT";
-                thumbWrapper.appendChild(placeholder);
-            }
+    // --- Thumb ---
+    const thumbWrapper = document.createElement("div");
+    thumbWrapper.className = "zx-thumb-wrapper";
 
-            // --- Meta (textos) ---
-            const meta = document.createElement("div");
-            meta.className = "zx-meta";
+    // Normalizamos el thumb: si viene con varias URLs separadas por coma, usamos la primera
+    let thumbUrl = (game.thumb || "").trim();
+    if (thumbUrl.includes(",")) {
+      thumbUrl = thumbUrl.split(",")[0].trim();
+    }
 
-            const titleEl = document.createElement("h3");
-            titleEl.className = "zx-title";
-            titleEl.textContent = game.displayTitulo || game.titulo;
-            meta.appendChild(titleEl);
+    if (thumbUrl) {
+      const img = document.createElement("img");
+      img.className = "zx-thumb-img";
+      img.src = thumbUrl;
+      img.alt = game.titulo || "Screenshot";
+      thumbWrapper.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "zx-thumb-placeholder";
+      placeholder.textContent = "SIN SCREENSHOT";
+      thumbWrapper.appendChild(placeholder);
+    }
 
-            // Publisher en su propia línea
-            if (game.pub) {
-                const pubEl = document.createElement("p");
-                pubEl.className = "zx-subtitle";
-                pubEl.textContent = game.pub.replace(/[\"“”«»„‟]+/g, "");
-                meta.appendChild(pubEl);
-            }
+    // --- Meta (textos) ---
+    const meta = document.createElement("div");
+    meta.className = "zx-meta";
 
-            // Año en su propia línea
-            if (game.anio) {
-                const yearEl = document.createElement("p");
-                yearEl.className = "zx-subtitle";
-                yearEl.textContent = game.anio.replace(/[\"“”«»„‟]+/g, "");
-                meta.appendChild(yearEl);
-            }
+    const titleEl = document.createElement("h3");
+    titleEl.className = "zx-title";
+    titleEl.textContent = game.displayTitulo || game.titulo;
+    meta.appendChild(titleEl);
 
-            card.appendChild(thumbWrapper);
-            card.appendChild(meta);
+    // Publisher en su propia línea
+    if (game.pub) {
+      const pubEl = document.createElement("p");
+      pubEl.className = "zx-subtitle";
+      pubEl.textContent = game.pub.replace(/[\"“”«»„‟]+/g, "");
+      meta.appendChild(pubEl);
+    }
 
-            return card;
-        }
+    // Año en su propia línea
+    if (game.anio) {
+      const yearEl = document.createElement("p");
+      yearEl.className = "zx-subtitle";
+      yearEl.textContent = game.anio.replace(/[\"“”«»„‟]+/g, "");
+      meta.appendChild(yearEl);
+    }
 
-        // =========================================
-        // CARGA INICIAL DE LA LISTA
-        // =========================================
-        async function loadZXList() {
-            const container = document.getElementById("zx-spectrum-list");
-            if (!container) return;
+    card.appendChild(thumbWrapper);
+    card.appendChild(meta);
 
-            try {
-                container.innerHTML = '<p class="zx-list-loading">Cargando listado de juegos...</p>';
+    return card;
+  }
 
-                const response = await fetch(ZX_LISTA_CSV_URL);
-                if (!response.ok) {
-                    throw new Error("No se pudo cargar el CSV");
-                }
+  // =========================================
+  // PINTAR LISTA + ACTUALIZAR CONTADOR
+  // =========================================
+  function renderGames(gamesToRender, query = "") {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
 
-                const text = await response.text();
-                const games = parseCSV(text);
+    container.innerHTML = "";
 
-                // Ordenar alfabéticamente usando sortKey (ya en minúsculas)
-                games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+    if (!gamesToRender.length) {
+      container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos que coincidan con la búsqueda.</p>';
+    } else {
+      gamesToRender.forEach(game => {
+        const card = createGameCard(game);
+        container.appendChild(card);
+      });
+    }
 
-                // Actualizar contador "X REGISTROS" en la cabecera
-                const recordsEl = document.querySelector(".spectrum-records-text");
-                if (recordsEl) {
-                    const total = games.length;
-                    recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
-                }
+    // Actualizar contador "X REGISTROS" o "N DE X REGISTROS"
+    const recordsEl = document.querySelector(".spectrum-records-text");
+    if (recordsEl) {
+      const total = allGames.length;
+      if (!query.trim()) {
+        recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
+      } else {
+        const current = gamesToRender.length;
+        recordsEl.textContent =
+          current.toLocaleString("es-ES") +
+          " DE " +
+          total.toLocaleString("es-ES") +
+          " REGISTROS";
+      }
+    }
+  }
 
-                container.innerHTML = "";
+  // =========================================
+  // CONFIGURAR BUSCADOR
+  // =========================================
+  function setupSearch() {
+    const searchInput = document.querySelector(".spectrum-search-input");
+    if (!searchInput) return;
 
-                if (!games.length) {
-                    container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos en la lista.</p>';
-                    return;
-                }
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value || "";
+      const trimmed = query.trim();
 
-                games.forEach(game => {
-                    const card = createGameCard(game);
-                    container.appendChild(card);
-                });
+      if (!trimmed) {
+        // Sin texto → lista completa
+        renderGames(allGames, "");
+        return;
+      }
 
-            } catch (err) {
-                console.error("Error al cargar la lista ZX:", err);
-                container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
-            }
-        }
+      const qNorm = normalizeText(trimmed);
 
-        document.addEventListener("DOMContentLoaded", loadZXList);
-    </script>
+      const filtered = allGames.filter(game => {
+        const titleNorm = normalizeText(game.displayTitulo || game.titulo);
+        const pubNorm   = normalizeText(game.pub);
+        const yearNorm  = normalizeText(game.anio);
+
+        return (
+          titleNorm.includes(qNorm) ||
+          pubNorm.includes(qNorm) ||
+          yearNorm.includes(qNorm)
+        );
+      });
+
+      renderGames(filtered, query);
+    });
+  }
+
+  // =========================================
+  // CARGA INICIAL DE LA LISTA
+  // =========================================
+  async function loadZXList() {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    try {
+      container.innerHTML = '<p class="zx-list-loading">Cargando listado de juegos...</p>';
+
+      const response = await fetch(ZX_LISTA_CSV_URL);
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el CSV");
+      }
+
+      const text = await response.text();
+      const games = parseCSV(text);
+
+      // Ordenar alfabéticamente usando sortKey (ya en minúsculas)
+      games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+      // Guardamos la lista completa para el buscador
+      allGames = games;
+
+      // Pintamos la lista completa (estado inicial, sin filtro)
+      renderGames(allGames, "");
+
+      // Configuramos el buscador (una sola vez)
+      setupSearch();
+
+    } catch (err) {
+      console.error("Error al cargar la lista ZX:", err);
+      container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadZXList);
+</script>
+
 
 </body>
 </html>
