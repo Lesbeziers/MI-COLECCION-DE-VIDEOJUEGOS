@@ -564,9 +564,16 @@ p {
     margin-top: 90px;
 }
 
+/* 1 — Por defecto, ninguna página con .top-bar--spectrum añade margen */
 .top-bar--spectrum + main.platforms-content {
+    margin-top: 0;
+}
+
+/* 2 — SOLO Spectrum-lista, que sí tiene buscador, añade el margen */
+.top-bar--spectrum .spectrum-header-box + main.platforms-content {
     margin-top: 160px;
 }
+
 
 /* =====================================================
    LISTA DE JUEGOS ZX SPECTRUM
