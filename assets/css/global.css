@@ -748,3 +748,20 @@ PAGINA ZX SPECTRUM
     border-radius: 6px;
     background-color: #555;  /* un pelín más claro que el wrapper */
 }
+/* =========================================
+   ZX SPECTRUM — CARD BÁSICA (layout horizontal)
+========================================= */
+.zx-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;              /* separación thumb ↔ texto */
+    padding: 10px 16px;     /* respirito lateral */
+    text-align: left;       /* que el texto no herede el centrado del body */
+}
+
+.zx-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+}
