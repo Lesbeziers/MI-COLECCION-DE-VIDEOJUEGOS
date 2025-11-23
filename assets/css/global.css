@@ -243,6 +243,10 @@ p {
     letter-spacing: 0.5px;
     text-align: center;
     pointer-events: none;
+
+    /* 👇 FIJA ALTURA REAL DEL TEXTO PARA CENTRARLO */
+    line-height: 30px;
+    height: 30px;
 }
 
 .top-bar-back,
