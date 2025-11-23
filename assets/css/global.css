@@ -768,5 +768,5 @@ body:not(.spectrum-lista):not(.ficha-final) main.platforms-content {
 
 /* Margen correcto para la página PLATAFORMAS */
 body.plataformas main.platforms-content {
-    margin-top: 120px !important;
+    margin-top: 100px !important;
 }
