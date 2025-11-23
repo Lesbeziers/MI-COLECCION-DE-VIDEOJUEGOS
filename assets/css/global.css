@@ -681,3 +681,12 @@ p {
 .platform-card--zxspectrum {
     cursor: pointer;
 }
+
+/* =====================================================
+   PARCHE ALINEADO CABECERA (FORZADO)
+===================================================== */
+
+.top-bar-inner > .top-bar-title {
+    position: relative !important;
+    transform: translateY(6px) !important;
+}
