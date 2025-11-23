@@ -212,21 +212,28 @@ p {
 /* =====================================================
    BANDA SUPERIOR (HEADER FIJO)
 ===================================================== */
+
 .top-bar {
     width: 100%;
-    height: 73px;
     background-color: #101010;
     border-bottom: 3px solid #555;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
-
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* Fila principal: back | título | home */
+.top-bar-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    height: 73px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 12px;
+    padding: 0 16px;
 }
 
 .top-bar-title {
@@ -234,7 +241,6 @@ p {
     font-size: 30px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    flex: 1;
     text-align: center;
     pointer-events: none;
 }
@@ -247,8 +253,8 @@ p {
     flex-shrink: 0;
 }
 
-.top-bar-back { margin-right: 12px; }
-.top-bar-home { margin-left: 12px; }
+.top-bar-back { margin-right: 0; }
+.top-bar-home { margin-left: 0; }
 
 /* ----------------------------------------------------
    PAGINA PLATAFORMAS (grid de iconos)
@@ -488,19 +494,18 @@ p {
 
 /* =====================================================
    ZX SPECTRUM — CABECERA EXTENDIDA
+   (mismo header, pero con buscador debajo)
 ===================================================== */
-.top-bar--spectrum {
-    height: auto;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 20px 16px 10px;
-}
 
-.top-bar--spectrum .top-bar-row {
-    height: 73px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
+/* El header sigue siendo .top-bar top-bar--spectrum
+   y dentro lleva:
+   <div class="top-bar-inner"> ... </div>
+   <div class="spectrum-header-box"> ... </div>
+*/
+
+.top-bar--spectrum .top-bar-inner {
+    /* pequeña separación extra hacia abajo si quieres */
+    padding-bottom: 6px;
 }
 
 /* Buscador */
@@ -618,8 +623,6 @@ p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-left: 12px;
-    flex: 1;
 }
 
 /* =====================================================
