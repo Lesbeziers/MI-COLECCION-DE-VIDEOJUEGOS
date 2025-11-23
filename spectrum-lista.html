@@ -257,14 +257,28 @@
 
     container.innerHTML = "";
 
-    if (!gamesToRender.length) {
+        if (!gamesToRender.length) {
       container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos que coincidan con la búsqueda.</p>';
     } else {
       gamesToRender.forEach(game => {
         const card = createGameCard(game);
+
+        // 🔹 Hacer que toda la tarjeta sea clicable
+        // Usamos el ID que viene del CSV (columna "ID")
+        card.addEventListener("click", () => {
+          if (game.id) {
+            window.location.href =
+              "spectrum-ficha.html?id=" + encodeURIComponent(game.id);
+          }
+        });
+
+        // Cambiamos el cursor para que se note que es clicable
+        card.style.cursor = "pointer";
+
         container.appendChild(card);
       });
     }
+
 
     // Actualizar contador "X REGISTROS" o "N DE X REGISTROS"
     const recordsEl = document.querySelector(".spectrum-records-text");
