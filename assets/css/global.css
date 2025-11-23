@@ -705,4 +705,19 @@ p {
     text-overflow: ellipsis;
 }
 
+/* PASO 1 — Ficha Final: corregir separación superior del bloque 10/7800 */
+.ficha-nav {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
 
+/* PASO 2 — Ficha Final: pegar la línea gris inferior al bloque 10/7800 */
+.ficha-nav {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* PASO 3 — Ficha Final: ajustar el arranque del contenido debajo de la LÍNEA 2 */
+.ficha-content {
+    margin-top: 12px !important;
+}
