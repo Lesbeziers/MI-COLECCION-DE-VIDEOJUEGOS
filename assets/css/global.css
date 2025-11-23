@@ -284,6 +284,205 @@ p {
     align-items: center;
 }
 
+/* Círculo para los iconos de plataformas (similar a stat-circle) */
+.platform-icon-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #aaa;
+    background-color: #232221;
+    background-size: 80%;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0 auto 4px auto;
+}
+
+/* Texto bajo cada icono en PLATAFORMAS */
+.platform-card .stat-label {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* HOVER en PLATAFORMAS (igual que en landing) */
+.platform-card:hover .platform-icon-circle {
+    border-color: #ff8800;
+    opacity: 1;
+    transition: all 0.25s ease;
+}
+
+.platform-card:hover .stat-label {
+    color: #ff8800;
+    transition: color 0.25s ease;
+}
+
+.platform-card:hover {
+    transform: translateY(-3px);
+    transition: transform 0.25s ease;
+}
+
+/* ============================
+   ICONOS MICROORDENADORES
+============================ */
+.platform-card--zxspectrum .platform-icon-circle {
+    background-image: url('../icons/ic_zxspectrum.svg');
+}
+
+.platform-card--commodore64 .platform-icon-circle {
+    background-image: url('../icons/ic_commodore64.svg');
+}
+
+.platform-card--amiga .platform-icon-circle {
+    background-image: url('../icons/ic_amiga.svg');
+}
+
+.platform-card--amstrad .platform-icon-circle {
+    background-image: url('../icons/ic_amstrad.svg');
+}
+
+.platform-card--msx .platform-icon-circle {
+    background-image: url('../icons/ic_msx.svg');
+}
+
+/* ============================
+   ICONOS NINTENDO
+============================ */
+.platform-card--nes .platform-icon-circle {
+    background-image: url('../icons/ic_nes.svg');
+}
+
+.platform-card--snes .platform-icon-circle {
+    background-image: url('../icons/ic_snes.svg');
+}
+
+.platform-card--nintendo64 .platform-icon-circle {
+    background-image: url('../icons/ic_nintendo64.svg');
+}
+
+.platform-card--gamecube .platform-icon-circle {
+    background-image: url('../icons/ic_gamecube.svg');
+}
+
+.platform-card--wii .platform-icon-circle {
+    background-image: url('../icons/ic_wii.svg');
+}
+
+.platform-card--wiiu .platform-icon-circle {
+    background-image: url('../icons/ic_wiiu.svg');
+}
+
+.platform-card--switch .platform-icon-circle {
+    background-image: url('../icons/ic_Switch.svg'); /* S mayúscula */
+}
+
+.platform-card--switch2 .platform-icon-circle {
+    background-image: url('../icons/ic_switch2.svg');
+}
+
+.platform-card--gameboy .platform-icon-circle {
+    background-image: url('../icons/ic_gameboy.svg');
+}
+
+.platform-card--gbcolor .platform-icon-circle {
+    background-image: url('../icons/ic_gbcolor.svg');
+}
+
+.platform-card--gbadvance .platform-icon-circle {
+    background-image: url('../icons/ic_gbadvance.svg');
+}
+
+.platform-card--nintendods .platform-icon-circle {
+    background-image: url('../icons/ic_nitendods.svg'); /* nombre raro del SVG */
+}
+
+.platform-card--nintendo3ds .platform-icon-circle {
+    background-image: url('../icons/ic_nintendo3ds.svg');
+}
+
+/* ============================
+   ICONOS SONY
+============================ */
+.platform-card--psx .platform-icon-circle {
+    background-image: url('../icons/ic_psx.svg');
+}
+
+.platform-card--ps2 .platform-icon-circle {
+    background-image: url('../icons/ic_ps2.svg');
+}
+
+.platform-card--ps3 .platform-icon-circle {
+    background-image: url('../icons/ic_ps3.svg');
+}
+
+.platform-card--ps4 .platform-icon-circle {
+    background-image: url('../icons/ic_ps4.svg');
+}
+
+.platform-card--ps5 .platform-icon-circle {
+    background-image: url('../icons/ic_ps5.svg');
+}
+
+.platform-card--psp .platform-icon-circle {
+    background-image: url('../icons/ic_psp.svg');
+}
+
+.platform-card--psvita .platform-icon-circle {
+    background-image: url('../icons/ic_psvita.svg');
+}
+
+/* ============================
+   ICONOS SEGA
+============================ */
+.platform-card--mastersystem .platform-icon-circle {
+    background-image: url('../icons/ic_mastersystem.svg');
+}
+
+.platform-card--megadrive .platform-icon-circle {
+    background-image: url('../icons/ic_megadrive.svg');
+}
+
+.platform-card--saturn .platform-icon-circle {
+    background-image: url('../icons/ic_saturn.svg');
+}
+
+.platform-card--dreamcast .platform-icon-circle {
+    background-image: url('../icons/ic_dreamcast.svg');
+}
+
+.platform-card--gamegear .platform-icon-circle {
+    background-image: url('../icons/ic_gamegear.svg');
+}
+
+/* ============================
+   ICONOS ATARI
+============================ */
+.platform-card--atari2600 .platform-icon-circle {
+    background-image: url('../icons/ic_atari2600.svg');
+}
+
+.platform-card--atari5200 .platform-icon-circle {
+    background-image: url('../icons/ic_atari5200.svg');
+}
+
+.platform-card--atari7800 .platform-icon-circle {
+    background-image: url('../icons/ic_atari7800.svg');
+}
+
+.platform-card--atarijaguar .platform-icon-circle {
+    background-image: url('../icons/ic_atarijaguar.svg');
+}
+
+/* ============================
+   ICONOS OTROS
+============================ */
+.platform-card--pc .platform-icon-circle {
+    background-image: url('../icons/ic_pc.svg');
+}
+
+.platform-card--arcade .platform-icon-circle {
+    background-image: url('../icons/ic_arcade.svg');
+}
+
+
 /* =====================================================
    ZX SPECTRUM — CABECERA EXTENDIDA
 ===================================================== */
