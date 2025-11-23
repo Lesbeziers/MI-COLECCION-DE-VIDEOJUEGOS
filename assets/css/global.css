@@ -548,7 +548,9 @@ p {
 }
 
 /* Contador */
-.spectrum-records-block { padding: 4px 0; }
+.spectrum-records-block {
+    padding: 9px 0 4px 0;   /* 9px arriba → 5px más respecto a los 4px originales */
+}
 
 .spectrum-records-text {
     font-size: 16px;
