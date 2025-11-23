@@ -765,3 +765,28 @@ PAGINA ZX SPECTRUM
     justify-content: center;
     text-align: left;
 }
+
+/* =========================================
+   ZX SPECTRUM — TEXTOS DE LA CARD
+========================================= */
+.zx-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Publisher y Año */
+.zx-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+/* Forzar UNA sola línea y añadir "..." si se desborda */
+.zx-title,
+.zx-subtitle {
+    white-space: nowrap;        /* NO permite salto de línea */
+    overflow: hidden;           /* Corta lo que se sale del ancho */
+    text-overflow: ellipsis;    /* Añade "…" al final */
+}
