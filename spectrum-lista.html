@@ -76,6 +76,37 @@
   // =========================================
   const ZX_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
 
+// Parser sencillo de una línea CSV que respeta comillas
+  function parseCSVLine(line) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+
+      if (ch === '"') {
+        // Si estamos dentro de comillas y vemos "" → es una comilla literal
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // saltamos la segunda
+        } else {
+          inQuotes = !inQuotes; // abrimos / cerramos comillas
+        }
+      } else if (ch === "," && !inQuotes) {
+        // Separador real de campo
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+
+    // Último campo
+    result.push(current.trim());
+    return result;
+  }
+    
   // =========================================
   // UTILIDAD SIMPLE PARA PARSEAR EL CSV
   // =========================================
@@ -83,7 +114,7 @@
     const lines = text.trim().split(/\r?\n/);
     if (lines.length === 0) return [];
 
-    const header = lines[0].split(",");
+    cconst header = parseCSVLine(lines[0]);
     const rows = [];
 
     const idxID      = header.indexOf("ID");
@@ -96,7 +127,7 @@
       const line = lines[i];
       if (!line.trim()) continue;
 
-      const cols = line.split(",");
+      const cols = parseCSVLine(line);
 
       const id     = cols[idxID]     !== undefined ? cols[idxID].trim()     : "";
       const titulo = cols[idxTitulo] !== undefined ? cols[idxTitulo].trim() : "";
