@@ -699,3 +699,26 @@ PAGINA ZX SPECTRUM
     margin: 2px 0 0 0;
 }
 
+/* =========================================================
+   ZX SPECTRUM — LISTA DE JUEGOS (wrapper + loading centrado)
+========================================================= */
+
+.zx-list-wrapper {
+    width: 100%;
+    max-width: 1080px;
+    margin: 10px auto 40px;   /* pequeño margen sobre la primera card */
+    padding: 0 0 0;
+}
+
+.zx-list-grid {
+    /* contenedor donde se inyectan las cards */
+}
+
+.zx-list-loading {
+    text-align: center;
+    padding: 60px 0;          /* centra visualmente el texto de carga */
+    font-size: 16px;
+    color: #dddddd;
+    opacity: 0.9;
+}
+
