@@ -163,6 +163,17 @@ p {
     margin: 0 auto 14px auto;
 }
 
+/* Icono de PLATAFORMAS (landing) */
+.stat-block:nth-child(1) .stat-circle {
+    background-image: url('../icons/ic_plataformas.svg');
+}
+
+/* Icono de COLECCIÓN (landing) */
+.stat-block:nth-child(2) .stat-circle {
+    background-image: url('../icons/ic_coleccion.svg');
+}
+
+
 .stat-label {
     font-size: 18px;
     font-weight: 600;
