@@ -258,9 +258,6 @@ if (thumbUrl) {
       const text = await response.text();
       const games = parseCSV(text);
 
-              const text = await response.text();
-      const games = parseCSV(text);
-
       // Ordenar alfabéticamente usando sortKey (ya en minúsculas)
       games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
 
@@ -270,15 +267,6 @@ if (thumbUrl) {
         const total = games.length;
         recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
       }
-
-
-              // Actualizar contador "X REGISTROS" en la cabecera
-      const recordsEl = document.querySelector(".spectrum-records-text");
-      if (recordsEl) {
-        const total = games.length;
-        recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
-      }
-
 
       container.innerHTML = "";
 
