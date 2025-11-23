@@ -6,8 +6,10 @@
     <title>ZX Spectrum – Ficha</title>
     <link rel="stylesheet" href="assets/css/global.css">
 </head>
+
 <body class="ficha-final">
-  <!-- CABECERA (misma que spectrum-lista) -->
+
+<!-- CABECERA -->
 <header class="top-bar top-bar--spectrum">
 
     <div class="top-bar-inner">
@@ -17,8 +19,9 @@
              alt="Atrás"
              onclick="history.back()">
 
+        <!-- ESTE H1 SE RELLENARÁ AUTOMÁTICAMENTE -->
         <h1 class="top-bar-title top-bar-title--ellipsis">
-            Nombre del juego muy largo que se truncará...
+            Cargando título...
         </h1>
 
         <img src="assets/img/ic_home.svg"
@@ -26,15 +29,11 @@
              alt="Home"
              onclick="window.location.href='index.html'">
 
-    </div>   <!-- cierre del bloque superior -->
+    </div>
 
-
-
-    <!-- 🔥 PEGAS AQUÍ EL BLOQUE 10/7800 -->
+    <!-- Barra navegación juego a juego -->
     <div class="game-nav-bar">
-
         <div class="game-nav-center">
-
             <img src="assets/img/ic_back.svg"
                  class="game-nav-arrow game-nav-arrow--prev"
                  alt="Anterior">
@@ -44,25 +43,136 @@
             <img src="assets/img/ic_back.svg"
                  class="game-nav-arrow game-nav-arrow--next"
                  alt="Siguiente">
-
         </div>
-
     </div>
-    <!-- 🔥 HASTA AQUÍ -->
 
 </header>
 
 
 
-<!-- CONTENIDO DE LA PÁGINA ZX SPECTRUM (FICHA) -->
+<!-- CONTENIDO -->
 <main class="platforms-content">
-
-
     <h1>Ficha de juego · ZX Spectrum</h1>
-    <p>Aquí montaremos la ficha completa con todos los datos de tu BBDD V 1.29.</p>
-
+    <p>Aquí montaremos la ficha completa con todos los datos.</p>
 </main>
 
-  <script src="assets/js/app.js"></script>
+
+
+<!-- ===========================================
+     SCRIPT DE LA FICHA — LEE ID Y CARGA CSV
+=========================================== -->
+<script>
+
+    /* URL del CSV de ZX_SPECTRUM */
+    const ZX_SPECTRUM_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
+
+    /* Leer parámetro ?id= de la URL */
+    function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    /* Parser de una línea CSV (respeta comillas) */
+    function parseCSVLine(line) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+
+        result.push(current.trim());
+        return result;
+    }
+
+    /* Parsear todo el CSV de ZX_SPECTRUM */
+    function parseSpectrumCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length === 0) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        const idxID        = header.indexOf("ID");
+        const idxTitMostrar = header.indexOf("TITULO_MOSTRAR");
+        const idxTit       = idxTitMostrar >= 0 ? idxTitMostrar : header.indexOf("TITULO");
+        const idxPub       = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxAnio      = header.indexOf("AÑO_MOSTRAR");
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (!line.trim()) continue;
+
+            const cols = parseCSVLine(line);
+
+            rows.push({
+                id:    cols[idxID]?.trim()    || "",
+                titulo:cols[idxTit]?.trim()   || "",
+                pub:   cols[idxPub]?.trim()   || "",
+                anio:  cols[idxAnio]?.trim()  || ""
+            });
+        }
+
+        return rows;
+    }
+
+    /* Cargar datos y actualizar cabecera */
+    async function loadSpectrumFicha() {
+
+        const gameId = (getQueryParam("id") || "").trim();
+        if (!gameId) {
+            console.warn("No hay ID en la URL.");
+            return;
+        }
+
+        const h1 = document.querySelector(".top-bar-title");
+        if (!h1) return;
+
+        try {
+            const response = await fetch(ZX_SPECTRUM_CSV_URL);
+            if (!response.ok) throw new Error("No se pudo cargar el CSV");
+
+            const text = await response.text();
+            const games = parseSpectrumCSV(text);
+
+            const game = games.find(row => row.id === gameId);
+
+            if (game) {
+                h1.textContent = game.titulo || "Juego ZX Spectrum";
+                document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
+            } else {
+                h1.textContent = "Juego no encontrado";
+            }
+
+        } catch (err) {
+            console.error("Error cargando ZX_SPECTRUM:", err);
+            h1.textContent = "Error cargando datos";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
+
+</script>
+
+
+
+<script src="assets/js/app.js"></script>
+
 </body>
 </html>
