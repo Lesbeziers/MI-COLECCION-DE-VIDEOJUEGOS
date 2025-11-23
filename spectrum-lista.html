@@ -44,7 +44,7 @@
 
 <!-- FILA 3: CONTADOR -->
 <div class="spectrum-records-block">
-    <p class="spectrum-records-text">7.800 REGISTROS</p>
+    <p class="spectrum-records-text">Cargando registros...</p>
 </div>
 
 </header>
@@ -221,6 +221,14 @@ if (thumbUrl) {
 
       const text = await response.text();
       const games = parseCSV(text);
+
+              // Actualizar contador "X REGISTROS" en la cabecera
+      const recordsEl = document.querySelector(".spectrum-records-text");
+      if (recordsEl) {
+        const total = games.length;
+        recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
+      }
+
 
       container.innerHTML = "";
 
