@@ -722,3 +722,29 @@ PAGINA ZX SPECTRUM
     opacity: 0.9;
 }
 
+/* =========================================
+   THUMBS ZX SPECTRUM (80x80)
+========================================= */
+.zx-thumb-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;   /* redondeo elegante */
+    overflow: hidden;     /* recorte del screenshot */
+    background-color: #3a3a3a; /* gris claro (fallback) */
+    flex-shrink: 0;       /* que nunca se deforme */
+}
+
+.zx-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;    /* RELLENA el cuadrado */
+    object-position: center; /* usa la zona central */
+    display: block;
+}
+
+.zx-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    background-color: #555;  /* un pelín más claro que el wrapper */
+}
