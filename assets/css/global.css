@@ -707,10 +707,11 @@ body.ficha-final .game-nav-bar {
 
 .top-bar-inner > .top-bar-title {
     position: relative;
-    top: 0;          /* posición natural */
-    transform: none; /* sin desplazamientos */
-    line-height: 1;  /* altura de línea exacta */
+    top: 6px;        /* 🔥 BAJA el título para alinearlo con los iconos */
+    transform: none;
+    line-height: 1;
 }
+
 
 /* =====================================================
    FICHA FINAL — CABECERA (título truncado)
