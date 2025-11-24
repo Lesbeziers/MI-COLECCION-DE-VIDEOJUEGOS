@@ -818,7 +818,7 @@ body.ficha-final .game-nav-arrow--next-real {
 /* Subimos un poco el contenido de la ficha para que quede
    más pegado a la cabecera compacta */
 body.ficha-final .platforms-content {
-    padding-top: 0px; /* si lo ves muy separado/bajo, baja este número */
+    padding-top: -15px; /* si lo ves muy separado/bajo, baja este número */
 }
 
 /* =========================================================
