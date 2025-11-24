@@ -9,192 +9,182 @@
 
 <body class="ficha-final">
 
-<!-- CABECERA -->
-<header class="top-bar top-bar--spectrum">
+    <!-- CABECERA -->
+    <header class="top-bar top-bar--spectrum">
+        <div class="top-bar-inner top-bar-inner--ficha">
 
-    <div class="top-bar-inner top-bar-inner--ficha">
+            <!-- Botón ATRÁS (izquierda) -->
+            <img src="assets/img/ic_back.svg"
+                 class="top-bar-back"
+                 alt="Atrás"
+                 onclick="history.back()">
 
-        <!-- Botón ATRÁS (izquierda) -->
-        <img src="assets/img/ic_back.svg"
-             class="top-bar-back"
-             alt="Atrás"
-             onclick="history.back()">
+            <!-- Navegación juego a juego (centrada) -->
+            <div class="game-nav-bar game-nav-bar--inline">
+                <div class="game-nav-center">
+                    <img src="assets/img/ic_back.svg"
+                         class="game-nav-arrow game-nav-arrow--prev"
+                         alt="Anterior">
 
-        <!-- Navegación juego a juego (centrada) -->
-        <div class="game-nav-bar game-nav-bar--inline">
-            <div class="game-nav-center">
-                <img src="assets/img/ic_back.svg"
-                     class="game-nav-arrow game-nav-arrow--prev"
-                     alt="Anterior">
+                    <span class="game-nav-counter">10 / 7.800</span>
 
-                <span class="game-nav-counter">10 / 7.800</span>
-
-                <img src="assets/img/ic_back.svg"
-                     class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
-                     alt="Siguiente">
+                    <img src="assets/img/ic_back.svg"
+                         class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
+                         alt="Siguiente">
+                </div>
             </div>
+
+            <!-- Botón HOME (derecha) -->
+            <img src="assets/img/ic_home.svg"
+                 class="top-bar-home"
+                 alt="Home"
+                 onclick="window.location.href='index.html'">
+
         </div>
+    </header>
 
-        <!-- Botón HOME (derecha) -->
-        <img src="assets/img/ic_home.svg"
-             class="top-bar-home"
-             alt="Home"
-             onclick="window.location.href='index.html'">
+    <!-- CONTENIDO -->
+    <main class="platforms-content">
+        <h1 id="ficha-title">Cargando juego...</h1>
+        <p>Aquí montaremos la ficha completa con todos los datos.</p>
+    </main>
 
-    </div>
+    <!-- ===========================================
+         SCRIPT DE LA FICHA — LEE ID Y CARGA CSV
+    ============================================ -->
+    <script>
+        /* URL del CSV de ZX_SPECTRUM */
+        const ZX_SPECTRUM_CSV_URL =
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
 
-</header>
+        /* Leer parámetro ?id= de la URL */
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
 
+        /* Parser de una línea CSV (respeta comillas) */
+        function parseCSVLine(line) {
+            const result = [];
+            let current = "";
+            let inQuotes = false;
 
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
 
-
-<!-- CONTENIDO -->
-<main class="platforms-content">
-    <h1 id="ficha-title">Cargando juego...</h1>
-    <p>Aquí montaremos la ficha completa con todos los datos.</p>
-</main>
-
-
-
-<!-- ===========================================
-     SCRIPT DE LA FICHA — LEE ID Y CARGA CSV
-=========================================== -->
-<script>
-    /* URL del CSV de ZX_SPECTRUM */
-    const ZX_SPECTRUM_CSV_URL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
-
-    /* Leer parámetro ?id= de la URL */
-    function getQueryParam(name) {
-        const params = new URLSearchParams(window.location.search);
-        return params.get(name);
-    }
-
-    /* Parser de una línea CSV (respeta comillas) */
-    function parseCSVLine(line) {
-        const result = [];
-        let current = "";
-        let inQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-
-            if (ch === '"') {
-                if (inQuotes && line[i + 1] === '"') {
-                    current += '"';
-                    i++;
+                if (ch === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (ch === "," && !inQuotes) {
+                    result.push(current.trim());
+                    current = "";
                 } else {
-                    inQuotes = !inQuotes;
+                    current += ch;
                 }
-            } else if (ch === "," && !inQuotes) {
-                result.push(current.trim());
-                current = "";
+            }
+
+            result.push(current.trim());
+            return result;
+        }
+
+        /* Parsear todo el CSV de ZX_SPECTRUM */
+        function parseSpectrumCSV(text) {
+            const lines = text.trim().split(/\r?\n/);
+            if (lines.length === 0) return [];
+
+            const header = parseCSVLine(lines[0]);
+            const rows = [];
+
+            /* Columnas importantes */
+            const idxID          = header.indexOf("ID");
+            const idxTitMostrar  = header.indexOf("TITULO_MOSTRAR");
+            const idxTitConTilde = header.indexOf("TÍTULO");
+
+            /* Elegimos columna de título en este orden:
+               1) TITULO_MOSTRAR (si existiera)
+               2) TÍTULO (con tilde, ZX_SPECTRUM)
+               3) TITULO (sin tilde, por si acaso)
+            */
+            let idxTit = -1;
+            if (idxTitMostrar >= 0) {
+                idxTit = idxTitMostrar;
+            } else if (idxTitConTilde >= 0) {
+                idxTit = idxTitConTilde;
             } else {
-                current += ch;
+                idxTit = header.indexOf("TITULO");
             }
+
+            const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
+            const idxAnio = header.indexOf("AÑO_MOSTRAR");
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+
+                const cols = parseCSVLine(line);
+
+                rows.push({
+                    id:     idxID  >= 0 && cols[idxID]   !== undefined ? cols[idxID].trim()   : "",
+                    titulo: idxTit >= 0 && cols[idxTit]  !== undefined ? cols[idxTit].trim()  : "",
+                    pub:    idxPub >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
+                    anio:   idxAnio>= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : ""
+                });
+            }
+
+            return rows;
         }
 
-        result.push(current.trim());
-        return result;
-    }
+        /* Cargar datos y actualizar ficha */
+        async function loadSpectrumFicha() {
 
-    /* Parsear todo el CSV de ZX_SPECTRUM */
-    function parseSpectrumCSV(text) {
-        const lines = text.trim().split(/\r?\n/);
-        if (lines.length === 0) return [];
+            const gameId = (getQueryParam("id") || "").trim();
+            if (!gameId) {
+                console.warn("No hay ID en la URL.");
+                return;
+            }
 
-        const header = parseCSVLine(lines[0]);
-        const rows = [];
+            const h1Content = document.getElementById("ficha-title");
 
-        /* Columnas importantes */
-        const idxID          = header.indexOf("ID");
-        const idxTitMostrar  = header.indexOf("TITULO_MOSTRAR");
-        const idxTitConTilde = header.indexOf("TÍTULO");
+            try {
+                const response = await fetch(ZX_SPECTRUM_CSV_URL);
+                if (!response.ok) throw new Error("No se pudo cargar el CSV");
 
-        /* Elegimos columna de título en este orden:
-           1) TITULO_MOSTRAR (si existiera)
-           2) TÍTULO (con tilde, ZX_SPECTRUM)
-           3) TITULO (sin tilde, por si acaso)
-        */
-        let idxTit = -1;
-        if (idxTitMostrar >= 0) {
-            idxTit = idxTitMostrar;
-        } else if (idxTitConTilde >= 0) {
-            idxTit = idxTitConTilde;
-        } else {
-            idxTit = header.indexOf("TITULO");
-        }
+                const text  = await response.text();
+                const games = parseSpectrumCSV(text);
 
-        const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
-        const idxAnio = header.indexOf("AÑO_MOSTRAR");
+                const game = games.find(row => row.id === gameId);
 
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (!line.trim()) continue;
+                if (game) {
+                    // Título del navegador (pestaña)
+                    document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
 
-            const cols = parseCSVLine(line);
-
-            rows.push({
-                id:     idxID  >= 0 && cols[idxID]   !== undefined ? cols[idxID].trim()   : "",
-                titulo: idxTit >= 0 && cols[idxTit]  !== undefined ? cols[idxTit].trim()  : "",
-                pub:    idxPub >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
-                anio:   idxAnio>= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : ""
-            });
-        }
-
-        return rows;
-    }
-
-    /* Cargar datos y actualizar ficha */
-    async function loadSpectrumFicha() {
-
-        const gameId = (getQueryParam("id") || "").trim();
-        if (!gameId) {
-            console.warn("No hay ID en la URL.");
-            return;
-        }
-
-        const h1Content = document.getElementById("ficha-title");
-
-        try {
-            const response = await fetch(ZX_SPECTRUM_CSV_URL);
-            if (!response.ok) throw new Error("No se pudo cargar el CSV");
-
-            const text  = await response.text();
-            const games = parseSpectrumCSV(text);
-
-            const game = games.find(row => row.id === gameId);
-
-            if (game) {
-                // Título del navegador (pestaña)
-                document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
-
-                // Título grande dentro de la ficha
-                if (h1Content) {
-                    h1Content.textContent = game.titulo || "Juego ZX Spectrum";
+                    // Título grande dentro de la ficha
+                    if (h1Content) {
+                        h1Content.textContent = game.titulo || "Juego ZX Spectrum";
+                    }
+                } else {
+                    // Juego no encontrado
+                    if (h1Content) {
+                        h1Content.textContent = "Juego no encontrado";
+                    }
                 }
-            } else {
-                // Juego no encontrado
+
+            } catch (err) {
+                console.error("Error cargando ZX_SPECTRUM:", err);
                 if (h1Content) {
-                    h1Content.textContent = "Juego no encontrado";
+                    h1Content.textContent = "Error cargando datos";
                 }
             }
-
-        } catch (err) {
-            console.error("Error cargando ZX_SPECTRUM:", err);
-            if (h1Content) {
-                h1Content.textContent = "Error cargando datos";
-            }
         }
-    }
 
-    document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
-</script>
+        document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
+    </script>
 
-
-
-
-<script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js"></script>
 
 </body>
 </html>
