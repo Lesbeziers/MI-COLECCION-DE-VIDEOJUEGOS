@@ -107,13 +107,29 @@
         if (lines.length === 0) return [];
 
         const header = parseCSVLine(lines[0]);
-        const rows = [];
+const rows = [];
 
-        const idxID        = header.indexOf("ID");
-        const idxTitMostrar = header.indexOf("TITULO_MOSTRAR");
-        const idxTit       = idxTitMostrar >= 0 ? idxTitMostrar : header.indexOf("TITULO");
-        const idxPub       = header.indexOf("PUBLISHER_MOSTRAR");
-        const idxAnio      = header.indexOf("AÑO_MOSTRAR");
+/* Columnas importantes */
+const idxID         = header.indexOf("ID");
+const idxTitMostrar = header.indexOf("TITULO_MOSTRAR");
+const idxTitConTilde = header.indexOf("TÍTULO");
+
+/* Elegimos columna de título en este orden:
+   1) TITULO_MOSTRAR (si existiera)
+   2) TÍTULO (con tilde, ZX_SPECTRUM)
+   3) TITULO (sin tilde, por si acaso)
+*/
+let idxTit = -1;
+if (idxTitMostrar >= 0) {
+  idxTit = idxTitMostrar;
+} else if (idxTitConTilde >= 0) {
+  idxTit = idxTitConTilde;
+} else {
+  idxTit = header.indexOf("TITULO");
+}
+
+const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
+const idxAnio = header.indexOf("AÑO_MOSTRAR");
 
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
@@ -122,11 +138,11 @@
             const cols = parseCSVLine(line);
 
             rows.push({
-                id:    cols[idxID]?.trim()    || "",
-                titulo:cols[idxTit]?.trim()   || "",
-                pub:   cols[idxPub]?.trim()   || "",
-                anio:  cols[idxAnio]?.trim()  || ""
-            });
+  id:    idxID  >= 0 && cols[idxID]  !== undefined ? cols[idxID].trim()  : "",
+  titulo:idxTit >= 0 && cols[idxTit] !== undefined ? cols[idxTit].trim() : "",
+  pub:   idxPub >= 0 && cols[idxPub] !== undefined ? cols[idxPub].trim() : "",
+  anio:  idxAnio>= 0 && cols[idxAnio]!== undefined ? cols[idxAnio].trim(): ""
+});
         }
 
         return rows;
