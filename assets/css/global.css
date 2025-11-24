@@ -754,7 +754,7 @@ body.ficha-final .game-nav-bar {
 
 /* Ficha Final — colocar correctamente el arranque del contenido debajo de la cabecera */
 body.ficha-final main.platforms-content {
-    margin-top: 120px;   /* un poco más de aire respecto a la cabecera completa */
+    margin-top: 90px;   /* un poco más de aire respecto a la cabecera completa */
 }
 
 body.spectrum-lista main.platforms-content {
@@ -849,14 +849,4 @@ body.ficha-final .game-nav-arrow {
 /* Icono next rotado correctamente */
 body.ficha-final .game-nav-arrow--next-real {
     transform: scaleX(-1);
-}
-
-/* Ajuste fino: acercar el título "FICHA DE JUEGO..." a la cabecera
-   SOLO en la página de ficha (body.ficha-final) */
-body.ficha-final .platforms-content {
-    padding-top: 0 !important;  /* anulamos cualquier padding heredado */
-}
-
-body.ficha-final .platforms-content h1:first-of-type {
-    margin-top: 8px !important; /* antes seguro que estaba en 30-40px */
 }
