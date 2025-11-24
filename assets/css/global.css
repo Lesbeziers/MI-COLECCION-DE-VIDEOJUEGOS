@@ -821,3 +821,32 @@ body.ficha-final .platforms-content {
     padding-top: 16px; /* si lo ves muy separado/bajo, baja este número */
 }
 
+/* =========================================================
+   AJUSTES FINOS DE LA CABECERA — FICHA ZX
+   ========================================================= */
+
+/* Hace que el contador suba visualmente hasta alinearse
+   con los iconos BACK y HOME */
+body.ficha-final .game-nav-center {
+    display: flex;
+    align-items: center;     /* centra verticalmente respecto a los iconos */
+    gap: 12px;               /* separación algo mayor: más limpio */
+    margin-top: -4px;        /* >>> SUBE el bloque 10/7800 + flechas <<< */
+}
+
+/* Contador mucho más grande */
+body.ficha-final .game-nav-counter {
+    font-size: 22px;         /* EL DOBLE (el valor perfecto para móvil) */
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* Flechas un poco más altas para acompañar al contador */
+body.ficha-final .game-nav-arrow {
+    height: 18px;            /* Antes 12–14px, ahora más proporcionadas */
+}
+
+/* Icono next rotado correctamente */
+body.ficha-final .game-nav-arrow--next-real {
+    transform: scaleX(-1);
+}
