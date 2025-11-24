@@ -12,18 +12,30 @@
 <!-- CABECERA -->
 <header class="top-bar top-bar--spectrum">
 
-    <div class="top-bar-inner">
+    <div class="top-bar-inner top-bar-inner--ficha">
 
+        <!-- Botón ATRÁS (izquierda) -->
         <img src="assets/img/ic_back.svg"
              class="top-bar-back"
              alt="Atrás"
              onclick="history.back()">
 
-        <!-- ESTE H1 SE RELLENARÁ AUTOMÁTICAMENTE -->
-        <h1 class="top-bar-title top-bar-title--ellipsis">
-            Cargando título...
-        </h1>
+        <!-- Navegación juego a juego (centrada) -->
+        <div class="game-nav-bar game-nav-bar--inline">
+            <div class="game-nav-center">
+                <img src="assets/img/ic_back.svg"
+                     class="game-nav-arrow game-nav-arrow--prev"
+                     alt="Anterior">
 
+                <span class="game-nav-counter">10 / 7.800</span>
+
+                <img src="assets/img/ic_back.svg"
+                     class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
+                     alt="Siguiente">
+            </div>
+        </div>
+
+        <!-- Botón HOME (derecha) -->
         <img src="assets/img/ic_home.svg"
              class="top-bar-home"
              alt="Home"
@@ -31,22 +43,8 @@
 
     </div>
 
-    <!-- Barra navegación juego a juego -->
-    <div class="game-nav-bar">
-        <div class="game-nav-center">
-            <img src="assets/img/ic_back.svg"
-                 class="game-nav-arrow game-nav-arrow--prev"
-                 alt="Anterior">
-
-            <span class="game-nav-counter">10 / 7.800</span>
-
-            <img src="assets/img/ic_back.svg"
-                 class="game-nav-arrow game-nav-arrow--next"
-                 alt="Siguiente">
-        </div>
-    </div>
-
 </header>
+
 
 
 
