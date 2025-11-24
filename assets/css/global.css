@@ -851,8 +851,12 @@ body.ficha-final .game-nav-arrow--next-real {
     transform: scaleX(-1);
 }
 
-/* Prioridad absoluta: sobreescribir padding top en FICHA */
+/* Ajuste fino: acercar el título "FICHA DE JUEGO..." a la cabecera
+   SOLO en la página de ficha (body.ficha-final) */
 body.ficha-final .platforms-content {
-    padding-top: 0 !important;   /* el !important se usa SOLO aquí */
-    margin-top: -30px;           /* acercar aún más */
+    padding-top: 0 !important;  /* anulamos cualquier padding heredado */
+}
+
+body.ficha-final .platforms-content h1:first-of-type {
+    margin-top: 8px !important; /* antes seguro que estaba en 30-40px */
 }
