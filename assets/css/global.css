@@ -754,7 +754,7 @@ body.ficha-final .game-nav-bar {
 
 /* Ficha Final — colocar correctamente el arranque del contenido debajo de la cabecera */
 body.ficha-final main.platforms-content {
-    margin-top: 90px;   /* un poco más de aire respecto a la cabecera completa */
+    margin-top: 100px;   /* un poco más de aire respecto a la cabecera completa */
 }
 
 body.spectrum-lista main.platforms-content {
