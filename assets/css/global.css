@@ -784,7 +784,7 @@ body.ficha-final .top-bar--spectrum .top-bar-inner--ficha {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px; /* ajustable si la ves muy alta/baja */
+    /* OJO: sin padding aquí, así hereda el mismo que en el resto de páginas */
 }
 
 /* El bloque central de navegación ocupa el hueco del título
@@ -831,7 +831,7 @@ body.ficha-final .game-nav-center {
     display: flex;
     align-items: center;     /* centra verticalmente respecto a los iconos */
     gap: 12px;               /* separación algo mayor: más limpio */
-    margin-top: -4px;        /* >>> SUBE el bloque 10/7800 + flechas <<< */
+    margin-top: 2px;        /* >>> SUBE el bloque 10/7800 + flechas <<< */
 }
 
 /* Contador mucho más grande */
