@@ -50,7 +50,7 @@
 
 <!-- CONTENIDO -->
 <main class="platforms-content">
-    <h1>Ficha de juego · ZX Spectrum</h1>
+    <h1 id="ficha-title">Cargando juego...</h1>
     <p>Aquí montaremos la ficha completa con todos los datos.</p>
 </main>
 
@@ -60,7 +60,6 @@
      SCRIPT DE LA FICHA — LEE ID Y CARGA CSV
 =========================================== -->
 <script>
-
     /* URL del CSV de ZX_SPECTRUM */
     const ZX_SPECTRUM_CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
@@ -105,29 +104,29 @@
         if (lines.length === 0) return [];
 
         const header = parseCSVLine(lines[0]);
-const rows = [];
+        const rows = [];
 
-/* Columnas importantes */
-const idxID         = header.indexOf("ID");
-const idxTitMostrar = header.indexOf("TITULO_MOSTRAR");
-const idxTitConTilde = header.indexOf("TÍTULO");
+        /* Columnas importantes */
+        const idxID          = header.indexOf("ID");
+        const idxTitMostrar  = header.indexOf("TITULO_MOSTRAR");
+        const idxTitConTilde = header.indexOf("TÍTULO");
 
-/* Elegimos columna de título en este orden:
-   1) TITULO_MOSTRAR (si existiera)
-   2) TÍTULO (con tilde, ZX_SPECTRUM)
-   3) TITULO (sin tilde, por si acaso)
-*/
-let idxTit = -1;
-if (idxTitMostrar >= 0) {
-  idxTit = idxTitMostrar;
-} else if (idxTitConTilde >= 0) {
-  idxTit = idxTitConTilde;
-} else {
-  idxTit = header.indexOf("TITULO");
-}
+        /* Elegimos columna de título en este orden:
+           1) TITULO_MOSTRAR (si existiera)
+           2) TÍTULO (con tilde, ZX_SPECTRUM)
+           3) TITULO (sin tilde, por si acaso)
+        */
+        let idxTit = -1;
+        if (idxTitMostrar >= 0) {
+            idxTit = idxTitMostrar;
+        } else if (idxTitConTilde >= 0) {
+            idxTit = idxTitConTilde;
+        } else {
+            idxTit = header.indexOf("TITULO");
+        }
 
-const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
-const idxAnio = header.indexOf("AÑO_MOSTRAR");
+        const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxAnio = header.indexOf("AÑO_MOSTRAR");
 
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
@@ -136,17 +135,17 @@ const idxAnio = header.indexOf("AÑO_MOSTRAR");
             const cols = parseCSVLine(line);
 
             rows.push({
-  id:    idxID  >= 0 && cols[idxID]  !== undefined ? cols[idxID].trim()  : "",
-  titulo:idxTit >= 0 && cols[idxTit] !== undefined ? cols[idxTit].trim() : "",
-  pub:   idxPub >= 0 && cols[idxPub] !== undefined ? cols[idxPub].trim() : "",
-  anio:  idxAnio>= 0 && cols[idxAnio]!== undefined ? cols[idxAnio].trim(): ""
-});
+                id:     idxID  >= 0 && cols[idxID]   !== undefined ? cols[idxID].trim()   : "",
+                titulo: idxTit >= 0 && cols[idxTit]  !== undefined ? cols[idxTit].trim()  : "",
+                pub:    idxPub >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
+                anio:   idxAnio>= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : ""
+            });
         }
 
         return rows;
     }
 
-    /* Cargar datos y actualizar cabecera */
+    /* Cargar datos y actualizar ficha */
     async function loadSpectrumFicha() {
 
         const gameId = (getQueryParam("id") || "").trim();
@@ -155,34 +154,43 @@ const idxAnio = header.indexOf("AÑO_MOSTRAR");
             return;
         }
 
-        const h1 = document.querySelector(".top-bar-title");
-        if (!h1) return;
+        const h1Content = document.getElementById("ficha-title");
 
         try {
             const response = await fetch(ZX_SPECTRUM_CSV_URL);
             if (!response.ok) throw new Error("No se pudo cargar el CSV");
 
-            const text = await response.text();
+            const text  = await response.text();
             const games = parseSpectrumCSV(text);
 
             const game = games.find(row => row.id === gameId);
 
             if (game) {
-                h1.textContent = game.titulo || "Juego ZX Spectrum";
+                // Título del navegador (pestaña)
                 document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
+
+                // Título grande dentro de la ficha
+                if (h1Content) {
+                    h1Content.textContent = game.titulo || "Juego ZX Spectrum";
+                }
             } else {
-                h1.textContent = "Juego no encontrado";
+                // Juego no encontrado
+                if (h1Content) {
+                    h1Content.textContent = "Juego no encontrado";
+                }
             }
 
         } catch (err) {
             console.error("Error cargando ZX_SPECTRUM:", err);
-            h1.textContent = "Error cargando datos";
+            if (h1Content) {
+                h1Content.textContent = "Error cargando datos";
+            }
         }
     }
 
     document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
-
 </script>
+
 
 
 
