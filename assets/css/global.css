@@ -854,5 +854,5 @@ body.ficha-final .game-nav-arrow--next-real {
 /* Prioridad absoluta: sobreescribir padding top en FICHA */
 body.ficha-final .platforms-content {
     padding-top: 0 !important;   /* el !important se usa SOLO aquí */
-    margin-top: -10px;           /* acercar aún más */
+    margin-top: -30px;           /* acercar aún más */
 }
