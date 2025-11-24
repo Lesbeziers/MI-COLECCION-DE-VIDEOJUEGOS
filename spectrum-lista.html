@@ -123,6 +123,11 @@
     const idxAnio   = header.indexOf("AÑO_MOSTRAR");
     const idxThumb  = header.indexOf("THUMB_URL");
 
+    const idxAutor   = header.indexOf("AUTOR_MOSTRAR");
+    const idxDes     = header.indexOf("DESARROLLO");
+    const idxContr   = header.indexOf("CONTRIBUCIONES");
+    const idxGenero  = header.indexOf("GENERO_MOSTRAR");
+
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim()) continue;
@@ -135,6 +140,12 @@
       const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
       const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
 
+      const autor  = (idxAutor   >= 0 && cols[idxAutor]   !== undefined) ? cols[idxAutor].trim()   : "";
+      const des    = (idxDes     >= 0 && cols[idxDes]     !== undefined) ? cols[idxDes].trim()     : "";
+      const contr  = (idxContr   >= 0 && cols[idxContr]   !== undefined) ? cols[idxContr].trim()   : "";
+      const genero = (idxGenero  >= 0 && cols[idxGenero]  !== undefined) ? cols[idxGenero].trim()  : "";
+
+
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
 
@@ -142,14 +153,19 @@
       const displayTitulo = formatTitleWithArticle(titulo);
 
       rows.push({
-        id,
-        titulo,
-        displayTitulo,
-        pub,
-        anio,
-        thumb,
-        sortKey: displayTitulo.toLowerCase()
+      id,
+      titulo,
+      displayTitulo,
+      pub,
+      anio,
+      thumb,
+      autor,
+      des,
+      contr,
+      genero,
+      sortKey: displayTitulo.toLowerCase()
       });
+
     }
 
     return rows;
@@ -318,16 +334,27 @@
       const qNorm = normalizeText(trimmed);
 
       const filtered = allGames.filter(game => {
-        const titleNorm = normalizeText(game.displayTitulo || game.titulo);
-        const pubNorm   = normalizeText(game.pub);
-        const yearNorm  = normalizeText(game.anio);
+     const titleNorm  = normalizeText(game.displayTitulo || game.titulo);
+     const pubNorm    = normalizeText(game.pub);
+     const yearNorm   = normalizeText(game.anio);
 
-        return (
-          titleNorm.includes(qNorm) ||
-          pubNorm.includes(qNorm) ||
-          yearNorm.includes(qNorm)
-        );
-      });
+     // 🔹 Nuevos campos
+     const autorNorm  = normalizeText(game.autor);
+     const desNorm    = normalizeText(game.des);
+     const contrNorm  = normalizeText(game.contr);
+     const generoNorm = normalizeText(game.genero);
+
+     return (
+    titleNorm.includes(qNorm)  ||
+    pubNorm.includes(qNorm)    ||
+    yearNorm.includes(qNorm)   ||
+    autorNorm.includes(qNorm)  ||
+    desNorm.includes(qNorm)    ||
+    contrNorm.includes(qNorm)  ||
+    generoNorm.includes(qNorm)
+  );
+});
+
 
       renderGames(filtered, query);
     });
