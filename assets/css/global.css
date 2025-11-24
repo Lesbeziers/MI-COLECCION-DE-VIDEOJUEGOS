@@ -772,3 +772,52 @@ body:not(.spectrum-lista):not(.ficha-final) main.platforms-content {
 body.plataformas main.platforms-content {
     margin-top: 100px !important;
 }
+
+/* =========================================================
+   CABECERA COMPACTA PARA FICHA ZX SPECTRUM (body.ficha-final)
+   ========================================================= */
+
+/* Hacemos que la cabecera de la ficha sea una sola fila:
+   [Back]   [ < 10 / 7.800 > ]   [Home]
+*/
+body.ficha-final .top-bar--spectrum .top-bar-inner--ficha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px; /* ajustable si la ves muy alta/baja */
+}
+
+/* El bloque central de navegación ocupa el hueco del título
+   y se centra visualmente */
+body.ficha-final .game-nav-bar--inline {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* Flechas + contador en línea centrada */
+body.ficha-final .game-nav-center {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* separación entre flechas y texto */
+}
+
+/* Contador más protagonista */
+body.ficha-final .game-nav-counter {
+    font-weight: 700;
+    font-size: 14px;      /* súbelo a 15–16 si quieres más presencia */
+    letter-spacing: 0.03em;
+}
+
+/* Si el icono de "siguiente" es el mismo SVG que back,
+   lo giramos para que apunte a la derecha */
+body.ficha-final .game-nav-arrow--next-real {
+    transform: scaleX(-1);
+}
+
+/* Subimos un poco el contenido de la ficha para que quede
+   más pegado a la cabecera compacta */
+body.ficha-final .platforms-content {
+    padding-top: 16px; /* si lo ves muy separado/bajo, baja este número */
+}
+
