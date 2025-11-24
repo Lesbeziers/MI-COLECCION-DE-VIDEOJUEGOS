@@ -259,6 +259,27 @@
       meta.appendChild(yearEl);
     }
 
+          // Línea combinada: Autor / Desarrollo / Género
+    if (game.autor || game.des || game.genero) {
+      const infoEl = document.createElement("p");
+      infoEl.className = "zx-subtitle";
+
+      const pieces = [];
+
+      if (game.autor) {
+        pieces.push(game.autor.replace(/[\"“”«»„‟]+/g, ""));
+      }
+      if (game.des) {
+        pieces.push(game.des.replace(/[\"“”«»„‟]+/g, ""));
+      }
+      if (game.genero) {
+        pieces.push(game.genero.replace(/[\"“”«»„‟]+/g, ""));
+      }
+
+      infoEl.textContent = pieces.join(" · ");
+      meta.appendChild(infoEl);
+    }
+
     card.appendChild(thumbWrapper);
     card.appendChild(meta);
 
