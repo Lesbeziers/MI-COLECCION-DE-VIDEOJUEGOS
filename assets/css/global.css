@@ -1,25 +1,26 @@
-/* ----------------------------------------------------
-   TIPOGRAFÍA ROBOTO CONDENSED (Google Fonts)
------------------------------------------------------ */
+/* ============================================
+   TIPOGRAFÍA
+============================================ */
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700&display=swap');
 
-/* ----------------------------------------------------
+/* ============================================
    RESET MODERNO
------------------------------------------------------ */
+============================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     height: 100%;
     width: 100%;
 }
 
-/* ----------------------------------------------------
-   BASE GLOBAL DEL PROYECTO
------------------------------------------------------ */
+/* ============================================
+   BASE GLOBAL
+============================================ */
 body {
     background-color: #232221;
     color: #ddd;
@@ -28,10 +29,13 @@ body {
     text-align: center;
 }
 
-/* ----------------------------------------------------
-   TITULOS
------------------------------------------------------ */
-h1, h2, h3, h4 {
+/* ============================================
+   TIPOGRAFÍA
+============================================ */
+h1,
+h2,
+h3,
+h4 {
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -51,7 +55,6 @@ p {
     line-height: 1.4;
 }
 
-/* Ajuste móvil */
 @media (max-width: 600px) {
     h1 {
         font-size: 30px;
@@ -59,9 +62,9 @@ p {
     }
 }
 
-/* ----------------------------------------------------
+/* ============================================
    ICONO PORTADA
------------------------------------------------------ */
+============================================ */
 .hero-icon {
     width: 110px;
     height: 110px;
@@ -72,10 +75,9 @@ p {
     margin: 20px auto 10px auto;
 }
 
-/* ----------------------------------------------------
-   LANDING — BLOQUES PRINCIPALES
------------------------------------------------------ */
-
+/* ============================================
+   LANDING - BLOQUES PRINCIPALES
+============================================ */
 .circle-block {
     display: inline-block;
     margin: 30px;
@@ -100,9 +102,9 @@ p {
     font-weight: 500;
 }
 
-/* ----------------------------------------------------
-   BLOQUE BÚSQUEDA (landing)
------------------------------------------------------ */
+/* ============================================
+   BÚSQUEDA LANDING
+============================================ */
 .search-section {
     margin-top: 60px;
 }
@@ -138,9 +140,9 @@ p {
     border-color: #ff8800;
 }
 
-/* ----------------------------------------------------
+/* ============================================
    ESTADÍSTICAS LANDING
------------------------------------------------------ */
+============================================ */
 .stats {
     display: flex;
     justify-content: center;
@@ -159,22 +161,18 @@ p {
     background-size: 90%;
     background-repeat: no-repeat;
     background-position: center;
-    background-color: transparent; /* sin fondo */
-    border: none;                  /* sin aro extra */
+    background-color: transparent;
+    border: none;
     margin: 0 auto 14px auto;
 }
 
-
-/* Icono de PLATAFORMAS (landing) */
 .stat-block:nth-child(1) .stat-circle {
     background-image: url('../icons/ic_plataformas.svg');
 }
 
-/* Icono de COLECCIÓN (landing) */
 .stat-block:nth-child(2) .stat-circle {
     background-image: url('../icons/ic_coleccion.svg');
 }
-
 
 .stat-label {
     font-size: 18px;
@@ -187,7 +185,6 @@ p {
     color: #fff;
 }
 
-/* HOVER landing */
 .stat-block:hover .stat-circle {
     border-color: #ff8800;
     transition: all 0.25s;
@@ -197,9 +194,9 @@ p {
     color: #ff8800;
 }
 
-/* ----------------------------------------------------
+/* ============================================
    FOOTER
------------------------------------------------------ */
+============================================ */
 .footer-note {
     margin-top: 60px;
     margin-bottom: 30px;
@@ -209,10 +206,9 @@ p {
     text-align: center;
 }
 
-/* =====================================================
+/* ============================================
    BANDA SUPERIOR (HEADER FIJO)
-===================================================== */
-
+============================================ */
 .top-bar {
     width: 100%;
     background-color: #101010;
@@ -224,16 +220,22 @@ p {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
 }
 
-/* Fila principal: back | título | home */
 .top-bar-inner {
     max-width: 1080px;
     margin: 0 auto;
     height: 73px;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    align-items: center;      /* importante: centrado vertical real */
+    align-items: center;
     column-gap: 12px;
     padding: 0 16px;
+}
+
+.top-bar-inner > .top-bar-title {
+    position: relative;
+    top: 6px;
+    transform: none;
+    line-height: 1;
 }
 
 .top-bar-title {
@@ -247,7 +249,11 @@ p {
     height: 30px;
 }
 
-
+.top-bar-title--ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .top-bar-back,
 .top-bar-home {
@@ -257,13 +263,9 @@ p {
     flex-shrink: 0;
 }
 
-.top-bar-back { margin-right: 0; }
-.top-bar-home { margin-left: 0; }
-
-/* ----------------------------------------------------
-   PAGINA PLATAFORMAS (grid de iconos)
------------------------------------------------------ */
-
+/* ============================================
+   PÁGINA PLATAFORMAS - ESTRUCTURA
+============================================ */
 .platform-section-title {
     text-align: center;
     color: #ff8800;
@@ -280,7 +282,9 @@ p {
     opacity: 0.5;
 }
 
-.platform-section { margin-top: 10px; }
+.platform-section {
+    margin-top: 10px;
+}
 
 .platforms-grid {
     display: grid;
@@ -296,27 +300,23 @@ p {
     align-items: center;
 }
 
-/* Círculo para los iconos de plataformas (similar a stat-circle) */
 .platform-icon-circle {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    border: none;                   /* sin aro */
-    background-color: transparent;  /* sin fondo gris */
+    border: none;
+    background-color: transparent;
     background-size: 80%;
     background-repeat: no-repeat;
     background-position: center;
     margin: 0 auto 4px auto;
 }
 
-
-/* Texto bajo cada icono en PLATAFORMAS */
 .platform-card .stat-label {
     font-size: 14px;
     white-space: nowrap;
 }
 
-/* HOVER en PLATAFORMAS (igual que en landing) */
 .platform-card:hover .platform-icon-circle {
     border-color: #ff8800;
     opacity: 1;
@@ -333,9 +333,13 @@ p {
     transition: transform 0.25s ease;
 }
 
-/* ============================
-   ICONOS MICROORDENADORES
-============================ */
+.platform-card--zxspectrum {
+    cursor: pointer;
+}
+
+/* ============================================
+   ICONOS PLATAFORMAS - MICROORDENADORES
+============================================ */
 .platform-card--zxspectrum .platform-icon-circle {
     background-image: url('../icons/ic_zxspectrum.svg');
 }
@@ -356,9 +360,9 @@ p {
     background-image: url('../icons/ic_msx.svg');
 }
 
-/* ============================
-   ICONOS NINTENDO
-============================ */
+/* ============================================
+   ICONOS PLATAFORMAS - NINTENDO
+============================================ */
 .platform-card--nes .platform-icon-circle {
     background-image: url('../icons/ic_nes.svg');
 }
@@ -384,7 +388,7 @@ p {
 }
 
 .platform-card--switch .platform-icon-circle {
-    background-image: url('../icons/ic_Switch.svg'); /* S mayúscula */
+    background-image: url('../icons/ic_Switch.svg');
 }
 
 .platform-card--switch2 .platform-icon-circle {
@@ -404,16 +408,16 @@ p {
 }
 
 .platform-card--nintendods .platform-icon-circle {
-    background-image: url('../icons/ic_nitendods.svg'); /* nombre raro del SVG */
+    background-image: url('../icons/ic_nitendods.svg');
 }
 
 .platform-card--nintendo3ds .platform-icon-circle {
     background-image: url('../icons/ic_nintendo3ds.svg');
 }
 
-/* ============================
-   ICONOS SONY
-============================ */
+/* ============================================
+   ICONOS PLATAFORMAS - SONY
+============================================ */
 .platform-card--psx .platform-icon-circle {
     background-image: url('../icons/ic_psx.svg');
 }
@@ -442,9 +446,9 @@ p {
     background-image: url('../icons/ic_psvita.svg');
 }
 
-/* ============================
-   ICONOS SEGA
-============================ */
+/* ============================================
+   ICONOS PLATAFORMAS - SEGA
+============================================ */
 .platform-card--mastersystem .platform-icon-circle {
     background-image: url('../icons/ic_mastersystem.svg');
 }
@@ -465,9 +469,9 @@ p {
     background-image: url('../icons/ic_gamegear.svg');
 }
 
-/* ============================
-   ICONOS ATARI
-============================ */
+/* ============================================
+   ICONOS PLATAFORMAS - ATARI
+============================================ */
 .platform-card--atari2600 .platform-icon-circle {
     background-image: url('../icons/ic_atari2600.svg');
 }
@@ -484,9 +488,9 @@ p {
     background-image: url('../icons/ic_atarijaguar.svg');
 }
 
-/* ============================
-   ICONOS OTROS
-============================ */
+/* ============================================
+   ICONOS PLATAFORMAS - OTROS
+============================================ */
 .platform-card--pc .platform-icon-circle {
     background-image: url('../icons/ic_pc.svg');
 }
@@ -495,25 +499,16 @@ p {
     background-image: url('../icons/ic_arcade.svg');
 }
 
-
-/* =====================================================
-   ZX SPECTRUM — CABECERA EXTENDIDA
-   (mismo header, pero con buscador debajo)
-===================================================== */
-
-/* El header sigue siendo .top-bar top-bar--spectrum
-   y dentro lleva:
-   <div class="top-bar-inner"> ... </div>
-   <div class="spectrum-header-box"> ... </div>
-*/
-
+/* ============================================
+   ZX SPECTRUM - CABECERA EXTENDIDA
+============================================ */
 .top-bar--spectrum .top-bar-inner {
-    /* pequeña separación extra hacia abajo si quieres */
     padding-bottom: 6px;
 }
 
-/* Buscador */
-.spectrum-header-box { width: 100%; }
+.spectrum-header-box {
+    width: 100%;
+}
 
 .spectrum-search-wrapper {
     display: flex;
@@ -547,9 +542,8 @@ p {
     pointer-events: none;
 }
 
-/* Contador */
 .spectrum-records-block {
-    padding: 9px 0 4px 0;   /* 9px arriba → 5px más respecto a los 4px originales */
+    padding: 9px 0 4px 0;
 }
 
 .spectrum-records-text {
@@ -558,28 +552,32 @@ p {
     text-align: center;
 }
 
-/* =====================================================
-   SEPARAR CONTENIDO DE LA CABECERA FIJA
-===================================================== */
-
+/* ============================================
+   MÁRGENES DE CONTENIDO PRINCIPAL
+============================================ */
 .top-bar + main.platforms-content {
     margin-top: 90px;
 }
 
-/* 1 — Por defecto, ninguna página con .top-bar--spectrum añade margen */
 .top-bar--spectrum + main.platforms-content {
     margin-top: 0;
 }
 
-/* 2 — SOLO Spectrum-lista, que sí tiene buscador, añade el margen */
-.top-bar--spectrum .spectrum-header-box + main.platforms-content {
+body.plataformas main.platforms-content {
+    margin-top: 100px !important;
+}
+
+body.spectrum-lista main.platforms-content {
     margin-top: 160px;
 }
 
+body:not(.spectrum-lista):not(.ficha-final) main.platforms-content {
+    margin-top: 120px;
+}
 
-/* =====================================================
+/* ============================================
    LISTA DE JUEGOS ZX SPECTRUM
-===================================================== */
+============================================ */
 .zx-list-wrapper {
     width: 100%;
     max-width: 1080px;
@@ -611,8 +609,6 @@ p {
     flex: 1;
     display: flex;
     flex-direction: column;
-
-    /* 👇 clave para que los textos largos puedan encoger y usar "..." */
     min-width: 0;
 }
 
@@ -622,7 +618,7 @@ p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;   /* 👈 que no crezca más allá del contenedor */
+    max-width: 100%;
 }
 
 .zx-subtitle {
@@ -631,49 +627,26 @@ p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-   max-width: 100%;   /* 👈 idem */
+    max-width: 100%;
 }
 
-/* =====================================================
-   FICHA FINAL — CABECERA (título truncado)
-===================================================== */
-.top-bar-title--ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* =====================================================
-   FICHA FINAL — NAVEGACIÓN ENTRE FICHAS
-===================================================== */
-
-/* Barra completa entre dos líneas grises */
+/* ============================================
+   NAVEGACIÓN ENTRE FICHAS
+============================================ */
 .game-nav-bar {
     width: 100%;
     padding: 8px 0;
-    margin-bottom: 0;             /* para que no cree separación extra */
+    margin-bottom: 0;
 }
 
-/* FICHA FINAL — acercar el bloque 10/7.800 al título */
-body.ficha-final .game-nav-bar {
-    padding-top: 2px;   /* menos aire arriba (antes 8px globales) */
-    margin-top: -4px;   /* lo subimos un poquito hacia el título */
-}
-
-/* Bloque centrado */
 .game-nav-center {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 14px;
+    margin-top: -10px;
 }
 
-/* Subir el bloque 10/7.800 con flechas */
-.game-nav-center {
-    margin-top: -10px;   /* 🔥 Sube todo el bloque 20px */
-}
-
-/* Flechas */
 .game-nav-arrow {
     width: 20px;
     height: 20px;
@@ -690,185 +663,95 @@ body.ficha-final .game-nav-bar {
     transform: scaleX(-1);
 }
 
-/* Texto central */
 .game-nav-counter {
     font-size: 16px;
     color: #ddd;
     font-weight: 400;
 }
 
-/* Activar cursor de “clic” SOLO en ZX Spectrum */
-.platform-card--zxspectrum {
-    cursor: pointer;
+/* ============================================
+   FICHA FINAL - ESTRUCTURA
+============================================ */
+body.ficha-final .game-nav-bar {
+    padding-top: 2px;
+    margin-top: -4px;
 }
 
-/* =====================================================
-   PARCHE ALINEADO CABECERA (FORZADO)
-   (aplica a plataformas, lista y ficha)
-===================================================== */
-
-.top-bar-inner > .top-bar-title {
-    position: relative;
-    top: 6px;        /* 🔥 BAJA el título para alinearlo con los iconos */
-    transform: none;
-    line-height: 1;
+body.ficha-final main.platforms-content {
+    margin-top: 100px;
 }
 
-
-/* =====================================================
-   FICHA FINAL — CABECERA (título truncado)
-   (solo controla el truncado con “...”, no la altura)
-===================================================== */
-
-.top-bar-title--ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+body.ficha-final .platforms-content {
+    padding-top: 0px;
 }
 
-/* PASO 1 — Ficha Final: corregir separación superior del bloque 10/7800 */
 .ficha-nav {
     margin-top: 0 !important;
     padding-top: 0 !important;
-}
-
-/* PASO 2 — Ficha Final: pegar la línea gris inferior al bloque 10/7800 */
-.ficha-nav {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
-/* PASO 3 — Ficha Final: ajustar el arranque del contenido debajo de la LÍNEA 2 */
 .ficha-content {
     margin-top: 12px !important;
 }
 
-/* PASO 4 — Ficha Final: compactar el bloque 10/7800 */
-.ficha-nav {
-    height: 32px;               /* altura compacta y limpia */
-    display: flex;
-    align-items: center;        /* centra verticalmente el 10/7800 */
-    justify-content: center;    /* centra horizontalmente */
-    line-height: 1;             /* evita que el texto abra más altura */
-}
-
-/* Ficha Final — colocar correctamente el arranque del contenido debajo de la cabecera */
-body.ficha-final main.platforms-content {
-    margin-top: 100px;   /* un poco más de aire respecto a la cabecera completa */
-}
-
-/* =========================================
-   FICHA FINAL – CARÁTULA PRINCIPAL
-========================================= */
-
-.ficha-final .ficha-cover-wrapper {
-    margin-top: 12px;
-    margin-bottom: 16px;
-    /* Ajusta el ancho máximo según tu gusto */
-    max-width: 240px;
-}
-
-.ficha-final .ficha-cover {
-    height: 320px;           /* alto fijo tipo carátula vertical */
-    width: auto;
-    display: block;
-    object-fit: cover;       /* llena el alto recortando lo que sobra */
-    object-position: right center; /* alineada a la derecha */
-    border-radius: 4px;
-    cursor: pointer;         /* luego servirá para la modal */
-}
-
-
-body.spectrum-lista main.platforms-content {
-    margin-top: 160px;   /* 🔥 suficiente para la cabecera + buscador */
-}
-
-/* ============================
-   PÁGINA PLATAFORMAS — margen bajo cabecera
-============================ */
-body:not(.spectrum-lista):not(.ficha-final) main.platforms-content {
-    margin-top: 120px;   /* puedes subir/bajar este valor */
-}
-
-/* Margen correcto para la página PLATAFORMAS */
-body.plataformas main.platforms-content {
-    margin-top: 100px !important;
-}
-
-/* =========================================================
-   CABECERA COMPACTA PARA FICHA ZX SPECTRUM (body.ficha-final)
-   ========================================================= */
-
-/* Hacemos que la cabecera de la ficha sea una sola fila:
-   [Back]   [ < 10 / 7.800 > ]   [Home]
-*/
+/* ============================================
+   FICHA FINAL - CABECERA COMPACTA
+============================================ */
 body.ficha-final .top-bar--spectrum .top-bar-inner--ficha {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* OJO: sin padding aquí, así hereda el mismo que en el resto de páginas */
 }
 
-/* El bloque central de navegación ocupa el hueco del título
-   y se centra visualmente */
 body.ficha-final .game-nav-bar--inline {
     flex: 1;
     display: flex;
     justify-content: center;
 }
 
-/* Flechas + contador en línea centrada */
 body.ficha-final .game-nav-center {
     display: flex;
     align-items: center;
-    gap: 8px; /* separación entre flechas y texto */
+    gap: 12px;
+    margin-top: 10px;
 }
 
-/* Contador más protagonista */
 body.ficha-final .game-nav-counter {
-    font-weight: 700;
-    font-size: 14px;      /* súbelo a 15–16 si quieres más presencia */
-    letter-spacing: 0.03em;
-}
-
-/* Si el icono de "siguiente" es el mismo SVG que back,
-   lo giramos para que apunte a la derecha */
-body.ficha-final .game-nav-arrow--next-real {
-    transform: scaleX(-1);
-}
-
-/* Subimos un poco el contenido de la ficha para que quede
-   más pegado a la cabecera compacta */
-body.ficha-final .platforms-content {
-    padding-top: 0px; /* si lo ves muy separado/bajo, baja este número */
-}
-
-/* =========================================================
-   AJUSTES FINOS DE LA CABECERA — FICHA ZX
-   ========================================================= */
-
-/* Hace que el contador suba visualmente hasta alinearse
-   con los iconos BACK y HOME */
-body.ficha-final .game-nav-center {
-    display: flex;
-    align-items: center;     /* centra verticalmente respecto a los iconos */
-    gap: 12px;               /* separación algo mayor: más limpio */
-    margin-top: 10px;        /* >>> SUBE el bloque 10/7800 + flechas <<< */
-}
-
-/* Contador mucho más grande */
-body.ficha-final .game-nav-counter {
-    font-size: 22px;         /* EL DOBLE (el valor perfecto para móvil) */
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
 
-/* Flechas un poco más altas para acompañar al contador */
 body.ficha-final .game-nav-arrow {
-    height: 18px;            /* Antes 12–14px, ahora más proporcionadas */
+    height: 18px;
 }
 
-/* Icono next rotado correctamente */
 body.ficha-final .game-nav-arrow--next-real {
     transform: scaleX(-1);
+}
+
+/* ============================================
+   FICHA FINAL - CARÁTULA PRINCIPAL
+============================================ */
+.ficha-final .ficha-cover-wrapper {
+    margin-top: 12px;
+    margin-bottom: 16px;
+    max-width: 240px;
+}
+
+.ficha-final .ficha-cover {
+    height: 320px;
+    width: auto;
+    display: block;
+    object-fit: cover;
+    object-position: right center;
+    border-radius: 4px;
+    cursor: pointer;
 }
