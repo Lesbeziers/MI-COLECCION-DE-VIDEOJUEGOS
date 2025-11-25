@@ -129,18 +129,23 @@ function parseSpectrumCSV(text) {
         idxCaratula = header.indexOf("CARATULA");
     }
 
-    // 🆕 Columna donde guardas las imágenes extra
-    // Prioridad:
-    // 1) IMAGENES
-    // 2) IMAGENES_ADICIONALES
-    // 3) IMÁGENES_ADICIONALES
-    let idxImgAdic = header.indexOf("IMAGENES");
-    if (idxImgAdic < 0) {
-        idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
-    }
-    if (idxImgAdic < 0) {
-        idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
-    }
+// 🆕 Columna donde guardas las imágenes extra
+// Prioridad:
+// 1) IMÁGENES  (nombre real en ZX_SPECTRUM)
+// 2) IMAGENES  (por si algún día exportas sin tilde)
+// 3) IMAGENES_ADICIONALES
+// 4) IMÁGENES_ADICIONALES
+let idxImgAdic = header.indexOf("IMÁGENES");      // 👈 nombre real
+if (idxImgAdic < 0) {
+    idxImgAdic = header.indexOf("IMAGENES");
+}
+if (idxImgAdic < 0) {
+    idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
+}
+if (idxImgAdic < 0) {
+    idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
+}
+
 
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
