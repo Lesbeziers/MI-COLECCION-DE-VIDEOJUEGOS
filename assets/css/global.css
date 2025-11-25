@@ -744,6 +744,8 @@ body.ficha-final .game-nav-arrow--next-real {
     margin-top: 12px;
     margin-bottom: 16px;
     max-width: 240px;
+    margin-left: 16px;  /* Mismo padding que top-bar-inner */
+    margin-right: auto;
 }
 
 .ficha-final .ficha-cover {
@@ -752,6 +754,6 @@ body.ficha-final .game-nav-arrow--next-real {
     display: block;
     object-fit: cover;
     object-position: right center;
-    border-radius: 4px;
+    border-radius: 8px;  /* Esquinas más redondeadas */
     cursor: pointer;
 }
