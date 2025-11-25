@@ -324,6 +324,23 @@
     searchInput.addEventListener("input", () => {
       const query = searchInput.value || "";
       const trimmed = query.trim();
+// =============================================
+// ATALLO "B+" → mostrar solo juegos que empiezan
+// por la letra indicada antes del "+"
+// =============================================
+const letterMatch = trimmed.match(/^([a-zñáéíóúü])\+$/i);
+
+if (letterMatch) {
+    const letter = normalizeText(letterMatch[1]); // "b" en el caso de "B+"
+
+    const filteredByLetter = allGames.filter(game => {
+        const titleNorm = normalizeText(game.displayTitulo || game.titulo);
+        return titleNorm.startsWith(letter);
+    });
+
+    renderGames(filteredByLetter, trimmed);
+    return; // ⬅️ IMPORTANTE: no seguir con el buscador normal
+}
 
       if (!trimmed) {
         // Sin texto → lista completa
