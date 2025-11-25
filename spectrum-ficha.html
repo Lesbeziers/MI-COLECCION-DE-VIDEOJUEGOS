@@ -46,6 +46,12 @@
     <!-- CONTENIDO -->
     <main class="platforms-content">
         <h1 id="ficha-title">Cargando juego...</h1>
+        <div class="ficha-cover-wrapper">
+            <img id="ficha-cover"
+                 class="ficha-cover"
+                 alt="Carátula del juego"
+                 style="display:none;">
+        </div>
         <p>Aquí montaremos la ficha completa con todos los datos.</p>
     </main>
 
@@ -92,94 +98,134 @@
         }
 
         /* Parsear todo el CSV de ZX_SPECTRUM */
-        function parseSpectrumCSV(text) {
-            const lines = text.trim().split(/\r?\n/);
-            if (lines.length === 0) return [];
+       function parseSpectrumCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length === 0) return [];
 
-            const header = parseCSVLine(lines[0]);
-            const rows = [];
+    const header = parseCSVLine(lines[0]);
+    const rows = [];
 
-            /* Columnas importantes */
-            const idxID          = header.indexOf("ID");
-            const idxTitMostrar  = header.indexOf("TITULO_MOSTRAR");
-            const idxTitConTilde = header.indexOf("TÍTULO");
+    // Columnas importantes ya existentes
+    const idxID          = header.indexOf("ID");
+    const idxTitMostrar  = header.indexOf("TITULO_MOSTRAR");
+    const idxTitConTilde = header.indexOf("TÍTULO");
 
-            /* Elegimos columna de título en este orden:
-               1) TITULO_MOSTRAR (si existiera)
-               2) TÍTULO (con tilde, ZX_SPECTRUM)
-               3) TITULO (sin tilde, por si acaso)
-            */
-            let idxTit = -1;
-            if (idxTitMostrar >= 0) {
-                idxTit = idxTitMostrar;
-            } else if (idxTitConTilde >= 0) {
-                idxTit = idxTitConTilde;
-            } else {
-                idxTit = header.indexOf("TITULO");
-            }
+    // Elegimos columna de título
+    let idxTit = -1;
+    if (idxTitMostrar >= 0) {
+        idxTit = idxTitMostrar;
+    } else if (idxTitConTilde >= 0) {
+        idxTit = idxTitConTilde;
+    } else {
+        idxTit = header.indexOf("TITULO");
+    }
 
-            const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
-            const idxAnio = header.indexOf("AÑO_MOSTRAR");
+    const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio = header.indexOf("AÑO_MOSTRAR");
 
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
+    // 🆕 Nuevas columnas para la carátula
+    const idxCaratula = header.indexOf("CARATULA"); // sin tilde, como en ZX_SPECTRUM
+    // Intentamos cubrir variantes "IMAGENES_ADICIONALES" / "IMÁGENES_ADICIONALES"
+    let idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
+    if (idxImgAdic < 0) {
+        idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
+    }
 
-                const cols = parseCSVLine(line);
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
 
-                rows.push({
-                    id:     idxID  >= 0 && cols[idxID]   !== undefined ? cols[idxID].trim()   : "",
-                    titulo: idxTit >= 0 && cols[idxTit]  !== undefined ? cols[idxTit].trim()  : "",
-                    pub:    idxPub >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
-                    anio:   idxAnio>= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : ""
-                });
-            }
+        const cols = parseCSVLine(line);
 
-            return rows;
-        }
+        rows.push({
+            id:     idxID   >= 0 && cols[idxID]   !== undefined ? cols[idxID].trim()   : "",
+            titulo: idxTit  >= 0 && cols[idxTit]  !== undefined ? cols[idxTit].trim()  : "",
+            pub:    idxPub  >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
+            anio:   idxAnio >= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : "",
+            // 🆕 Nuevos campos
+            caratula:           idxCaratula >= 0 && cols[idxCaratula] !== undefined ? cols[idxCaratula].trim() : "",
+            imagenesAdicionales: idxImgAdic >= 0 && cols[idxImgAdic]   !== undefined ? cols[idxImgAdic].trim()   : ""
+        });
+    }
+
+    return rows;
+}
+
 
         /* Cargar datos y actualizar ficha */
-        async function loadSpectrumFicha() {
+      async function loadSpectrumFicha() {
 
-            const gameId = (getQueryParam("id") || "").trim();
-            if (!gameId) {
-                console.warn("No hay ID en la URL.");
-                return;
+    const gameId = (getQueryParam("id") || "").trim();
+    if (!gameId) {
+        console.warn("No hay ID en la URL.");
+        return;
+    }
+
+    const h1Content   = document.getElementById("ficha-title");
+    const coverImg    = document.getElementById("ficha-cover");
+
+    try {
+        const response = await fetch(ZX_SPECTRUM_CSV_URL);
+        if (!response.ok) throw new Error("No se pudo cargar el CSV");
+
+        const text  = await response.text();
+        const games = parseSpectrumCSV(text);
+
+        const game = games.find(row => row.id === gameId);
+
+        if (game) {
+            // Título del navegador (pestaña)
+            document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
+
+            // Título grande dentro de la ficha
+            if (h1Content) {
+                h1Content.textContent = game.titulo || "Juego ZX Spectrum";
             }
 
-            const h1Content = document.getElementById("ficha-title");
+            // ==============================
+            //   LÓGICA DE CARÁTULA
+            // ==============================
+            if (coverImg) {
+                let coverUrl = "";
 
-            try {
-                const response = await fetch(ZX_SPECTRUM_CSV_URL);
-                if (!response.ok) throw new Error("No se pudo cargar el CSV");
-
-                const text  = await response.text();
-                const games = parseSpectrumCSV(text);
-
-                const game = games.find(row => row.id === gameId);
-
-                if (game) {
-                    // Título del navegador (pestaña)
-                    document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
-
-                    // Título grande dentro de la ficha
-                    if (h1Content) {
-                        h1Content.textContent = game.titulo || "Juego ZX Spectrum";
+                // 1) Prioridad: columna CARATULA (dato metido a mano)
+                if (game.caratula) {
+                    coverUrl = game.caratula;
+                } else if (game.imagenesAdicionales) {
+                    // 2) Si no hay CARATULA, intentamos sacar la primera URL
+                    //    de IMAGENES_ADICIONALES (puede contener texto+URLs)
+                    const match = game.imagenesAdicionales.match(/https?:\/\/\S+/);
+                    if (match) {
+                        // Limpiamos posibles colas de comillas o comas
+                        coverUrl = match[0].replace(/["',]+$/g, "");
                     }
+                }
+
+                if (coverUrl) {
+                    coverImg.src = coverUrl;
+                    coverImg.alt = "Carátula de " + (game.titulo || "juego ZX Spectrum");
+                    coverImg.style.display = "block";
                 } else {
-                    // Juego no encontrado
-                    if (h1Content) {
-                        h1Content.textContent = "Juego no encontrado";
-                    }
+                    // Si no hay carátula, ocultamos el contenedor
+                    coverImg.style.display = "none";
                 }
+            }
 
-            } catch (err) {
-                console.error("Error cargando ZX_SPECTRUM:", err);
-                if (h1Content) {
-                    h1Content.textContent = "Error cargando datos";
-                }
+        } else {
+            // Juego no encontrado
+            if (h1Content) {
+                h1Content.textContent = "Juego no encontrado";
             }
         }
+
+    } catch (err) {
+        console.error("Error cargando ZX_SPECTRUM:", err);
+        if (h1Content) {
+            h1Content.textContent = "Error cargando datos";
+        }
+    }
+}
+
 
         document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
     </script>
