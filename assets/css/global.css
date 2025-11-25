@@ -757,6 +757,28 @@ body.ficha-final main.platforms-content {
     margin-top: 100px;   /* un poco más de aire respecto a la cabecera completa */
 }
 
+/* =========================================
+   FICHA FINAL – CARÁTULA PRINCIPAL
+========================================= */
+
+.ficha-final .ficha-cover-wrapper {
+    margin-top: 12px;
+    margin-bottom: 16px;
+    /* Ajusta el ancho máximo según tu gusto */
+    max-width: 240px;
+}
+
+.ficha-final .ficha-cover {
+    height: 320px;           /* alto fijo tipo carátula vertical */
+    width: auto;
+    display: block;
+    object-fit: cover;       /* llena el alto recortando lo que sobra */
+    object-position: right center; /* alineada a la derecha */
+    border-radius: 4px;
+    cursor: pointer;         /* luego servirá para la modal */
+}
+
+
 body.spectrum-lista main.platforms-content {
     margin-top: 160px;   /* 🔥 suficiente para la cabecera + buscador */
 }
