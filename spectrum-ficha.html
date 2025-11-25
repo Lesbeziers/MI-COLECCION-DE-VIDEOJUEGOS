@@ -124,7 +124,12 @@
     const idxAnio = header.indexOf("AÑO_MOSTRAR");
 
     // 🆕 Nuevas columnas para la carátula
-    const idxCaratula = header.indexOf("CARATULA"); // sin tilde, como en ZX_SPECTRUM
+    // 🆕 Nuevas columnas para la carátula
+let idxCaratula = header.indexOf("CARÁTULA");   // nombre real con tilde
+if (idxCaratula < 0) {
+    // Fallback por si algún día la exportas sin tilde
+    idxCaratula = header.indexOf("CARATULA");
+}
     // Intentamos cubrir variantes "IMAGENES_ADICIONALES" / "IMÁGENES_ADICIONALES"
     let idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
     if (idxImgAdic < 0) {
