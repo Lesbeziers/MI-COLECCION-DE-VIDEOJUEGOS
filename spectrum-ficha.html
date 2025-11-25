@@ -129,22 +129,23 @@ function parseSpectrumCSV(text) {
         idxCaratula = header.indexOf("CARATULA");
     }
 
-// 🆕 Columna donde guardas las imágenes extra
-// Prioridad:
-// 1) IMÁGENES  (nombre real en ZX_SPECTRUM)
-// 2) IMAGENES  (por si algún día exportas sin tilde)
-// 3) IMAGENES_ADICIONALES
-// 4) IMÁGENES_ADICIONALES
-let idxImgAdic = header.indexOf("IMÁGENES");      // 👈 nombre real
-if (idxImgAdic < 0) {
-    idxImgAdic = header.indexOf("IMAGENES");
-}
-if (idxImgAdic < 0) {
-    idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
-}
-if (idxImgAdic < 0) {
-    idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
-}
+    // 🆕 Columna donde guardas las imágenes extra
+    // Prioridad:
+    // 1) IMÁGENES  (nombre real en ZX_SPECTRUM)
+    // 2) IMAGENES  (por si algún día exportas sin tilde)
+    // 3) IMAGENES_ADICIONALES
+    // 4) IMÁGENES_ADICIONALES
+    let idxImgAdic = header.indexOf("IMÁGENES");      // 👈 con tilde
+    if (idxImgAdic < 0) {
+        idxImgAdic = header.indexOf("IMAGENES");
+    }
+    if (idxImgAdic < 0) {
+        idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
+    }
+    if (idxImgAdic < 0) {
+        idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
+    }
+
 
 
     for (let i = 1; i < lines.length; i++) {
@@ -193,6 +194,9 @@ if (idxImgAdic < 0) {
         alert("GAME OBJ: " + JSON.stringify(game));
 
         if (game) {
+             if (game.titulo === "Fairlight") {
+                alert("IMÁGENES EN CSV (Fairlight): " + game.imagenesAdicionales);
+            }
             // Título del navegador (pestaña)
             document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
 
