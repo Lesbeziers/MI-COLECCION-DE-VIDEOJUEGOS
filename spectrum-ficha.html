@@ -55,21 +55,31 @@
         <p>Aquí montaremos la ficha completa con todos los datos.</p>
     </main>
 
-    <!-- ===========================================
-         SCRIPT DE LA FICHA — LEE ID Y CARGA CSV
-    ============================================ -->
     <script>
-        /* URL del CSV de ZX_SPECTRUM */
-        const ZX_SPECTRUM_CSV_URL =
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const ZX_SPECTRUM_CSV_URL = 
             "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
 
-        /* Leer parámetro ?id= de la URL */
+        // ============================================
+        // UTILIDADES
+        // ============================================
+        
+        /**
+         * Obtiene un parámetro de la URL
+         * @param {string} name - Nombre del parámetro
+         * @returns {string|null}
+         */
         function getQueryParam(name) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(name);
+            return new URLSearchParams(window.location.search).get(name);
         }
 
-        /* Parser de una línea CSV (respeta comillas) */
+        /**
+         * Parser de línea CSV que respeta comillas
+         * @param {string} line - Línea CSV a parsear
+         * @returns {string[]}
+         */
         function parseCSVLine(line) {
             const result = [];
             let current = "";
@@ -97,190 +107,242 @@
             return result;
         }
 
-function parseSpectrumCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (lines.length === 0) return [];
-
-    const header = parseCSVLine(lines[0]);
-    const rows = [];
-
-    // Columnas importantes ya existentes
-    const idxID          = header.indexOf("ID");
-    const idxTitMostrar  = header.indexOf("TITULO_MOSTRAR");
-    const idxTitConTilde = header.indexOf("TÍTULO");
-
-    // Elegimos columna de título
-    let idxTit = -1;
-    if (idxTitMostrar >= 0) {
-        idxTit = idxTitMostrar;
-    } else if (idxTitConTilde >= 0) {
-        idxTit = idxTitConTilde;
-    } else {
-        idxTit = header.indexOf("TITULO");
-    }
-
-    const idxPub  = header.indexOf("PUBLISHER_MOSTRAR");
-    const idxAnio = header.indexOf("AÑO_MOSTRAR");
-
-    // 🆕 Nuevas columnas para la carátula
-    let idxCaratula = header.indexOf("CARÁTULA");   // nombre real con tilde
-    if (idxCaratula < 0) {
-        // Fallback por si algún día la exportas sin tilde
-        idxCaratula = header.indexOf("CARATULA");
-    }
-
-    // 🆕 Columna donde guardas las imágenes extra
-    // Prioridad:
-    // 1) IMÁGENES  (nombre real en ZX_SPECTRUM)
-    // 2) IMAGENES  (por si algún día exportas sin tilde)
-    // 3) IMAGENES_ADICIONALES
-    // 4) IMÁGENES_ADICIONALES
-    let idxImgAdic = header.indexOf("IMÁGENES");      // 👈 con tilde
-    if (idxImgAdic < 0) {
-        idxImgAdic = header.indexOf("IMAGENES");
-    }
-    if (idxImgAdic < 0) {
-        idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
-    }
-    if (idxImgAdic < 0) {
-        idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
-    }
-
-
-
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue;
-
-        const cols = parseCSVLine(line);
-
-        rows.push({
-            id:     idxID   >= 0 && cols[idxID]   !== undefined ? cols[idxID].trim()   : "",
-            titulo: idxTit  >= 0 && cols[idxTit]  !== undefined ? cols[idxTit].trim()  : "",
-            pub:    idxPub  >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
-            anio:   idxAnio >= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : "",
-            // 🆕 Nuevos campos
-            caratula:            idxCaratula >= 0 && cols[idxCaratula] !== undefined ? cols[idxCaratula].trim() : "",
-            imagenesAdicionales: idxImgAdic  >= 0 && cols[idxImgAdic]  !== undefined ? cols[idxImgAdic].trim()  : ""
-        });
-    }
-
-    return rows;
-}
-
-
-
-        /* Cargar datos y actualizar ficha */
-      async function loadSpectrumFicha() {
-
-    const gameId = (getQueryParam("id") || "").trim();
-    if (!gameId) {
-        console.warn("No hay ID en la URL.");
-        return;
-    }
-
-    const h1Content   = document.getElementById("ficha-title");
-    const coverImg    = document.getElementById("ficha-cover");
-
-    try {
-        const response = await fetch(ZX_SPECTRUM_CSV_URL);
-        if (!response.ok) throw new Error("No se pudo cargar el CSV");
-
-        const text  = await response.text();
-        const games = parseSpectrumCSV(text);
-
-        const game = games.find(row => row.id === gameId);
-        alert("GAME FOUND: " + (game ? "SI" : "NO"));
-        alert("GAME OBJ: " + JSON.stringify(game));
-
-        if (game) {
-             if (game.titulo === "Fairlight") {
-                alert("IMÁGENES EN CSV (Fairlight): " + game.imagenesAdicionales);
+        /**
+         * Busca índice de columna con fallbacks
+         * @param {string[]} header - Array de encabezados
+         * @param {string[]} names - Nombres a buscar (en orden de prioridad)
+         * @returns {number}
+         */
+        function findColumnIndex(header, names) {
+            for (const name of names) {
+                const idx = header.indexOf(name);
+                if (idx >= 0) return idx;
             }
-            // Título del navegador (pestaña)
-            document.title = (game.titulo || "Juego ZX Spectrum") + " – ZX Spectrum";
+            return -1;
+        }
 
-            // Título grande dentro de la ficha
-            if (h1Content) {
-                h1Content.textContent = game.titulo || "Juego ZX Spectrum";
+        /**
+         * Obtiene valor de columna de forma segura
+         * @param {string[]} cols - Array de valores
+         * @param {number} idx - Índice de columna
+         * @returns {string}
+         */
+        function getColumnValue(cols, idx) {
+            return idx >= 0 && cols[idx] !== undefined ? cols[idx].trim() : "";
+        }
+
+        // ============================================
+        // PARSER CSV
+        // ============================================
+        
+        /**
+         * Parsea el CSV de ZX Spectrum
+         * @param {string} text - Contenido del CSV
+         * @returns {Array<Object>}
+         */
+        function parseSpectrumCSV(text) {
+            const lines = text.trim().split(/\r?\n/);
+            if (lines.length === 0) return [];
+
+            const header = parseCSVLine(lines[0]);
+            const rows = [];
+
+            // Localizar índices de columnas
+            const idxID = header.indexOf("ID");
+            const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
+            const idxPub = header.indexOf("PUBLISHER_MOSTRAR");
+            const idxAnio = header.indexOf("AÑO_MOSTRAR");
+            const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
+            const idxImgAdic = findColumnIndex(header, [
+                "IMÁGENES", 
+                "IMAGENES", 
+                "IMAGENES_ADICIONALES", 
+                "IMÁGENES_ADICIONALES"
+            ]);
+
+            // Procesar filas
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+
+                const cols = parseCSVLine(line);
+
+                rows.push({
+                    id: getColumnValue(cols, idxID),
+                    titulo: getColumnValue(cols, idxTit),
+                    pub: getColumnValue(cols, idxPub),
+                    anio: getColumnValue(cols, idxAnio),
+                    caratula: getColumnValue(cols, idxCaratula),
+                    imagenesAdicionales: getColumnValue(cols, idxImgAdic)
+                });
             }
 
-            // ==============================
-            //   LÓGICA DE CARÁTULA
-            // ==============================
-            if (coverImg) {
-                let coverUrl = "";
+            return rows;
+        }
 
-                // 1) Prioridad absoluta: columna CARÁTULA (dato metido a mano)
-                if (game.caratula) {
-                    coverUrl = game.caratula;
+        // ============================================
+        // EXTRACCIÓN DE CARÁTULA
+        // ============================================
+        
+        /**
+         * Extrae URLs de un texto
+         * @param {string} text - Texto con URLs
+         * @returns {Array<{url: string, index: number}>}
+         */
+        function extractURLs(text) {
+            const urlRegex = /https?:\/\/[^\s,]+/g;
+            const urls = [];
+            let match;
+
+            while ((match = urlRegex.exec(text)) !== null) {
+                const cleanUrl = match[0].replace(/["',]+$/g, "");
+                urls.push({
+                    url: cleanUrl,
+                    index: match.index
+                });
+            }
+
+            return urls;
+        }
+
+        /**
+         * Busca la mejor carátula en las imágenes adicionales
+         * @param {string} imagenesText - Texto con URLs de imágenes
+         * @returns {string}
+         */
+        function findBestCover(imagenesText) {
+            const urls = extractURLs(imagenesText);
+            if (urls.length === 0) return "";
+
+            // Por defecto, la primera URL
+            let bestUrl = urls[0].url;
+
+            // Buscar "Inlay Front" cerca de alguna URL
+            for (const item of urls) {
+                const contextStart = Math.max(0, item.index - 80);
+                const context = imagenesText
+                    .slice(contextStart, item.index)
+                    .toLowerCase();
+
+                if (context.includes("inlay") && context.includes("front")) {
+                    bestUrl = item.url;
+                    break;
                 }
-                // 2) Si no hay CARÁTULA, intentamos sacar una buena portada
-                //    desde IMÁGENES ADICIONALES (priorizando "Inlay Front")
-                else if (game.imagenesAdicionales) {
-                    const textIA = game.imagenesAdicionales;
-                    const urlRegex = /https?:\/\/[^\s,]+/g;
-                    const urls = [];
-                    let m;
+            }
 
-                    // Sacamos TODAS las URLs + su posición en el texto
-                    while ((m = urlRegex.exec(textIA)) !== null) {
-                        const urlLimpia = m[0].replace(/["',]+$/g, "");
-                        urls.push({
-                            url: urlLimpia,
-                            index: m.index
-                        });
-                    }
+            return bestUrl;
+        }
 
-                    if (urls.length > 0) {
-                        // Por defecto, nos quedamos con la primera
-                        let elegida = urls[0].url;
+        /**
+         * Obtiene la URL de carátula del juego
+         * @param {Object} game - Datos del juego
+         * @returns {string}
+         */
+        function getCoverURL(game) {
+            // 1. Prioridad: columna CARÁTULA
+            if (game.caratula) {
+                return game.caratula;
+            }
 
-                        // Pero si alguna va precedida de "inlay front", la preferimos
-                        for (const item of urls) {
-                            const contextStart = Math.max(0, item.index - 80);
-                            const context = textIA
-                                .slice(contextStart, item.index)
-                                .toLowerCase();
+            // 2. Buscar en imágenes adicionales
+            if (game.imagenesAdicionales) {
+                return findBestCover(game.imagenesAdicionales);
+            }
 
-                            if (context.includes("inlay") && context.includes("front")) {
-                                elegida = item.url;
-                                break;
-                            }
-                        }
+            return "";
+        }
 
-                        coverUrl = elegida;
-                        alert("DEBUG COVER URL: " + coverUrl);   // ← pega esta línea
-                    }
+        // ============================================
+        // ACTUALIZACIÓN DE UI
+        // ============================================
+        
+        /**
+         * Actualiza el título de la página
+         * @param {Object} game - Datos del juego
+         */
+        function updateTitle(game) {
+            const title = game.titulo || "Juego ZX Spectrum";
+            document.title = `${title} – ZX Spectrum`;
+            
+            const h1 = document.getElementById("ficha-title");
+            if (h1) {
+                h1.textContent = title;
+            }
+        }
+
+        /**
+         * Actualiza la carátula
+         * @param {Object} game - Datos del juego
+         */
+        function updateCover(game) {
+            const coverImg = document.getElementById("ficha-cover");
+            if (!coverImg) return;
+
+            const coverUrl = getCoverURL(game);
+
+            if (coverUrl) {
+                coverImg.src = coverUrl;
+                coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
+                coverImg.style.display = "block";
+            } else {
+                coverImg.style.display = "none";
+            }
+        }
+
+        /**
+         * Muestra mensaje de error
+         * @param {string} message - Mensaje a mostrar
+         */
+        function showError(message) {
+            const h1 = document.getElementById("ficha-title");
+            if (h1) {
+                h1.textContent = message;
+            }
+        }
+
+        // ============================================
+        // CARGA PRINCIPAL
+        // ============================================
+        
+        /**
+         * Carga y muestra los datos del juego
+         */
+        async function loadSpectrumFicha() {
+            const gameId = (getQueryParam("id") || "").trim();
+            
+            if (!gameId) {
+                console.warn("No hay ID en la URL.");
+                showError("ID no especificado");
+                return;
+            }
+
+            try {
+                const response = await fetch(ZX_SPECTRUM_CSV_URL);
+                if (!response.ok) {
+                    throw new Error("No se pudo cargar el CSV");
                 }
 
-                if (coverUrl) {
-                    coverImg.src = coverUrl;
-                    coverImg.alt = "Carátula de " + (game.titulo || "juego ZX Spectrum");
-                    coverImg.style.display = "block";
+                const text = await response.text();
+                const games = parseSpectrumCSV(text);
+                const game = games.find(row => row.id === gameId);
+
+                if (game) {
+                    updateTitle(game);
+                    updateCover(game);
                 } else {
-                    // Si no hay carátula, ocultamos el contenedor
-                    coverImg.style.display = "none";
+                    showError("Juego no encontrado");
                 }
-            }
 
-
-        } else {
-            // Juego no encontrado
-            if (h1Content) {
-                h1Content.textContent = "Juego no encontrado";
+            } catch (err) {
+                console.error("Error cargando ZX_SPECTRUM:", err);
+                showError("Error cargando datos");
             }
         }
 
-    } catch (err) {
-        console.error("Error cargando ZX_SPECTRUM:", err);
-        if (h1Content) {
-            h1Content.textContent = "Error cargando datos";
-        }
-    }
-}
-
-
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        
         document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
     </script>
 
