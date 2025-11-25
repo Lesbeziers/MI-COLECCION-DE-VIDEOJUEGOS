@@ -184,6 +184,7 @@ function parseSpectrumCSV(text) {
         const games = parseSpectrumCSV(text);
 
         const game = games.find(row => row.id === gameId);
+        alert("GAME OBJ: " + JSON.stringify(game));
 
         if (game) {
             // Título del navegador (pestaña)
