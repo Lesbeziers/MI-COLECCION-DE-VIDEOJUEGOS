@@ -97,8 +97,7 @@
             return result;
         }
 
-        /* Parsear todo el CSV de ZX_SPECTRUM */
-       function parseSpectrumCSV(text) {
+function parseSpectrumCSV(text) {
     const lines = text.trim().split(/\r?\n/);
     if (lines.length === 0) return [];
 
@@ -124,14 +123,21 @@
     const idxAnio = header.indexOf("AÑO_MOSTRAR");
 
     // 🆕 Nuevas columnas para la carátula
-    // 🆕 Nuevas columnas para la carátula
-let idxCaratula = header.indexOf("CARÁTULA");   // nombre real con tilde
-if (idxCaratula < 0) {
-    // Fallback por si algún día la exportas sin tilde
-    idxCaratula = header.indexOf("CARATULA");
-}
-    // Intentamos cubrir variantes "IMAGENES_ADICIONALES" / "IMÁGENES_ADICIONALES"
-    let idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
+    let idxCaratula = header.indexOf("CARÁTULA");   // nombre real con tilde
+    if (idxCaratula < 0) {
+        // Fallback por si algún día la exportas sin tilde
+        idxCaratula = header.indexOf("CARATULA");
+    }
+
+    // 🆕 Columna donde guardas las imágenes extra
+    // Prioridad:
+    // 1) IMAGENES
+    // 2) IMAGENES_ADICIONALES
+    // 3) IMÁGENES_ADICIONALES
+    let idxImgAdic = header.indexOf("IMAGENES");
+    if (idxImgAdic < 0) {
+        idxImgAdic = header.indexOf("IMAGENES_ADICIONALES");
+    }
     if (idxImgAdic < 0) {
         idxImgAdic = header.indexOf("IMÁGENES_ADICIONALES");
     }
@@ -148,13 +154,14 @@ if (idxCaratula < 0) {
             pub:    idxPub  >= 0 && cols[idxPub]  !== undefined ? cols[idxPub].trim()  : "",
             anio:   idxAnio >= 0 && cols[idxAnio] !== undefined ? cols[idxAnio].trim() : "",
             // 🆕 Nuevos campos
-            caratula:           idxCaratula >= 0 && cols[idxCaratula] !== undefined ? cols[idxCaratula].trim() : "",
-            imagenesAdicionales: idxImgAdic >= 0 && cols[idxImgAdic]   !== undefined ? cols[idxImgAdic].trim()   : ""
+            caratula:            idxCaratula >= 0 && cols[idxCaratula] !== undefined ? cols[idxCaratula].trim() : "",
+            imagenesAdicionales: idxImgAdic  >= 0 && cols[idxImgAdic]  !== undefined ? cols[idxImgAdic].trim()  : ""
         });
     }
 
     return rows;
 }
+
 
 
         /* Cargar datos y actualizar ficha */
