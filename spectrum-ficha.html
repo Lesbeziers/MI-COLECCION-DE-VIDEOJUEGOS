@@ -47,24 +47,27 @@
 <main class="platforms-content">
     
     <!-- BLOQUE SUPERIOR: Carátula + Info básica -->
-    <div class="ficha-hero">
-        <div class="ficha-cover-wrapper">
-            <img id="ficha-cover"
-                 class="ficha-cover"
-                 alt="Carátula del juego"
-                 style="display:none;">
+<div class="ficha-hero">
+    <div class="ficha-cover-wrapper">
+        <img id="ficha-cover"
+             class="ficha-cover"
+             alt="Carátula del juego"
+             style="display:none;">
+    </div>
+    <div class="ficha-hero-info">
+        <h1 id="ficha-title">Cargando ficha...</h1>
+
+        <!-- Ocultamos estos elementos hasta que el juego esté cargado -->
+        <p class="ficha-platform" style="display:none;">ZX Spectrum</p>
+        <p class="ficha-puntuacion" id="ficha-puntuacion" style="display:none;"></p>
+
+        <div class="ficha-rating" style="display:none;">
+            <span class="ficha-rating-stars" id="ficha-rating-stars">★★★★★</span>
         </div>
-        <div class="ficha-hero-info">
-    <h1 id="ficha-title">Cargando ficha...</h1>
-    <p class="ficha-platform">ZX Spectrum</p>
-    <p class="ficha-puntuacion" id="ficha-puntuacion"></p>
-    <div class="ficha-rating">
-        <span class="ficha-rating-stars" id="ficha-rating-stars">★★★★★</span>
     </div>
 </div>
-    </div>
+<!-- Eliminamos el placeholder de abajo -->
 
-    <p>Aquí montaremos la ficha completa con todos los datos.</p>
 </main>
 
    <script>
