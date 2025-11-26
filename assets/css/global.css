@@ -781,13 +781,11 @@ body.ficha-final #ficha-title {
     margin: 0;
     flex-shrink: 0;
 
-    width: 220px;
-    height: 320px;
-
-    /* 🟩 AÑADE ESTO: el “rectángulo gris” */
-    background-color: #666;   /* mismo gris que las estrellas */
-    border-radius: 8px;       /* mismo redondeo que la carátula */
-    overflow: hidden;         /* por si acaso la imagen se sale un pelín */
+    width: 220px;          /* ancho fijo del contenedor */
+    background-color: #666;  /* placeholder gris */
+    border-radius: 8px;      /* igual que la carátula */
+    overflow: hidden;        /* recortar contenido */
+    position: relative;      /* necesario para placeholder */
 }
 
 
