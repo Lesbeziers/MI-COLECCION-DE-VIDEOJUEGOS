@@ -837,3 +837,17 @@ body.ficha-final #ficha-title {
         font-size: 24px;
     }
 }
+
+/* ============================================
+   PUNTUACIÓN EN LA FICHA FINAL
+============================================ */
+
+.ficha-puntuacion {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.ficha-puntuacion b {
+    color: #ddd;
+}
