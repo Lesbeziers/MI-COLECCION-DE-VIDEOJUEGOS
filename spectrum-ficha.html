@@ -67,296 +67,357 @@
     <p>Aquí montaremos la ficha completa con todos los datos.</p>
 </main>
 
-    <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
-        const ZX_SPECTRUM_CSV_URL = 
-            "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
+   <script>
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
+    const ZX_SPECTRUM_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
 
-        // ============================================
-        // UTILIDADES
-        // ============================================
-        
-        /**
-         * Obtiene un parámetro de la URL
-         * @param {string} name - Nombre del parámetro
-         * @returns {string|null}
-         */
-        function getQueryParam(name) {
-            return new URLSearchParams(window.location.search).get(name);
-        }
+    const ZX_LISTA_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
 
-        /**
-         * Parser de línea CSV que respeta comillas
-         * @param {string} line - Línea CSV a parsear
-         * @returns {string[]}
-         */
-        function parseCSVLine(line) {
-            const result = [];
-            let current = "";
-            let inQuotes = false;
+    // Lista ordenada de juegos para navegación
+    let sortedGamesList = [];
+    let currentGameIndex = -1;
 
-            for (let i = 0; i < line.length; i++) {
-                const ch = line[i];
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    
+    function getQueryParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+    }
 
-                if (ch === '"') {
-                    if (inQuotes && line[i + 1] === '"') {
-                        current += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (ch === "," && !inQuotes) {
-                    result.push(current.trim());
-                    current = "";
+    function parseCSVLine(line) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
                 } else {
-                    current += ch;
+                    inQuotes = !inQuotes;
                 }
-            }
-
-            result.push(current.trim());
-            return result;
-        }
-
-        /**
-         * Busca índice de columna con fallbacks
-         * @param {string[]} header - Array de encabezados
-         * @param {string[]} names - Nombres a buscar (en orden de prioridad)
-         * @returns {number}
-         */
-        function findColumnIndex(header, names) {
-            for (const name of names) {
-                const idx = header.indexOf(name);
-                if (idx >= 0) return idx;
-            }
-            return -1;
-        }
-
-        /**
-         * Obtiene valor de columna de forma segura
-         * @param {string[]} cols - Array de valores
-         * @param {number} idx - Índice de columna
-         * @returns {string}
-         */
-        function getColumnValue(cols, idx) {
-            return idx >= 0 && cols[idx] !== undefined ? cols[idx].trim() : "";
-        }
-
-        // ============================================
-        // PARSER CSV
-        // ============================================
-        
-        /**
-         * Parsea el CSV de ZX Spectrum
-         * @param {string} text - Contenido del CSV
-         * @returns {Array<Object>}
-         */
-        function parseSpectrumCSV(text) {
-            const lines = text.trim().split(/\r?\n/);
-            if (lines.length === 0) return [];
-
-            const header = parseCSVLine(lines[0]);
-            const rows = [];
-
-            // Localizar índices de columnas
-            const idxID = header.indexOf("ID");
-            const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
-            const idxPub = header.indexOf("PUBLISHER_MOSTRAR");
-            const idxAnio = header.indexOf("AÑO_MOSTRAR");
-            const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
-            const idxImgAdic = findColumnIndex(header, [
-                "IMÁGENES", 
-                "IMAGENES", 
-                "IMAGENES_ADICIONALES", 
-                "IMÁGENES_ADICIONALES"
-            ]);
-
-            // Procesar filas
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
-
-                const cols = parseCSVLine(line);
-
-                rows.push({
-                    id: getColumnValue(cols, idxID),
-                    titulo: getColumnValue(cols, idxTit),
-                    pub: getColumnValue(cols, idxPub),
-                    anio: getColumnValue(cols, idxAnio),
-                    caratula: getColumnValue(cols, idxCaratula),
-                    imagenesAdicionales: getColumnValue(cols, idxImgAdic)
-                });
-            }
-
-            return rows;
-        }
-
-        // ============================================
-        // EXTRACCIÓN DE CARÁTULA
-        // ============================================
-        
-        /**
-         * Extrae URLs de un texto
-         * @param {string} text - Texto con URLs
-         * @returns {Array<{url: string, index: number}>}
-         */
-        function extractURLs(text) {
-            const urlRegex = /https?:\/\/[^\s,]+/g;
-            const urls = [];
-            let match;
-
-            while ((match = urlRegex.exec(text)) !== null) {
-                const cleanUrl = match[0].replace(/["',]+$/g, "");
-                urls.push({
-                    url: cleanUrl,
-                    index: match.index
-                });
-            }
-
-            return urls;
-        }
-
-        /**
-         * Busca la mejor carátula en las imágenes adicionales
-         * @param {string} imagenesText - Texto con URLs de imágenes
-         * @returns {string}
-         */
-        function findBestCover(imagenesText) {
-            const urls = extractURLs(imagenesText);
-            if (urls.length === 0) return "";
-
-            // Por defecto, la primera URL
-            let bestUrl = urls[0].url;
-
-            // Buscar "Inlay Front" cerca de alguna URL
-            for (const item of urls) {
-                const contextStart = Math.max(0, item.index - 80);
-                const context = imagenesText
-                    .slice(contextStart, item.index)
-                    .toLowerCase();
-
-                if (context.includes("inlay") && context.includes("front")) {
-                    bestUrl = item.url;
-                    break;
-                }
-            }
-
-            return bestUrl;
-        }
-
-        /**
-         * Obtiene la URL de carátula del juego
-         * @param {Object} game - Datos del juego
-         * @returns {string}
-         */
-        function getCoverURL(game) {
-            // 1. Prioridad: columna CARÁTULA
-            if (game.caratula) {
-                return game.caratula;
-            }
-
-            // 2. Buscar en imágenes adicionales
-            if (game.imagenesAdicionales) {
-                return findBestCover(game.imagenesAdicionales);
-            }
-
-            return "";
-        }
-
-        // ============================================
-        // ACTUALIZACIÓN DE UI
-        // ============================================
-        
-        /**
-         * Actualiza el título de la página
-         * @param {Object} game - Datos del juego
-         */
-        function updateTitle(game) {
-            const title = game.titulo || "Juego ZX Spectrum";
-            document.title = `${title} – ZX Spectrum`;
-            
-            const h1 = document.getElementById("ficha-title");
-            if (h1) {
-                h1.textContent = title;
-            }
-        }
-
-        /**
-         * Actualiza la carátula
-         * @param {Object} game - Datos del juego
-         */
-        function updateCover(game) {
-            const coverImg = document.getElementById("ficha-cover");
-            if (!coverImg) return;
-
-            const coverUrl = getCoverURL(game);
-
-            if (coverUrl) {
-                coverImg.src = coverUrl;
-                coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
-                coverImg.style.display = "block";
+            } else if (ch === "," && !inQuotes) {
+                result.push(current.trim());
+                current = "";
             } else {
-                coverImg.style.display = "none";
+                current += ch;
             }
         }
 
-        /**
-         * Muestra mensaje de error
-         * @param {string} message - Mensaje a mostrar
-         */
-        function showError(message) {
-            const h1 = document.getElementById("ficha-title");
-            if (h1) {
-                h1.textContent = message;
+        result.push(current.trim());
+        return result;
+    }
+
+    function findColumnIndex(header, names) {
+        for (const name of names) {
+            const idx = header.indexOf(name);
+            if (idx >= 0) return idx;
+        }
+        return -1;
+    }
+
+    function getColumnValue(cols, idx) {
+        return idx >= 0 && cols[idx] !== undefined ? cols[idx].trim() : "";
+    }
+
+    function formatTitleWithArticle(title) {
+        if (!title) return "";
+        const t = title.trim();
+        const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+        const match = t.match(re);
+        if (!match) return t;
+        return match[2] + ", " + match[1];
+    }
+
+    // ============================================
+    // PARSER CSV - FICHA (datos completos)
+    // ============================================
+    
+    function parseSpectrumCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length === 0) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
+        const idxPub = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxAnio = header.indexOf("AÑO_MOSTRAR");
+        const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
+        const idxImgAdic = findColumnIndex(header, [
+            "IMÁGENES", 
+            "IMAGENES", 
+            "IMAGENES_ADICIONALES", 
+            "IMÁGENES_ADICIONALES"
+        ]);
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (!line.trim()) continue;
+
+            const cols = parseCSVLine(line);
+
+            rows.push({
+                id: getColumnValue(cols, idxID),
+                titulo: getColumnValue(cols, idxTit),
+                pub: getColumnValue(cols, idxPub),
+                anio: getColumnValue(cols, idxAnio),
+                caratula: getColumnValue(cols, idxCaratula),
+                imagenesAdicionales: getColumnValue(cols, idxImgAdic)
+            });
+        }
+
+        return rows;
+    }
+
+    // ============================================
+    // PARSER CSV - LISTA (para navegación)
+    // ============================================
+    
+    function parseListaCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length === 0) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (!line.trim()) continue;
+
+            const cols = parseCSVLine(line);
+            const id = getColumnValue(cols, idxID);
+            const titulo = getColumnValue(cols, idxTitulo);
+
+            if (!titulo) continue;
+
+            const displayTitulo = formatTitleWithArticle(titulo);
+
+            rows.push({
+                id,
+                titulo,
+                displayTitulo,
+                sortKey: displayTitulo.toLowerCase()
+            });
+        }
+
+        return rows;
+    }
+
+    // ============================================
+    // EXTRACCIÓN DE CARÁTULA
+    // ============================================
+    
+    function extractURLs(text) {
+        const urlRegex = /https?:\/\/[^\s,]+/g;
+        const urls = [];
+        let match;
+
+        while ((match = urlRegex.exec(text)) !== null) {
+            const cleanUrl = match[0].replace(/["',]+$/g, "");
+            urls.push({
+                url: cleanUrl,
+                index: match.index
+            });
+        }
+
+        return urls;
+    }
+
+    function findBestCover(imagenesText) {
+        const urls = extractURLs(imagenesText);
+        if (urls.length === 0) return "";
+
+        let bestUrl = urls[0].url;
+
+        for (const item of urls) {
+            const contextStart = Math.max(0, item.index - 80);
+            const context = imagenesText
+                .slice(contextStart, item.index)
+                .toLowerCase();
+
+            if (context.includes("inlay") && context.includes("front")) {
+                bestUrl = item.url;
+                break;
             }
         }
 
-        // ============================================
-        // CARGA PRINCIPAL
-        // ============================================
+        return bestUrl;
+    }
+
+    function getCoverURL(game) {
+        if (game.caratula) {
+            return game.caratula;
+        }
+
+        if (game.imagenesAdicionales) {
+            return findBestCover(game.imagenesAdicionales);
+        }
+
+        return "";
+    }
+
+    // ============================================
+    // ACTUALIZACIÓN DE UI
+    // ============================================
+    
+    function updateTitle(game) {
+        const title = game.titulo || "Juego ZX Spectrum";
+        document.title = `${title} – ZX Spectrum`;
         
-        /**
-         * Carga y muestra los datos del juego
-         */
-        async function loadSpectrumFicha() {
-            const gameId = (getQueryParam("id") || "").trim();
-            
-            if (!gameId) {
-                console.warn("No hay ID en la URL.");
-                showError("ID no especificado");
-                return;
-            }
+        const h1 = document.getElementById("ficha-title");
+        if (h1) {
+            h1.textContent = title;
+        }
+    }
 
-            try {
-                const response = await fetch(ZX_SPECTRUM_CSV_URL);
-                if (!response.ok) {
-                    throw new Error("No se pudo cargar el CSV");
+    function updateCover(game) {
+        const coverImg = document.getElementById("ficha-cover");
+        if (!coverImg) return;
+
+        const coverUrl = getCoverURL(game);
+
+        if (coverUrl) {
+            coverImg.src = coverUrl;
+            coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
+            coverImg.style.display = "block";
+        } else {
+            coverImg.style.display = "none";
+        }
+    }
+
+    function showError(message) {
+        const h1 = document.getElementById("ficha-title");
+        if (h1) {
+            h1.textContent = message;
+        }
+    }
+
+    // ============================================
+    // NAVEGACIÓN ENTRE JUEGOS
+    // ============================================
+
+    function updateNavCounter() {
+        const counterEl = document.querySelector(".game-nav-counter");
+        if (counterEl && currentGameIndex >= 0) {
+            const position = currentGameIndex + 1;
+            const total = sortedGamesList.length;
+            counterEl.textContent = `${position.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+        }
+    }
+
+    function setupNavigation() {
+        const prevArrow = document.querySelector(".game-nav-arrow--prev");
+        const nextArrow = document.querySelector(".game-nav-arrow--next");
+
+        if (prevArrow) {
+            prevArrow.addEventListener("click", () => {
+                if (currentGameIndex > 0) {
+                    const prevGame = sortedGamesList[currentGameIndex - 1];
+                    window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
                 }
-
-                const text = await response.text();
-                const games = parseSpectrumCSV(text);
-                const game = games.find(row => row.id === gameId);
-
-                if (game) {
-                    updateTitle(game);
-                    updateCover(game);
-                } else {
-                    showError("Juego no encontrado");
-                }
-
-            } catch (err) {
-                console.error("Error cargando ZX_SPECTRUM:", err);
-                showError("Error cargando datos");
-            }
+            });
+            prevArrow.style.cursor = "pointer";
         }
 
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
+        if (nextArrow) {
+            nextArrow.addEventListener("click", () => {
+                if (currentGameIndex < sortedGamesList.length - 1) {
+                    const nextGame = sortedGamesList[currentGameIndex + 1];
+                    window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
+                }
+            });
+            nextArrow.style.cursor = "pointer";
+        }
+    }
+
+    async function loadGamesList(gameId) {
+        try {
+            const response = await fetch(ZX_LISTA_CSV_URL);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar la lista");
+            }
+
+            const text = await response.text();
+            const games = parseListaCSV(text);
+
+            // Ordenar alfabéticamente
+            games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+            sortedGamesList = games;
+
+            // Encontrar posición del juego actual
+            currentGameIndex = games.findIndex(g => g.id === gameId);
+
+            // Actualizar contador
+            updateNavCounter();
+
+            // Configurar flechas
+            setupNavigation();
+
+        } catch (err) {
+            console.error("Error cargando lista para navegación:", err);
+        }
+    }
+
+    // ============================================
+    // CARGA PRINCIPAL
+    // ============================================
+    
+    async function loadSpectrumFicha() {
+        const gameId = (getQueryParam("id") || "").trim();
         
-        document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
-    </script>
+        if (!gameId) {
+            console.warn("No hay ID en la URL.");
+            showError("ID no especificado");
+            return;
+        }
+
+        try {
+            // Cargar datos del juego
+            const response = await fetch(ZX_SPECTRUM_CSV_URL);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar el CSV");
+            }
+
+            const text = await response.text();
+            const games = parseSpectrumCSV(text);
+            const game = games.find(row => row.id === gameId);
+
+            if (game) {
+                updateTitle(game);
+                updateCover(game);
+            } else {
+                showError("Juego no encontrado");
+            }
+
+            // Cargar lista para navegación
+            await loadGamesList(gameId);
+
+        } catch (err) {
+            console.error("Error cargando ZX_SPECTRUM:", err);
+            showError("Error cargando datos");
+        }
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    
+    document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
+</script>
 
     <script src="assets/js/app.js"></script>
 
