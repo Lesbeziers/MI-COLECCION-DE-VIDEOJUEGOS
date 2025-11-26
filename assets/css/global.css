@@ -752,13 +752,14 @@ body.ficha-final .game-nav-arrow--next-real {
 
 .ficha-final .ficha-cover {
     height: 320px;
-    width: auto;
+    width: 220px;
     display: block;
     object-fit: cover;
     object-position: right center;
-    border-radius: 8px;  /* Esquinas más redondeadas */
+    border-radius: 8px;
     cursor: pointer;
 }
+
 body.ficha-final #ficha-title {
     text-transform: none;
     margin-top: 10px;
