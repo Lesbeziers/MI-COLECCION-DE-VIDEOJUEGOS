@@ -760,6 +760,12 @@ body.ficha-final .game-nav-arrow--next-real {
     cursor: pointer;
 }
 
+.ficha-cover {
+    position: relative;
+    z-index: 5;
+}
+
+
 body.ficha-final #ficha-title {
     text-transform: none;
     margin-top: -5px;
@@ -786,6 +792,31 @@ body.ficha-final #ficha-title {
     border-radius: 8px;      /* igual que la carátula */
     overflow: hidden;        /* recortar contenido */
     position: relative;      /* necesario para placeholder */
+}
+/* ========== SKELETON SHIMMER ========== */
+
+/* Efecto shimmer por encima del fondo gris */
+.ficha-cover-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.18) 45%,
+        rgba(255, 255, 255, 0) 80%
+    );
+    transform: translateX(-100%);
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: inherit;
+    z-index: 2; /* por encima del fondo gris, por debajo de la foto */
+}
+
+/* Animación del barrido */
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    60%  { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
 }
 
 
@@ -933,3 +964,8 @@ body.ficha-final.loading .ficha-cover-wrapper {
     height: auto !important;
 }
 
+/* Cuando la imagen está visible, quitamos el shimmer */
+.ficha-cover[style*="display: block"] ~ .ficha-cover-wrapper::after,
+.ficha-cover[src] + .ficha-cover-wrapper::after {
+    display: none;
+}
