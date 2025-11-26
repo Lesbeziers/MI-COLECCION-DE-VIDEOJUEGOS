@@ -802,16 +802,19 @@ body.ficha-final #ficha-title {
     margin-bottom: 2px;   /* MUCHÍSIMO menos espacio con la puntuación */
 }
 
-/* Línea "· Puntuación: 8,8 (xxx votos)" */
+/* Línea "· Puntuación: 5,8 (5 votos)" */
 .ficha-puntuacion {
-    font-size: 16px;      /* mismo tamaño que "Aquí montaremos la ficha..." */
-    color: #ddd;          /* mismo color que ZX Spectrum */
+    font-size: 16px;      /* texto común */
+    color: #ddd;          /* texto común */
     margin-bottom: 8px;
+    font-weight: 400;     /* igual que el resto del texto */
 }
 
 .ficha-puntuacion b {
-    color: #ddd;          /* mantiene el bold sin cambiar color */
+    font-weight: 600;     /* mantiene la negrita */
+    color: #ddd;          /* mismo color, para que no cambie */
 }
+
 
 /* Bloque de estrellas (lo dejamos igual de momento) */
 .ficha-rating {
