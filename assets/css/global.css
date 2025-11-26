@@ -795,22 +795,29 @@ body.ficha-final #ficha-title {
     font-size: 32px;
 }
 
+/* Línea "ZX Spectrum" debajo del título */
 .ficha-platform {
-    font-size: 14px;
-    color: #aaa;
+    font-size: 16px;      /* mismo tamaño que el texto general */
+    color: #ddd;          /* mismo color que el texto de la ficha */
+    margin-bottom: 2px;   /* MUCHÍSIMO menos espacio con la puntuación */
+}
+
+/* Línea "· Puntuación: 8,8 (xxx votos)" */
+.ficha-puntuacion {
+    font-size: 16px;      /* mismo tamaño que "Aquí montaremos la ficha..." */
+    color: #ddd;          /* mismo color que ZX Spectrum */
     margin-bottom: 8px;
 }
 
+.ficha-puntuacion b {
+    color: #ddd;          /* mantiene el bold sin cambiar color */
+}
+
+/* Bloque de estrellas (lo dejamos igual de momento) */
 .ficha-rating {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.ficha-rating-value {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
 }
 
 .ficha-rating-stars {
@@ -818,6 +825,7 @@ body.ficha-final #ficha-title {
     font-size: 14px;
     letter-spacing: 2px;
 }
+
 
 /* ============================================
    FICHA FINAL - RESPONSIVE MÓVIL
