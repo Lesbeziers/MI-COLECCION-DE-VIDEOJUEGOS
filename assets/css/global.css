@@ -764,3 +764,56 @@ body.ficha-final #ficha-title {
     text-transform: none;
     margin-top: 10px;
 }
+
+/* ============================================
+   FICHA FINAL - HERO (Carátula + Info)
+============================================ */
+.ficha-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+    padding-top: 10px;
+}
+
+.ficha-hero .ficha-cover-wrapper {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.ficha-hero-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding-top: 5px;
+}
+
+.ficha-hero-info #ficha-title {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+}
+
+.ficha-platform {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.ficha-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ficha-rating-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.ficha-rating-stars {
+    color: #ff8800;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
