@@ -780,7 +780,12 @@ body.ficha-final #ficha-title {
 .ficha-hero .ficha-cover-wrapper {
     margin: 0;
     flex-shrink: 0;
+
+    /* 🔴 Reservamos el hueco de la carátula desde el principio */
+    width: 220px;      /* mismo ancho que .ficha-cover */
+    height: 320px;     /* opcional, para que también se reserve vertical */
 }
+
 
 .ficha-hero-info {
     display: flex;
