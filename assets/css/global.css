@@ -762,3 +762,6 @@ body.ficha-final #ficha-title {
     border-radius: 8px;  /* Esquinas más redondeadas */
     cursor: pointer;
 }
+body.ficha-final #ficha-title {
+    text-transform: none;
+}
