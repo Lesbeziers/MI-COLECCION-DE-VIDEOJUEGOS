@@ -383,7 +383,7 @@ function parseCSV(text) {
     if (!puntuacionEl) return;
     console.log("Puntuación del juego:", game.puntuacion);
     if (game.puntuacion && game.puntuacion.trim()) {
-        puntuacionEl.innerHTML = `· <b>Puntuación:</b> ${game.puntuacion}`;
+        puntuacionEl.innerHTML = `<b>Puntuación:</b> ${game.puntuacion}`;
     } else {
         puntuacionEl.innerHTML = "";
     }
