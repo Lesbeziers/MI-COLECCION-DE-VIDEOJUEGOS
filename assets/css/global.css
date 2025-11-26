@@ -790,8 +790,8 @@ body.ficha-final #ficha-title {
 }
 
 .ficha-hero-info #ficha-title {
-    margin: 0 0 8px 0;
-    font-size: 24px;
+    margin: -3px 0 8px 0;
+    font-size: 32px;
 }
 
 .ficha-platform {
