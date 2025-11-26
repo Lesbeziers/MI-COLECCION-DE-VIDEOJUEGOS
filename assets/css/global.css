@@ -781,9 +781,13 @@ body.ficha-final #ficha-title {
     margin: 0;
     flex-shrink: 0;
 
-    /* 🔴 Reservamos el hueco de la carátula desde el principio */
-    width: 220px;      /* mismo ancho que .ficha-cover */
-    height: 320px;     /* opcional, para que también se reserve vertical */
+    width: 220px;
+    height: 320px;
+
+    /* 🟩 AÑADE ESTO: el “rectángulo gris” */
+    background-color: #666;   /* mismo gris que las estrellas */
+    border-radius: 8px;       /* mismo redondeo que la carátula */
+    overflow: hidden;         /* por si acaso la imagen se sale un pelín */
 }
 
 
@@ -930,3 +934,4 @@ body.ficha-final.loading .ficha-cover-wrapper {
     width: auto !important;
     height: auto !important;
 }
+
