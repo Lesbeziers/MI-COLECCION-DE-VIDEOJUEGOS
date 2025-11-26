@@ -57,7 +57,7 @@
     <div class="ficha-hero-info">
         <h1 id="ficha-title">Cargando ficha...</h1>
 
-        <!-- Ocultamos estos elementos hasta que el juego esté cargado -->
+        <!-- Estos empiezan ocultos -->
         <p class="ficha-platform" style="display:none;">ZX Spectrum</p>
         <p class="ficha-puntuacion" id="ficha-puntuacion" style="display:none;"></p>
 
@@ -66,7 +66,8 @@
         </div>
     </div>
 </div>
-<!-- Eliminamos el placeholder de abajo -->
+<!-- Eliminamos el párrafo de "Aquí montaremos la ficha..." -->
+
 
 </main>
 
@@ -357,14 +358,21 @@ function parseCSV(text) {
     // ============================================
     
     function updateTitle(game) {
-        const title = game.titulo || "Juego ZX Spectrum";
-        document.title = `${title} – ZX Spectrum`;
-        
-        const h1 = document.getElementById("ficha-title");
-        if (h1) {
-            h1.textContent = title;
-        }
+    const title = game.titulo || "Juego ZX Spectrum";
+    document.title = `${title} – ZX Spectrum`;
+
+    const h1 = document.getElementById("ficha-title");
+    if (h1) {
+        h1.textContent = title;
     }
+
+    // Mostrar "ZX Spectrum" cuando ya tenemos juego
+    const platformEl = document.querySelector(".ficha-platform");
+    if (platformEl) {
+        platformEl.style.display = "block";
+    }
+}
+
 
     function updateCover(game) {
         const coverImg = document.getElementById("ficha-cover");
@@ -383,14 +391,26 @@ function parseCSV(text) {
 
     function updatePuntuacion(game) {
     const puntuacionEl = document.getElementById("ficha-puntuacion");
-    if (!puntuacionEl) return;
-    console.log("Puntuación del juego:", game.puntuacion);
-    if (game.puntuacion && game.puntuacion.trim()) {
-        puntuacionEl.innerHTML = `<b>Puntuación:</b> ${game.puntuacion}`;
+    const ratingEl = document.querySelector(".ficha-rating");
+    if (!puntuacionEl || !ratingEl) return;
+
+    const valor = (game.puntuacion || "").trim();
+    console.log("Puntuación del juego:", valor);
+
+    if (valor) {
+        // Texto completo
+        puntuacionEl.innerHTML = `<b>Puntuación:</b> ${valor}`;
+        // Mostrar línea de texto y estrellas
+        puntuacionEl.style.display = "block";
+        ratingEl.style.display = "flex";
     } else {
+        // No hay puntuación → ocultamos ambos
         puntuacionEl.innerHTML = "";
+        puntuacionEl.style.display = "none";
+        ratingEl.style.display = "none";
     }
-}   
+}
+
 
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
@@ -513,12 +533,12 @@ function parseCSV(text) {
             const game = games.find(row => row.id === gameId);
 
             if (game) {
-                updateTitle(game);
-                updateCover(game);
-                updatePuntuacion(game);
-            } else {
-                showError("Juego no encontrado");
-            }
+    updateTitle(game);
+    updateCover(game);
+    updatePuntuacion(game);
+} else {
+    showError("Juego no encontrado");
+}
 
             // Cargar lista para navegación
             await loadGamesList(gameId);
