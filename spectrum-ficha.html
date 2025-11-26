@@ -310,13 +310,16 @@
     // ============================================
 
     function updateNavCounter() {
-        const counterEl = document.querySelector(".game-nav-counter");
-        if (counterEl && currentGameIndex >= 0) {
-            const position = currentGameIndex + 1;
-            const total = sortedGamesList.length;
-            counterEl.textContent = `${position.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
-        }
+    const counterEl = document.querySelector(".game-nav-counter");
+    if (counterEl && currentGameIndex >= 0) {
+        const position = currentGameIndex + 1;
+        const total = sortedGamesList.length;
+        const counterText = `${position.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+        counterEl.textContent = counterText;
+        // Guardar en sessionStorage para la próxima carga
+        sessionStorage.setItem("navCounter", counterText);
     }
+}
 
     function setupNavigation() {
     const prevArrow = document.querySelector(".game-nav-arrow--prev");
