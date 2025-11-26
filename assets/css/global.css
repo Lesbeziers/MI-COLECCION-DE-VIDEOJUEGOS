@@ -678,7 +678,7 @@ body.ficha-final .game-nav-bar {
 }
 
 body.ficha-final main.platforms-content {
-    margin-top: 90px;
+    margin-top: 100px;
 }
 
 body.ficha-final .platforms-content {
@@ -704,9 +704,7 @@ body.ficha-final .platforms-content {
 /* ============================================
    FICHA FINAL - CABECERA COMPACTA
 ============================================ */
-body.ficha-final #ficha-title {
-    text-transform: uppercase;
-}
+
 body.ficha-final .top-bar--spectrum .top-bar-inner--ficha {
     display: flex;
     align-items: center;
@@ -738,6 +736,10 @@ body.ficha-final .game-nav-arrow {
 
 body.ficha-final .game-nav-arrow--next-real {
     transform: scaleX(-1);
+}
+
+body.ficha-final #ficha-title {
+    text-transform: uppercase;
 }
 
 /* ============================================
