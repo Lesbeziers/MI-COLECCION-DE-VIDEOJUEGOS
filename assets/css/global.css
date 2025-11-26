@@ -817,3 +817,22 @@ body.ficha-final #ficha-title {
     font-size: 14px;
     letter-spacing: 2px;
 }
+
+/* ============================================
+   FICHA FINAL - RESPONSIVE MÓVIL
+============================================ */
+@media (max-width: 600px) {
+    .ficha-hero .ficha-cover-wrapper {
+        max-width: 45%;
+    }
+
+    .ficha-final .ficha-cover {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 3 / 4;
+    }
+
+    .ficha-hero-info #ficha-title {
+        font-size: 24px;
+    }
+}
