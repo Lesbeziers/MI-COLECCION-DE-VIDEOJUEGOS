@@ -321,7 +321,7 @@
     }
 }
 
-    function setupNavigation() {
+function setupNavigation() {
     const prevArrow = document.querySelector(".game-nav-arrow--prev");
     const nextArrow = document.querySelector(".game-nav-arrow--next");
     const counterEl = document.querySelector(".game-nav-counter");
@@ -329,18 +329,41 @@
     if (prevArrow) {
         prevArrow.addEventListener("click", () => {
             if (currentGameIndex > 0) {
-                // Actualizar contador inmediatamente
+                // Actualizar contador inmediatamente y guardarlo
                 const newPosition = currentGameIndex;
                 const total = sortedGamesList.length;
+                const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
                 if (counterEl) {
-                    counterEl.textContent = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                    counterEl.textContent = counterText;
                 }
+                sessionStorage.setItem("navCounter", counterText);
+                
                 const prevGame = sortedGamesList[currentGameIndex - 1];
                 window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
             }
         });
         prevArrow.style.cursor = "pointer";
     }
+
+    if (nextArrow) {
+        nextArrow.addEventListener("click", () => {
+            if (currentGameIndex < sortedGamesList.length - 1) {
+                // Actualizar contador inmediatamente y guardarlo
+                const newPosition = currentGameIndex + 2;
+                const total = sortedGamesList.length;
+                const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                if (counterEl) {
+                    counterEl.textContent = counterText;
+                }
+                sessionStorage.setItem("navCounter", counterText);
+                
+                const nextGame = sortedGamesList[currentGameIndex + 1];
+                window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
+            }
+        });
+        nextArrow.style.cursor = "pointer";
+    }
+}
 
     if (nextArrow) {
         nextArrow.addEventListener("click", () => {
