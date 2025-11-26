@@ -762,7 +762,7 @@ body.ficha-final .game-nav-arrow--next-real {
 
 body.ficha-final #ficha-title {
     text-transform: none;
-    margin-top: 0px;
+    margin-top: -5px;
 }
 
 /* ============================================
