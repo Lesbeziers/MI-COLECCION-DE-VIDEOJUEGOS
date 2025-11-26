@@ -432,7 +432,18 @@
     // INICIALIZACIÓN
     // ============================================
     
-    document.addEventListener("DOMContentLoaded", loadSpectrumFicha);
+    document.addEventListener("DOMContentLoaded", () => {
+    // Recuperar contador guardado mientras carga
+    const savedCounter = sessionStorage.getItem("navCounter");
+    if (savedCounter) {
+        const counterEl = document.querySelector(".game-nav-counter");
+        if (counterEl) {
+            counterEl.textContent = savedCounter;
+        }
+    }
+    
+    loadSpectrumFicha();
+});
 </script>
 
     <script src="assets/js/app.js"></script>
