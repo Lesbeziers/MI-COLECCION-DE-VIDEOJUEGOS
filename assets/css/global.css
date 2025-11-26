@@ -824,7 +824,27 @@ body.ficha-final #ficha-title {
     gap: 8px;
 }
 
-/* Capa base: estrellas grises */
+/* Bloque de estrellas (rating con relleno progresivo) */
+.ficha-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Contenedor de estrellas:
+   - gris base
+   - tamaño fijo
+   - referencia para el ::before */
+#ficha-rating-stars {
+    position: relative;
+    display: inline-block;
+    font-size: 24px;      /* ← ajusta aquí si las quieres más grandes/pequeñas */
+    line-height: 1;
+    letter-spacing: 2px;  /* separa un pelín las estrellas */
+    color: #666;          /* gris base de las estrellas */
+}
+
+/* Capa de relleno coloreado, recortada por ancho */
 #ficha-rating-stars::before {
     content: "★★★★★";
     position: absolute;
@@ -840,26 +860,6 @@ body.ficha-final #ficha-title {
     /* ⭐ Animación del relleno */
     transition: width 0.6s cubic-bezier(0.15, 0.85, 0.30, 1.15);
 }
-
-
-
-
-/* Capa superior: estrellas de color, recortadas por ancho */
-#ficha-rating-stars::before {
-    content: "★★★★★";
-    position: absolute;
-    left: 0;
-    top: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    width: var(--fill, 0%);                /* porcentaje de relleno */
-    color: var(--rating-color, #00c853);   /* color según puntuación */
-    pointer-events: none;
-    z-index: 1;
-    transition: width 0.6s cubic-bezier(0.15, 0.85, 0.30, 1.15);
-}
-
-
 
 
 /* ============================================
