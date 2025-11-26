@@ -55,13 +55,13 @@
                  style="display:none;">
         </div>
         <div class="ficha-hero-info">
-            <h1 id="ficha-title">Cargando juego...</h1>
-            <p class="ficha-platform">ZX Spectrum</p>
-            <div class="ficha-rating">
-                <span class="ficha-rating-value" id="ficha-rating-value">--</span>
-                <span class="ficha-rating-stars" id="ficha-rating-stars">★★★★★</span>
-            </div>
-        </div>
+    <h1 id="ficha-title">Cargando juego...</h1>
+    <p class="ficha-platform">ZX Spectrum</p>
+    <p class="ficha-puntuacion" id="ficha-puntuacion"></p>
+    <div class="ficha-rating">
+        <span class="ficha-rating-stars" id="ficha-rating-stars">★★★★★</span>
+    </div>
+</div>
     </div>
 
     <p>Aquí montaremos la ficha completa con todos los datos.</p>
@@ -159,6 +159,7 @@
             "IMAGENES_ADICIONALES", 
             "IMÁGENES_ADICIONALES"
         ]);
+        const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
 
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
@@ -167,13 +168,14 @@
             const cols = parseCSVLine(line);
 
             rows.push({
-                id: getColumnValue(cols, idxID),
-                titulo: getColumnValue(cols, idxTit),
-                pub: getColumnValue(cols, idxPub),
-                anio: getColumnValue(cols, idxAnio),
-                caratula: getColumnValue(cols, idxCaratula),
-                imagenesAdicionales: getColumnValue(cols, idxImgAdic)
-            });
+    id: getColumnValue(cols, idxID),
+    titulo: getColumnValue(cols, idxTit),
+    pub: getColumnValue(cols, idxPub),
+    anio: getColumnValue(cols, idxAnio),
+    caratula: getColumnValue(cols, idxCaratula),
+    imagenesAdicionales: getColumnValue(cols, idxImgAdic),
+    puntuacion: getColumnValue(cols, idxPuntuacion)
+});
         }
 
         return rows;
@@ -298,6 +300,17 @@
         }
     }
 
+    function updatePuntuacion(game) {
+    const puntuacionEl = document.getElementById("ficha-puntuacion");
+    if (!puntuacionEl) return;
+
+    if (game.puntuacion && game.puntuacion.trim()) {
+        puntuacionEl.innerHTML = `· <b>Puntuación:</b> ${game.puntuacion}`;
+    } else {
+        puntuacionEl.innerHTML = "";
+    }
+}   
+
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
         if (h1) {
@@ -421,6 +434,7 @@
             if (game) {
                 updateTitle(game);
                 updateCover(game);
+                updatePuntuacion(game);
             } else {
                 showError("Juego no encontrado");
             }
