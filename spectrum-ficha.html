@@ -137,6 +137,61 @@
         return match[2] + ", " + match[1];
     }
 
+// ============================================
+// PARSER CSV GENERAL (soporta saltos de línea dentro de comillas)
+// ============================================
+function parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentField = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (ch === '"') {
+            if (inQuotes && text[i + 1] === '"') {
+                // Doble comilla dentro de campo: se convierte en una comilla
+                currentField += '"';
+                i++;
+            } else {
+                // Entramos o salimos de comillas
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === "," && !inQuotes) {
+            // Fin de campo
+            currentRow.push(currentField.trim());
+            currentField = "";
+        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+            // Fin de fila (solo si no estamos dentro de comillas)
+            // Manejo de \r\n
+            if (ch === "\r" && text[i + 1] === "\n") {
+                i++;
+            }
+            currentRow.push(currentField.trim());
+            // Evitar filas totalmente vacías
+            if (currentRow.some(v => v !== "")) {
+                rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = "";
+        } else {
+            currentField += ch;
+        }
+    }
+
+    // Último campo/fila si no termina en salto de línea
+    if (currentField.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(v => v !== "")) {
+            rows.push(currentRow);
+        }
+    }
+
+    return rows;
+}
+
+       
     // ============================================
     // PARSER CSV - FICHA (datos completos)
     // ============================================
@@ -197,41 +252,61 @@ if (thisId === debugId) {
     }
 
     // ============================================
-    // PARSER CSV - LISTA (para navegación)
+    // PARSER CSV GENERAL (soporta saltos de línea dentro de comillas)
     // ============================================
-    
-    function parseListaCSV(text) {
-        const lines = text.trim().split(/\r?\n/);
-        if (lines.length === 0) return [];
-
-        const header = parseCSVLine(lines[0]);
+    function parseCSV(text) {
         const rows = [];
+        let currentRow = [];
+        let currentField = "";
+        let inQuotes = false;
 
-        const idxID = header.indexOf("ID");
-        const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
 
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (!line.trim()) continue;
+            if (ch === '"') {
+                if (inQuotes && text[i + 1] === '"') {
+                    // Doble comilla dentro de campo: se convierte en una comilla
+                    currentField += '"';
+                    i++;
+                } else {
+                    // Entramos o salimos de comillas
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                // Fin de campo
+                currentRow.push(currentField.trim());
+                currentField = "";
+            } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+                // Fin de fila (solo si no estamos dentro de comillas)
+                if (ch === "\r" && text[i + 1] === "\n") {
+                    i++; // saltar \n después de \r
+                }
+                currentRow.push(currentField.trim());
+                // Evitar filas totalmente vacías
+                if (currentRow.some(v => v !== "")) {
+                    rows.push(currentRow);
+                }
+                currentRow = [];
+                currentField = "";
+            } else {
+                currentField += ch;
+            }
+        }
 
-            const cols = parseCSVLine(line);
-            const id = getColumnValue(cols, idxID);
-            const titulo = getColumnValue(cols, idxTitulo);
-
-            if (!titulo) continue;
-
-            const displayTitulo = formatTitleWithArticle(titulo);
-
-            rows.push({
-                id,
-                titulo,
-                displayTitulo,
-                sortKey: displayTitulo.toLowerCase()
-            });
+        // Último campo/fila si no termina en salto de línea
+        if (currentField.length > 0 || currentRow.length > 0) {
+            currentRow.push(currentField.trim());
+            if (currentRow.some(v => v !== "")) {
+                rows.push(currentRow);
+            }
         }
 
         return rows;
     }
+
+    // ============================================
+    // PARSER CSV - FICHA
+
 
     // ============================================
     // EXTRACCIÓN DE CARÁTULA
