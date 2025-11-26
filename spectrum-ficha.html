@@ -26,7 +26,7 @@
                          class="game-nav-arrow game-nav-arrow--prev"
                          alt="Anterior">
 
-                    <span class="game-nav-counter">10 / 7.800</span>
+                    <span class="game-nav-counter">- / -</span>
 
                     <img src="assets/img/ic_back.svg"
                          class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
@@ -319,29 +319,42 @@
     }
 
     function setupNavigation() {
-        const prevArrow = document.querySelector(".game-nav-arrow--prev");
-        const nextArrow = document.querySelector(".game-nav-arrow--next");
+    const prevArrow = document.querySelector(".game-nav-arrow--prev");
+    const nextArrow = document.querySelector(".game-nav-arrow--next");
+    const counterEl = document.querySelector(".game-nav-counter");
 
-        if (prevArrow) {
-            prevArrow.addEventListener("click", () => {
-                if (currentGameIndex > 0) {
-                    const prevGame = sortedGamesList[currentGameIndex - 1];
-                    window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
+    if (prevArrow) {
+        prevArrow.addEventListener("click", () => {
+            if (currentGameIndex > 0) {
+                // Actualizar contador inmediatamente
+                const newPosition = currentGameIndex;
+                const total = sortedGamesList.length;
+                if (counterEl) {
+                    counterEl.textContent = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
                 }
-            });
-            prevArrow.style.cursor = "pointer";
-        }
-
-        if (nextArrow) {
-            nextArrow.addEventListener("click", () => {
-                if (currentGameIndex < sortedGamesList.length - 1) {
-                    const nextGame = sortedGamesList[currentGameIndex + 1];
-                    window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
-                }
-            });
-            nextArrow.style.cursor = "pointer";
-        }
+                const prevGame = sortedGamesList[currentGameIndex - 1];
+                window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
+            }
+        });
+        prevArrow.style.cursor = "pointer";
     }
+
+    if (nextArrow) {
+        nextArrow.addEventListener("click", () => {
+            if (currentGameIndex < sortedGamesList.length - 1) {
+                // Actualizar contador inmediatamente
+                const newPosition = currentGameIndex + 2;
+                const total = sortedGamesList.length;
+                if (counterEl) {
+                    counterEl.textContent = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                }
+                const nextGame = sortedGamesList[currentGameIndex + 1];
+                window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
+            }
+        });
+        nextArrow.style.cursor = "pointer";
+    }
+}
 
     async function loadGamesList(gameId) {
         try {
