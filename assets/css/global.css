@@ -738,9 +738,6 @@ body.ficha-final .game-nav-arrow--next-real {
     transform: scaleX(-1);
 }
 
-body.ficha-final #ficha-title {
-    text-transform: uppercase;
-}
 
 /* ============================================
    FICHA FINAL - CARÁTULA PRINCIPAL
@@ -764,4 +761,5 @@ body.ficha-final #ficha-title {
 }
 body.ficha-final #ficha-title {
     text-transform: none;
+    margin-top: 20px;
 }
