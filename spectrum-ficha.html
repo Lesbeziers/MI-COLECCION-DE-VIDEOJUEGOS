@@ -310,77 +310,60 @@
     // ============================================
 
     function updateNavCounter() {
-    const counterEl = document.querySelector(".game-nav-counter");
-    if (counterEl && currentGameIndex >= 0) {
-        const position = currentGameIndex + 1;
-        const total = sortedGamesList.length;
-        const counterText = `${position.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
-        counterEl.textContent = counterText;
-        // Guardar en sessionStorage para la próxima carga
-        sessionStorage.setItem("navCounter", counterText);
+        const counterEl = document.querySelector(".game-nav-counter");
+        if (counterEl && currentGameIndex >= 0) {
+            const position = currentGameIndex + 1;
+            const total = sortedGamesList.length;
+            const counterText = `${position.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+            counterEl.textContent = counterText;
+            // Guardar en sessionStorage para la próxima carga
+            sessionStorage.setItem("navCounter", counterText);
+        }
     }
-}
 
-function setupNavigation() {
-    const prevArrow = document.querySelector(".game-nav-arrow--prev");
-    const nextArrow = document.querySelector(".game-nav-arrow--next");
-    const counterEl = document.querySelector(".game-nav-counter");
+    function setupNavigation() {
+        const prevArrow = document.querySelector(".game-nav-arrow--prev");
+        const nextArrow = document.querySelector(".game-nav-arrow--next");
+        const counterEl = document.querySelector(".game-nav-counter");
 
-    if (prevArrow) {
-        prevArrow.addEventListener("click", () => {
-            if (currentGameIndex > 0) {
-                // Actualizar contador inmediatamente y guardarlo
-                const newPosition = currentGameIndex;
-                const total = sortedGamesList.length;
-                const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
-                if (counterEl) {
-                    counterEl.textContent = counterText;
+        if (prevArrow) {
+            prevArrow.addEventListener("click", () => {
+                if (currentGameIndex > 0) {
+                    // Actualizar contador inmediatamente y guardarlo
+                    const newPosition = currentGameIndex;
+                    const total = sortedGamesList.length;
+                    const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                    if (counterEl) {
+                        counterEl.textContent = counterText;
+                    }
+                    sessionStorage.setItem("navCounter", counterText);
+                    
+                    const prevGame = sortedGamesList[currentGameIndex - 1];
+                    window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
                 }
-                sessionStorage.setItem("navCounter", counterText);
-                
-                const prevGame = sortedGamesList[currentGameIndex - 1];
-                window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
-            }
-        });
-        prevArrow.style.cursor = "pointer";
-    }
+            });
+            prevArrow.style.cursor = "pointer";
+        }
 
-    if (nextArrow) {
-        nextArrow.addEventListener("click", () => {
-            if (currentGameIndex < sortedGamesList.length - 1) {
-                // Actualizar contador inmediatamente y guardarlo
-                const newPosition = currentGameIndex + 2;
-                const total = sortedGamesList.length;
-                const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
-                if (counterEl) {
-                    counterEl.textContent = counterText;
+        if (nextArrow) {
+            nextArrow.addEventListener("click", () => {
+                if (currentGameIndex < sortedGamesList.length - 1) {
+                    // Actualizar contador inmediatamente y guardarlo
+                    const newPosition = currentGameIndex + 2;
+                    const total = sortedGamesList.length;
+                    const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                    if (counterEl) {
+                        counterEl.textContent = counterText;
+                    }
+                    sessionStorage.setItem("navCounter", counterText);
+                    
+                    const nextGame = sortedGamesList[currentGameIndex + 1];
+                    window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
                 }
-                sessionStorage.setItem("navCounter", counterText);
-                
-                const nextGame = sortedGamesList[currentGameIndex + 1];
-                window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
-            }
-        });
-        nextArrow.style.cursor = "pointer";
+            });
+            nextArrow.style.cursor = "pointer";
+        }
     }
-}
-
-    if (nextArrow) {
-        nextArrow.addEventListener("click", () => {
-            if (currentGameIndex < sortedGamesList.length - 1) {
-                // Actualizar contador inmediatamente
-                const newPosition = currentGameIndex + 2;
-                const total = sortedGamesList.length;
-                if (counterEl) {
-                    counterEl.textContent = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
-                }
-                const nextGame = sortedGamesList[currentGameIndex + 1];
-                window.location.href = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
-            }
-        });
-        nextArrow.style.cursor = "pointer";
-    }
-}
 
     async function loadGamesList(gameId) {
         try {
@@ -456,17 +439,17 @@ function setupNavigation() {
     // ============================================
     
     document.addEventListener("DOMContentLoaded", () => {
-    // Recuperar contador guardado mientras carga
-    const savedCounter = sessionStorage.getItem("navCounter");
-    if (savedCounter) {
-        const counterEl = document.querySelector(".game-nav-counter");
-        if (counterEl) {
-            counterEl.textContent = savedCounter;
+        // Recuperar contador guardado mientras carga
+        const savedCounter = sessionStorage.getItem("navCounter");
+        if (savedCounter) {
+            const counterEl = document.querySelector(".game-nav-counter");
+            if (counterEl) {
+                counterEl.textContent = savedCounter;
+            }
         }
-    }
-    
-    loadSpectrumFicha();
-});
+        
+        loadSpectrumFicha();
+    });
 </script>
 
     <script src="assets/js/app.js"></script>
