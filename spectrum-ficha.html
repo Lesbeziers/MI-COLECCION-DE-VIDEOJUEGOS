@@ -191,17 +191,16 @@ function parseCSV(text) {
     return rows;
 }
 
-       
+       // ============================================
+    // PARSER CSV - FICHA (datos completos) con soporte de filas partidas
     // ============================================
-    // PARSER CSV - FICHA (datos completos)
-    // ============================================
-    
     function parseSpectrumCSV(text) {
         const lines = text.trim().split(/\r?\n/);
-        if (lines.length === 0) return [];
+        if (!lines.length) return [];
 
         const header = parseCSVLine(lines[0]);
         console.log("Columnas del CSV:", header);
+        const expectedCols = header.length;
         const rows = [];
 
         const idxID = header.indexOf("ID");
@@ -210,102 +209,91 @@ function parseCSV(text) {
         const idxAnio = header.indexOf("AÑO_MOSTRAR");
         const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
         const idxImgAdic = findColumnIndex(header, [
-            "IMÁGENES", 
-            "IMAGENES", 
-            "IMAGENES_ADICIONALES", 
+            "IMÁGENES",
+            "IMAGENES",
+            "IMAGENES_ADICIONALES",
             "IMÁGENES_ADICIONALES"
         ]);
         const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
         console.log("Índice de PUNTUACIÓN:", idxPuntuacion);
-        
+
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+
+            let rawLine = lines[i];
+            let cols = parseCSVLine(rawLine);
+
+            // Si la fila viene "rota" en varias líneas (REVISTAS, SINOPSIS, etc.),
+            // vamos pegando líneas hasta tener el número correcto de columnas
+            while (cols.length < expectedCols && i + 1 < lines.length) {
+                rawLine += "\n" + lines[i + 1];
+                i++;
+                cols = parseCSVLine(rawLine);
+            }
+
+            const thisId = getColumnValue(cols, idxID);
+
+            // DEBUG opcional: dejamos "3" mientras probamos con 10th frame
+            const debugId = "3";
+            if (thisId === debugId) {
+                console.log("===== DEBUG FILA PUNTUACIÓN =====");
+                console.log("ID de la fila:", thisId);
+                console.log("Array completo de columnas:", cols);
+                console.log("Nº columnas:", cols.length);
+                console.log("Valor en índice PUNTUACIÓN (" + idxPuntuacion + "):", cols[idxPuntuacion]);
+                console.log("=================================");
+            }
+
+            rows.push({
+                id: thisId,
+                titulo: getColumnValue(cols, idxTit),
+                pub: getColumnValue(cols, idxPub),
+                anio: getColumnValue(cols, idxAnio),
+                caratula: getColumnValue(cols, idxCaratula),
+                imagenesAdicionales: getColumnValue(cols, idxImgAdic),
+                puntuacion: getColumnValue(cols, idxPuntuacion)
+            });
+        }
+
+        return rows;
+    }
+
+    // ============================================
+    // PARSER CSV - LISTA (para navegación)
+    // ============================================
+    function parseListaCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (!lines.length) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             if (!line.trim()) continue;
 
             const cols = parseCSVLine(line);
+            const id = getColumnValue(cols, idxID);
+            const titulo = getColumnValue(cols, idxTitulo);
 
-            // DEBUG PUNTUACIÓN – pon aquí el ID del juego que estás mirando en la ficha
-const debugId = "3";  // por ejemplo "3" o el que salga en la URL ?id=...
+            if (!titulo) continue;
 
-const thisId = getColumnValue(cols, idxID);
-if (thisId === debugId) {
-    console.log("===== DEBUG FILA PUNTUACIÓN =====");
-    console.log("ID de la fila:", thisId);
-    console.log("Array completo de columnas:", cols);
-    console.log("Valor en índice PUNTUACIÓN (" + idxPuntuacion + "):", cols[idxPuntuacion]);
-    console.log("=================================");
-}
-
+            const displayTitulo = formatTitleWithArticle(titulo);
 
             rows.push({
-    id: getColumnValue(cols, idxID),
-    titulo: getColumnValue(cols, idxTit),
-    pub: getColumnValue(cols, idxPub),
-    anio: getColumnValue(cols, idxAnio),
-    caratula: getColumnValue(cols, idxCaratula),
-    imagenesAdicionales: getColumnValue(cols, idxImgAdic),
-    puntuacion: getColumnValue(cols, idxPuntuacion)
-});
+                id,
+                titulo,
+                displayTitulo,
+                sortKey: displayTitulo.toLowerCase()
+            });
         }
 
         return rows;
     }
 
-    // ============================================
-    // PARSER CSV GENERAL (soporta saltos de línea dentro de comillas)
-    // ============================================
-    function parseCSV(text) {
-        const rows = [];
-        let currentRow = [];
-        let currentField = "";
-        let inQuotes = false;
-
-        for (let i = 0; i < text.length; i++) {
-            const ch = text[i];
-
-            if (ch === '"') {
-                if (inQuotes && text[i + 1] === '"') {
-                    // Doble comilla dentro de campo: se convierte en una comilla
-                    currentField += '"';
-                    i++;
-                } else {
-                    // Entramos o salimos de comillas
-                    inQuotes = !inQuotes;
-                }
-            } else if (ch === "," && !inQuotes) {
-                // Fin de campo
-                currentRow.push(currentField.trim());
-                currentField = "";
-            } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
-                // Fin de fila (solo si no estamos dentro de comillas)
-                if (ch === "\r" && text[i + 1] === "\n") {
-                    i++; // saltar \n después de \r
-                }
-                currentRow.push(currentField.trim());
-                // Evitar filas totalmente vacías
-                if (currentRow.some(v => v !== "")) {
-                    rows.push(currentRow);
-                }
-                currentRow = [];
-                currentField = "";
-            } else {
-                currentField += ch;
-            }
-        }
-
-        // Último campo/fila si no termina en salto de línea
-        if (currentField.length > 0 || currentRow.length > 0) {
-            currentRow.push(currentField.trim());
-            if (currentRow.some(v => v !== "")) {
-                rows.push(currentRow);
-            }
-        }
-
-        return rows;
-    }
-
-    // ============================================
-    // PARSER CSV - FICHA
 
 
     // ============================================
