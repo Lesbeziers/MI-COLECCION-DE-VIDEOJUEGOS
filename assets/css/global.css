@@ -857,3 +857,9 @@ body.ficha-final.loading p:not(#ficha-title) {
     display: none !important;
 }
 
+/* Título centrado solo mientras está en modo "Cargando ficha..." */
+.loading-title {
+    text-align: center;
+    width: 100%;
+    display: block;
+}
