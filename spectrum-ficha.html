@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="assets/css/global.css">
 </head>
 
-<body class="ficha-final">
+<body class="ficha-final loading">
 
     <!-- CABECERA -->
     <header class="top-bar top-bar--spectrum">
@@ -55,7 +55,7 @@
              style="display:none;">
     </div>
     <div class="ficha-hero-info">
-        <h1 id="ficha-title">Cargando ficha...</h1>
+ <h1 id="ficha-title" class="loading-title">Cargando ficha...</h1>
 
         <!-- Estos empiezan ocultos -->
         <p class="ficha-platform" style="display:none;">ZX Spectrum</p>
@@ -357,13 +357,14 @@ function parseCSV(text) {
     // ACTUALIZACIÓN DE UI
     // ============================================
     
-    function updateTitle(game) {
+function updateTitle(game) {
     const title = game.titulo || "Juego ZX Spectrum";
     document.title = `${title} – ZX Spectrum`;
 
     const h1 = document.getElementById("ficha-title");
     if (h1) {
         h1.textContent = title;
+        h1.classList.remove("loading-title");   // ① quitamos la clase del título
     }
 
     // Mostrar "ZX Spectrum" cuando ya tenemos juego
@@ -371,8 +372,10 @@ function parseCSV(text) {
     if (platformEl) {
         platformEl.style.display = "block";
     }
-}
 
+    // ② salimos del modo "loading" en todo el body
+    document.body.classList.remove("loading");
+}
 
     function updateCover(game) {
         const coverImg = document.getElementById("ficha-cover");
