@@ -825,8 +825,8 @@ body.ficha-final #ficha-title {
 
 .ficha-rating-stars {
     color: #ff8800;
-    font-size: 14px;
-    letter-spacing: 2px;
+    font-size: 28px;   /* DOBLE DE TAMAÑO */
+    letter-spacing: 3px;
 }
 
 
