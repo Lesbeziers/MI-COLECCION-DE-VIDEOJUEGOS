@@ -744,7 +744,7 @@ body.ficha-final .game-nav-arrow--next-real {
     margin-top: 12px;
     margin-bottom: 16px;
     max-width: 240px;
-    margin-left: 16px;  /* Mismo padding que top-bar-inner */
+    margin-left: 20px;  /* Mismo padding que top-bar-inner */
     margin-right: auto;
 }
 
