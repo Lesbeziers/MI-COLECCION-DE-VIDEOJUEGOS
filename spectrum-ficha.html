@@ -431,9 +431,18 @@ function updatePuntuacion(game) {
             color = "#ffd600"; // amarillo
         }
 
-        // 6) Aplicar variables CSS al span
-        starsEl.style.setProperty("--fill", porcentaje + "%");
-        starsEl.style.setProperty("--rating-color", color);
+        // 6) Aplicar variables CSS al span con animación garantizada
+
+// Primero reseteamos a 0% para que siempre haya "viaje"
+starsEl.style.setProperty("--fill", "0%");
+starsEl.style.setProperty("--rating-color", color);
+
+// Forzamos reflow para que el navegador pinte el 0%
+void starsEl.offsetWidth;
+
+// Ahora sí, llevamos el relleno al porcentaje final (se anima)
+starsEl.style.setProperty("--fill", porcentaje + "%");
+
 
     } else {
         // Sin puntuación → ocultar
