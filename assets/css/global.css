@@ -848,3 +848,12 @@ body.ficha-final #ficha-title {
         font-size: 24px;
     }
 }
+
+/* ESTADO DE CARGA DE FICHA */
+body.ficha-final.loading .ficha-platform,
+body.ficha-final.loading .ficha-puntuacion,
+body.ficha-final.loading .ficha-rating,
+body.ficha-final.loading p:not(#ficha-title) {
+    display: none !important;
+}
+
