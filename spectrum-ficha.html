@@ -392,27 +392,59 @@ function updateTitle(game) {
         }
     }
 
-    function updatePuntuacion(game) {
+function updatePuntuacion(game) {
     const puntuacionEl = document.getElementById("ficha-puntuacion");
     const ratingEl = document.querySelector(".ficha-rating");
-    if (!puntuacionEl || !ratingEl) return;
+    const starsEl = document.getElementById("ficha-rating-stars");
+    if (!puntuacionEl || !ratingEl || !starsEl) return;
 
     const valor = (game.puntuacion || "").trim();
     console.log("Puntuación del juego:", valor);
 
     if (valor) {
-        // Texto completo
+        // 1) Texto debajo de ZX Spectrum
         puntuacionEl.innerHTML = `<b>Puntuación:</b> ${valor}`;
-        // Mostrar línea de texto y estrellas
         puntuacionEl.style.display = "block";
         ratingEl.style.display = "flex";
+
+        // 2) Sacar la nota ("5,8" de "5,8 (5 votos)")
+        const match = valor.match(/^(\d+[.,]?\d*)/);
+        let nota = 0;
+        if (match) {
+            nota = parseFloat(match[1].replace(",", "."));
+        }
+
+        // 3) Clamp 0–10
+        if (isNaN(nota)) nota = 0;
+        if (nota < 0) nota = 0;
+        if (nota > 10) nota = 10;
+
+        // 4) Pasar a porcentaje 0–100
+        const porcentaje = (nota / 10) * 100;
+        console.log("Nota numérica:", nota, "→ porcentaje barra:", porcentaje);
+
+        // 5) Elegir color
+        let color = "#ff4b4b"; // rojo
+        if (nota >= 7) {
+            color = "#00c853"; // verde
+        } else if (nota >= 5) {
+            color = "#ffd600"; // amarillo
+        }
+
+        // 6) Aplicar variables CSS al span
+        starsEl.style.setProperty("--fill", porcentaje + "%");
+        starsEl.style.setProperty("--rating-color", color);
+
     } else {
-        // No hay puntuación → ocultamos ambos
+        // Sin puntuación → ocultar
         puntuacionEl.innerHTML = "";
         puntuacionEl.style.display = "none";
         ratingEl.style.display = "none";
+
+        starsEl.style.setProperty("--fill", "0%");
     }
 }
+
 
 
 
