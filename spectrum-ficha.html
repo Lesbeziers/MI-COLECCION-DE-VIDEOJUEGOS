@@ -169,6 +169,19 @@
 
             const cols = parseCSVLine(line);
 
+            // DEBUG PUNTUACIÓN – pon aquí el ID del juego que estás mirando en la ficha
+const debugId = "AQUÍ_EL_ID_DEL_JUEGO";  // por ejemplo "3" o el que salga en la URL ?id=...
+
+const thisId = getColumnValue(cols, idxID);
+if (thisId === debugId) {
+    console.log("===== DEBUG FILA PUNTUACIÓN =====");
+    console.log("ID de la fila:", thisId);
+    console.log("Array completo de columnas:", cols);
+    console.log("Valor en índice PUNTUACIÓN (" + idxPuntuacion + "):", cols[idxPuntuacion]);
+    console.log("=================================");
+}
+
+
             rows.push({
     id: getColumnValue(cols, idxID),
     titulo: getColumnValue(cols, idxTit),
