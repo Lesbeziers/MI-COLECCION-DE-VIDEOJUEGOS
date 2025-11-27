@@ -759,7 +759,7 @@ body.ficha-final #ficha-title {
     display: flex;
     align-items: flex-start;
     gap: 20px;
-    padding: 0 20px 20px 32px;
+    padding: 0 20px 20px 16px;   /* 16px para alinear con el icono Atrás */
     margin-top: 30px;
 }
 
@@ -1014,7 +1014,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
     justify-content: flex-start;
     gap: 12px;
     padding: 0;
-    margin: -5px 0 0 32px;
+    margin: -5px 0 0 16px;       /* 16px para que screenshots y carátula empiecen igual */
 }
 
 .screenshot-wrapper {
