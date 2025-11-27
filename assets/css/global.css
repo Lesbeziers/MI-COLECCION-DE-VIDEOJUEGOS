@@ -893,20 +893,32 @@ body.ficha-final #ficha-title {
 ============================================ */
 @media (max-width: 600px) {
 
+  /* 🟥 Carátula */
   .ficha-hero .ficha-cover-wrapper {
-      width: 40vw;
+      width: calc(100vw - 32px);   /* 16px izq + 16px der */
+      max-width: none;
+      margin: 0 16px;
       aspect-ratio: 220 / 320;
-      margin-left: 0;
+  }
+
+  /* 🟦 Screenshots */
+  .ficha-screenshots {
+      margin: -5px 16px 0 16px;  /* ahora margen a izquierda y derecha */
+      gap: 12px;
+      flex-wrap: wrap;           /* evita que se salgan del borde */
   }
 
   .screenshot-wrapper {
-      width: 40vw;
+      width: calc((100vw - 16px - 16px - 12px) / 2); 
+      /* 2 screenshots por fila, con gap de 12px */
   }
 
+  /* 🟧 Título reducido */
   .ficha-hero-info #ficha-title {
       font-size: 24px;
   }
 }
+
 
 
 /* ESTADO DE CARGA DE FICHA */
