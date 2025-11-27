@@ -787,17 +787,13 @@ body.ficha-final #ficha-title {
     margin: 0;
     flex-shrink: 0;
 
-    width: 220px;          /* ancho fijo del contenedor */
-    height: 320px;         /* 👉 alto fijo del contenedor */
-    background-color: #666;  /* placeholder gris */
-    border-radius: 8px;      /* igual que la carátula */
-    overflow: hidden;        /* recortar contenido */
-    position: relative;      /* necesario para placeholder */
-
-    display: flex;               /* 👉 para poder alinear contenido */
-    justify-content: flex-end;   /* 👉 imagen pegada a la derecha */
-    align-items: flex-start;     /* arriba-centro vertical (da igual, ocupa todo el alto) */
+    max-width: 220px;       /* límite de ancho */
+    background-color: #666;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
 }
+
 /* ========== SKELETON SHIMMER ========== */
 
 /* Efecto shimmer por encima del fondo gris */
