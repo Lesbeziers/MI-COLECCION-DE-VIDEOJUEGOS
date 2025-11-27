@@ -657,10 +657,53 @@ starsEl.style.setProperty("--fill", porcentaje + "%");
         }
         
         loadSpectrumFicha();
+        setupCoverModal();
     });
+       // ============================================
+// MODAL CARÁTULA
+// ============================================
+
+function setupCoverModal() {
+    const coverImg = document.getElementById("ficha-cover");
+    const modal = document.getElementById("cover-modal");
+    const modalImg = document.getElementById("cover-modal-img");
+    const closeBtn = document.querySelector(".cover-modal-close");
+
+    if (!coverImg || !modal || !modalImg || !closeBtn) return;
+
+    // Abrir modal al clicar carátula
+    coverImg.addEventListener("click", function() {
+        modalImg.src = coverImg.src;
+        modal.classList.add("active");
+    });
+
+    // Cerrar con la X
+    closeBtn.addEventListener("click", function() {
+        modal.classList.remove("active");
+    });
+
+    // Cerrar clicando fuera de la imagen
+    modal.addEventListener("click", function(e) {
+        if (e.target === modal) {
+            modal.classList.remove("active");
+        }
+    });
+
+    // Cerrar con ESC
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && modal.classList.contains("active")) {
+            modal.classList.remove("active");
+        }
+    });
+}
 </script>
 
     <script src="assets/js/app.js"></script>
 
+    <!-- MODAL CARÁTULA -->
+<div id="cover-modal" class="cover-modal">
+    <span class="cover-modal-close">&times;</span>
+    <img class="cover-modal-img" id="cover-modal-img" alt="Carátula ampliada">
+</div>
 </body>
 </html>
