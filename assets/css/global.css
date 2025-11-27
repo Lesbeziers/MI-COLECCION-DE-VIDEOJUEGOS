@@ -768,6 +768,7 @@ body.ficha-final #ficha-title {
     flex-shrink: 0;
 
     width: 200px;
+    max-width: 200px;
     aspect-ratio: 220 / 320;
     background-color: #666;
     border-radius: 8px;
