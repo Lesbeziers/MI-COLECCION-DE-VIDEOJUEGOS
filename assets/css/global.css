@@ -931,6 +931,10 @@ body.ficha-final.loading .ficha-cover-wrapper {
     display: none;
 }
 
+body.ficha-final.loading .ficha-section {
+    display: none !important;
+}
+
 /* Título solo en modo "Cargando ficha..." */
 .loading-title {
     width: 100%;
