@@ -1012,8 +1012,8 @@ body.ficha-final.loading .ficha-cover-wrapper {
     display: flex;
     justify-content: flex-start;
     gap: 12px;
-    padding: 0 20px;
-    margin-top: 16px;
+    padding: 0;
+    margin: 16px 0 0 20px;
 }
 
 .screenshot-wrapper {
