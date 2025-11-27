@@ -780,12 +780,12 @@ body.ficha-final #ficha-title {
     margin: 0;
     flex-shrink: 0;
 
-    width: 220px;          /* ancho fijo del contenedor */
-    height: 320px;         /* alto fijo del contenedor */
+    width: 280px;
+    height: 407px;
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
-    position: relative;    /* referencia para la imagen absoluta */
+    position: relative;
 }
 
 
