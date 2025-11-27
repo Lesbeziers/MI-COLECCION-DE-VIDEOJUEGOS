@@ -379,26 +379,30 @@ function updateTitle(game) {
 
     function updateCover(game) {
     const coverImg = document.getElementById("ficha-cover");
+    console.log("1. coverImg encontrado:", coverImg);
     if (!coverImg) return;
 
     const coverUrl = getCoverURL(game);
+    console.log("2. URL de carátula:", coverUrl);
 
     if (coverUrl) {
-        // Configurar el evento onload ANTES de asignar src
         coverImg.onload = function() {
-            // Calcular qué ancho tendría al escalar a 320px de alto
+            console.log("3. Imagen cargada correctamente");
+            console.log("4. Dimensiones naturales:", coverImg.naturalWidth, "x", coverImg.naturalHeight);
+            
             const aspectRatio = coverImg.naturalWidth / coverImg.naturalHeight;
             const scaledWidth = 320 * aspectRatio;
+            console.log("5. Ancho escalado:", scaledWidth);
 
             if (scaledWidth < 220) {
-                // Imagen estrecha: estirar para rellenar 220x320
+                console.log("6. Imagen ESTRECHA → aplicando fill");
                 coverImg.style.width = "100%";
                 coverImg.style.height = "100%";
                 coverImg.style.objectFit = "fill";
                 coverImg.style.left = "0";
                 coverImg.style.right = "auto";
             } else {
-                // Imagen ancha o correcta: escalar al alto, recortar exceso
+                console.log("6. Imagen ANCHA → aplicando cover");
                 coverImg.style.width = "auto";
                 coverImg.style.height = "100%";
                 coverImg.style.objectFit = "cover";
@@ -407,26 +411,19 @@ function updateTitle(game) {
             }
         };
 
+        coverImg.onerror = function() {
+            console.error("ERROR: No se pudo cargar la imagen:", coverUrl);
+        };
+
         coverImg.src = coverUrl;
         coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
         coverImg.style.display = "block";
+        console.log("7. src asignado y display:block aplicado");
     } else {
+        console.log("Sin URL de carátula");
         coverImg.style.display = "none";
     }
 }
-        const coverImg = document.getElementById("ficha-cover");
-        if (!coverImg) return;
-
-        const coverUrl = getCoverURL(game);
-
-        if (coverUrl) {
-            coverImg.src = coverUrl;
-            coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
-            coverImg.style.display = "block";
-        } else {
-            coverImg.style.display = "none";
-        }
-    }
 
 function updatePuntuacion(game) {
     const puntuacionEl = document.getElementById("ficha-puntuacion");
