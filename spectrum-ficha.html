@@ -381,16 +381,20 @@ function updateTitle(game) {
     const h1 = document.getElementById("ficha-title");
     if (h1) {
         h1.textContent = title;
-        h1.classList.remove("loading-title");   // ① quitamos la clase del título
+        h1.classList.remove("loading-title");
     }
 
-    // Mostrar "ZX Spectrum" cuando ya tenemos juego
     const platformEl = document.querySelector(".ficha-platform");
     if (platformEl) {
         platformEl.style.display = "block";
     }
 
-    // ② salimos del modo "loading" en todo el body
+    // Mostrar sección FICHA
+    const fichaSection = document.querySelector(".ficha-section");
+    if (fichaSection) {
+        fichaSection.style.display = "block";
+    }
+
     document.body.classList.remove("loading");
 }
 
