@@ -963,3 +963,45 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .ficha-cover[src] + .ficha-cover-wrapper::after {
     display: none;
 }
+
+/* ============================================
+   MODAL CARÁTULA PANTALLA COMPLETA
+============================================ */
+.cover-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.cover-modal.active {
+    display: flex;
+}
+
+.cover-modal-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.cover-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 40px;
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.cover-modal-close:hover {
+    opacity: 0.7;
+}
