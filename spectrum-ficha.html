@@ -378,6 +378,42 @@ function updateTitle(game) {
 }
 
     function updateCover(game) {
+    const coverImg = document.getElementById("ficha-cover");
+    if (!coverImg) return;
+
+    const coverUrl = getCoverURL(game);
+
+    if (coverUrl) {
+        // Configurar el evento onload ANTES de asignar src
+        coverImg.onload = function() {
+            // Calcular qué ancho tendría al escalar a 320px de alto
+            const aspectRatio = coverImg.naturalWidth / coverImg.naturalHeight;
+            const scaledWidth = 320 * aspectRatio;
+
+            if (scaledWidth < 220) {
+                // Imagen estrecha: estirar para rellenar 220x320
+                coverImg.style.width = "100%";
+                coverImg.style.height = "100%";
+                coverImg.style.objectFit = "fill";
+                coverImg.style.left = "0";
+                coverImg.style.right = "auto";
+            } else {
+                // Imagen ancha o correcta: escalar al alto, recortar exceso
+                coverImg.style.width = "auto";
+                coverImg.style.height = "100%";
+                coverImg.style.objectFit = "cover";
+                coverImg.style.left = "auto";
+                coverImg.style.right = "0";
+            }
+        };
+
+        coverImg.src = coverUrl;
+        coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
+        coverImg.style.display = "block";
+    } else {
+        coverImg.style.display = "none";
+    }
+}
         const coverImg = document.getElementById("ficha-cover");
         if (!coverImg) return;
 
