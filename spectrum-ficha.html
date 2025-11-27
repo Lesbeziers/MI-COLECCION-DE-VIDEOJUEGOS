@@ -377,9 +377,10 @@ function updateTitle(game) {
     document.body.classList.remove("loading");
 }
 
-   function updateCover(game) {
+ function updateCover(game) {
     const coverImg = document.getElementById("ficha-cover");
-    if (!coverImg) return;
+    const wrapper = document.querySelector(".ficha-cover-wrapper");
+    if (!coverImg || !wrapper) return;
 
     const coverUrl = getCoverURL(game);
 
@@ -389,20 +390,21 @@ function updateTitle(game) {
             const naturalH = coverImg.naturalHeight;
             const aspectRatio = naturalW / naturalH;
             
-            // Proporción objetivo del wrapper: 220/320 = 0.6875
-            const targetRatio = 220 / 320;
+            // Obtener tamaño REAL del wrapper (funciona en móvil y PC)
+            const wrapperWidth = wrapper.offsetWidth;
+            const wrapperHeight = wrapper.offsetHeight;
+            const targetRatio = wrapperWidth / wrapperHeight;
             
-            // Calcular qué ancho tendría al escalar a 320px de alto
-            const scaledWidth = 320 * aspectRatio;
+            // Calcular qué ancho tendría al escalar al alto del wrapper
+            const scaledWidth = wrapperHeight * aspectRatio;
 
             // ====================================
             // VALOR AJUSTABLE: compresión horizontal
             // 1.0 = sin comprimir, 0.9 = 90% del ancho, 0.85 = 85%, etc.
-            // Cuanto más bajo, más se "aprieta" y más imagen cabe
             // ====================================
-            const squeezeRatio = 0.97;
+            const squeezeRatio = 0.85;
 
-            if (scaledWidth < 220) {
+            if (scaledWidth < wrapperWidth) {
                 // Imagen MUY ESTRECHA → estirar para rellenar
                 coverImg.style.width = "100%";
                 coverImg.style.height = "100%";
