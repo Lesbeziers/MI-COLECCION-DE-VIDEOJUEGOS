@@ -896,42 +896,37 @@ body.ficha-final #ficha-title {
 ============================================ */
 @media (max-width: 600px) {
 
-  /* Guías de 16px iguales que la cabecera */
-  body.ficha-final main.platforms-content {
-      padding: 0 16px;
-  }
-
-  /* El hero no añade márgenes laterales; los da el main */
+  /* HERO alineado con el icono Atrás: 16px a cada lado */
   .ficha-hero {
-      padding: 0 0 20px 0;
+      padding: 0 16px 20px 16px;
   }
 
-  /* 🟥 Carátula = MISMO ancho que UN screenshot */
+  /* 🟥 Carátula: mismo ancho que UN screenshot */
   .ficha-hero .ficha-cover-wrapper {
-      width: 45%;
+      width: calc((100vw - 32px - 12px) / 2);
       max-width: none;
       margin: 0;
       aspect-ratio: 220 / 320;
   }
 
-  /* 🟦 Contenedor screenshots alineado entre las dos guías */
+  /* 🟦 Screenshots: mismo margen 16px a izquierda y derecha */
   .ficha-screenshots {
-      margin: -5px 0 0 0;
+      margin: -5px 16px 0 16px;
       display: flex;
-      justify-content: space-between; /* uno a la izq, otro a la der */
-      gap: 0;                          /* el hueco lo genera space-between */
+      gap: 12px;  /* separación visual entre las dos imágenes */
   }
 
-  /* Cada screenshot ocupa UNA columna igual que la carátula */
+  /* Cada screenshot = mismo ancho que la carátula */
   .screenshot-wrapper {
-      width: 45%;
+      width: calc((100vw - 32px - 12px) / 2);
   }
 
-  /* Título más pequeño */
+  /* Título un poco más pequeño en móvil */
   .ficha-hero-info #ficha-title {
       font-size: 24px;
   }
 }
+
 
 
 
