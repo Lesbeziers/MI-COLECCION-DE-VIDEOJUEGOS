@@ -928,12 +928,18 @@ body.ficha-final.loading p:not(#ficha-title) {
 
 /* Estado de carga de la ficha: centra el título */
 body.ficha-final.loading .ficha-hero {
-    justify-content: center;       /* centra horizontalmente dentro del bloque */
+    justify-content: center;
+    width: 100%;
 }
 
 body.ficha-final.loading .ficha-hero-info {
-    align-items: center;           /* centra el contenido de la columna */
-    text-align: center;            /* el texto dentro, centrado */
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+body.ficha-final.loading .ficha-cover-wrapper {
+    display: none;
 }
 
 /* Título solo en modo "Cargando ficha..." */
