@@ -266,7 +266,7 @@ function parseCSV(text) {
                 anio: getColumnValue(cols, idxAnio),
                 caratula: getColumnValue(cols, idxCaratula),
                 imagenesAdicionales: getColumnValue(cols, idxImgAdic),
-                puntuacion: getColumnValue(cols, idxPuntuacion)
+                puntuacion: getColumnValue(cols, idxPuntuacion),
                 screenshots: getColumnValue(cols, idxScreenshots) 
             });
         }
@@ -563,11 +563,6 @@ function openModal(src) {
     }
 }
 
-function showError(message) {
-    // ... función existente ...
-}
-
-
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
         if (h1) {
@@ -692,6 +687,7 @@ function showError(message) {
     updateTitle(game);
     updateCover(game);
     updatePuntuacion(game);
+    updateScreenshots(game);
 } else {
     showError("Juego no encontrado");
 }
