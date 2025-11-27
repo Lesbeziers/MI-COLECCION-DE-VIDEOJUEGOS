@@ -794,11 +794,13 @@ body.ficha-final #ficha-title {
     flex-shrink: 0;
 
     width: 220px;          /* ancho fijo del contenedor */
+    height: 320px;         /* alto fijo del contenedor */
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
-    position: relative;
+    position: relative;    /* referencia para la imagen absoluta */
 }
+
 
 
 /* ========== SKELETON SHIMMER ========== */
@@ -921,14 +923,22 @@ body.ficha-final #ficha-title {
         max-width: 45%;
     }
 
-    .ficha-final .ficha-cover {
-        height: 320px;     /* o 260px si la quieres un pelín más baja en móvil */
-        width: auto;
-        margin-left: auto;
-        border-radius: 8px;
-        cursor: pointer;
-        /* SIN aspect-ratio */
-    }
+.ficha-final .ficha-cover {
+    position: absolute;  /* dentro del wrapper */
+    right: 0;            /* pegada al borde derecho */
+    top: 0;
+
+    height: 100%;        /* ocupa todo el alto del wrapper (320px) */
+    width: auto;         /* mantiene proporción original */
+
+    display: block;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 5;          /* por encima del shimmer */
+}
+.ficha-cover {
+    position: relative;
+    z-index: 5;
 }
 
 
