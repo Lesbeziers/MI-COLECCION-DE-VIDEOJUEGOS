@@ -738,18 +738,6 @@ body.ficha-final .game-nav-arrow--next-real {
     transform: scaleX(-1);
 }
 
-
-/* ============================================
-   FICHA FINAL - CARÁTULA PRINCIPAL
-============================================ */
-.ficha-final .ficha-cover-wrapper {
-    margin-top: 12px;
-    margin-bottom: 16px;
-    max-width: 240px;
-    margin-left: 20px;  /* Mismo padding que top-bar-inner */
-    margin-right: auto;
-}
-
 .ficha-final .ficha-cover {
     position: absolute;
     top: 0;
