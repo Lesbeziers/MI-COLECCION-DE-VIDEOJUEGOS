@@ -1010,7 +1010,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 ============================================ */
 .ficha-screenshots {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 12px;
     padding: 0 20px;
     margin-top: 16px;
@@ -1018,7 +1018,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 
 .screenshot-wrapper {
     width: calc(50% - 26px);
-    max-width: 180px;
+    max-width: 220px;
     aspect-ratio: 4 / 3;
     background-color: #666;
     border-radius: 8px;
@@ -1033,7 +1033,6 @@ body.ficha-final.loading .ficha-cover-wrapper {
     cursor: pointer;
 }
 
-/* Ocultar wrapper vacío si no hay screenshot */
 .screenshot-wrapper.empty {
     background-color: #444;
 }
