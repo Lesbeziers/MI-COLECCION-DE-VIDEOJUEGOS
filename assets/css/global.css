@@ -913,32 +913,21 @@ body.ficha-final #ficha-title {
     transition: width 1.6s cubic-bezier(0.15, 0.85, 0.30, 1.15);
 }
 
-
-
 /* ============================================
    FICHA FINAL - RESPONSIVE MÓVIL
 ============================================ */
 @media (max-width: 600px) {
-    .ficha-hero .ficha-cover-wrapper {
-        max-width: 45%;
-    }
 
-.ficha-final .ficha-cover {
-    position: absolute;  /* dentro del wrapper */
-    right: 0;            /* pegada al borde derecho */
-    top: 0;
+  .ficha-hero .ficha-cover-wrapper {
+      /* La carátula ocupa aprox. el 45% del ancho de pantalla */
+      width: 45vw;
+      height: calc(45vw * 320 / 220); /* mantiene proporción 220x320 */
+      margin-left: 12px;
+  }
 
-    height: 100%;        /* ocupa todo el alto del wrapper (320px) */
-    width: auto;         /* mantiene proporción original */
-
-    display: block;
-    border-radius: 8px;
-    cursor: pointer;
-    z-index: 5;          /* por encima del shimmer */
-}
-.ficha-cover {
-    position: relative;
-    z-index: 5;
+  .ficha-hero-info #ficha-title {
+      font-size: 24px;
+  }
 }
 
 
