@@ -229,6 +229,7 @@ function parseCSV(text) {
             "IMÁGENES_ADICIONALES"
         ]);
         const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
+        const idxScreenshots = findColumnIndex(header, ["SCREENSHOTS"]);
         console.log("Índice de PUNTUACIÓN:", idxPuntuacion);
 
         for (let i = 1; i < lines.length; i++) {
@@ -266,6 +267,7 @@ function parseCSV(text) {
                 caratula: getColumnValue(cols, idxCaratula),
                 imagenesAdicionales: getColumnValue(cols, idxImgAdic),
                 puntuacion: getColumnValue(cols, idxPuntuacion)
+                screenshots: getColumnValue(cols, idxScreenshots) 
             });
         }
 
@@ -513,7 +515,57 @@ starsEl.style.setProperty("--fill", porcentaje + "%");
     }
 }
 
+// ============================================
+// SCREENSHOTS
+// ============================================
 
+function updateScreenshots(game) {
+    const screenshot1 = document.getElementById("screenshot-1");
+    const screenshot2 = document.getElementById("screenshot-2");
+    const wrapper1 = screenshot1?.parentElement;
+    const wrapper2 = screenshot2?.parentElement;
+
+    if (!screenshot1 || !screenshot2) return;
+
+    // Parsear URLs separadas por ", "
+    const screenshotsRaw = (game.screenshots || "").trim();
+    const urls = screenshotsRaw ? screenshotsRaw.split(", ").map(u => u.trim()).filter(u => u) : [];
+
+    // Screenshot 1
+    if (urls[0]) {
+        screenshot1.src = urls[0];
+        screenshot1.style.display = "block";
+        screenshot1.onclick = () => openModal(urls[0]);
+        wrapper1.classList.remove("empty");
+    } else {
+        screenshot1.style.display = "none";
+        wrapper1.classList.add("empty");
+    }
+
+    // Screenshot 2
+    if (urls[1]) {
+        screenshot2.src = urls[1];
+        screenshot2.style.display = "block";
+        screenshot2.onclick = () => openModal(urls[1]);
+        wrapper2.classList.remove("empty");
+    } else {
+        screenshot2.style.display = "none";
+        wrapper2.classList.add("empty");
+    }
+}
+
+function openModal(src) {
+    const modal = document.getElementById("cover-modal");
+    const modalImg = document.getElementById("cover-modal-img");
+    if (modal && modalImg) {
+        modalImg.src = src;
+        modal.classList.add("active");
+    }
+}
+
+function showError(message) {
+    // ... función existente ...
+}
 
 
     function showError(message) {
