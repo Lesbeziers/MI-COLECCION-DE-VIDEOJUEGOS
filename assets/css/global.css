@@ -742,7 +742,9 @@ body.ficha-final .game-nav-arrow--next-real {
     position: absolute;
     top: 0;
     left: 0;
-    height: 100%;
+    width: 100%;        /* ocupa todo el ancho del wrapper */
+    height: 100%;       /* ocupa todo el alto del wrapper */
+    object-fit: cover;  /* recorta sin deformar */
     border-radius: 8px;
     cursor: pointer;
 }
@@ -893,31 +895,36 @@ body.ficha-final #ficha-title {
 ============================================ */
 @media (max-width: 600px) {
 
-  /* 🟥 Carátula */
+  /* Carátula y texto en móvil */
+  .ficha-hero {
+      padding: 0 16px 20px 16px;   /* alineado con el icono Atrás */
+  }
+
+  /* Carátula: mismo ancho que los screenshots */
   .ficha-hero .ficha-cover-wrapper {
-      width: calc(100vw - 32px);   /* 16px izq + 16px der */
+      width: calc((100vw - 32px - 12px) / 2);  /* igual que los screenshots */
       max-width: none;
-      margin: 0 16px;
+      margin: 0;
       aspect-ratio: 220 / 320;
   }
 
-  /* 🟦 Screenshots */
+  /* Bloque de screenshots: margen 16px a ambos lados */
   .ficha-screenshots {
-      margin: -5px 16px 0 16px;  /* ahora margen a izquierda y derecha */
+      margin: -5px 16px 0 16px;  /* 16px izquierda y derecha */
       gap: 12px;
-      flex-wrap: wrap;           /* evita que se salgan del borde */
   }
 
+  /* Cada screenshot ocupa la mitad del espacio disponible */
   .screenshot-wrapper {
-      width: calc((100vw - 16px - 16px - 12px) / 2); 
-      /* 2 screenshots por fila, con gap de 12px */
+      width: calc((100vw - 32px - 12px) / 2);
   }
 
-  /* 🟧 Título reducido */
+  /* Título un poco más pequeño en móvil */
   .ficha-hero-info #ficha-title {
       font-size: 24px;
   }
 }
+
 
 
 
