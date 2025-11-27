@@ -377,50 +377,63 @@ function updateTitle(game) {
     document.body.classList.remove("loading");
 }
 
-    function updateCover(game) {
+   function updateCover(game) {
     const coverImg = document.getElementById("ficha-cover");
-    console.log("1. coverImg encontrado:", coverImg);
     if (!coverImg) return;
 
     const coverUrl = getCoverURL(game);
-    console.log("2. URL de carátula:", coverUrl);
 
     if (coverUrl) {
         coverImg.onload = function() {
-            console.log("3. Imagen cargada correctamente");
-            console.log("4. Dimensiones naturales:", coverImg.naturalWidth, "x", coverImg.naturalHeight);
+            const naturalW = coverImg.naturalWidth;
+            const naturalH = coverImg.naturalHeight;
+            const aspectRatio = naturalW / naturalH;
             
-            const aspectRatio = coverImg.naturalWidth / coverImg.naturalHeight;
+            // Proporción objetivo del wrapper: 220/320 = 0.6875
+            const targetRatio = 220 / 320;
+            
+            // Calcular qué ancho tendría al escalar a 320px de alto
             const scaledWidth = 320 * aspectRatio;
-            console.log("5. Ancho escalado:", scaledWidth);
+
+            // ====================================
+            // VALOR AJUSTABLE: compresión horizontal
+            // 1.0 = sin comprimir, 0.9 = 90% del ancho, 0.85 = 85%, etc.
+            // Cuanto más bajo, más se "aprieta" y más imagen cabe
+            // ====================================
+            const squeezeRatio = 0.85;
 
             if (scaledWidth < 220) {
-                console.log("6. Imagen ESTRECHA → aplicando fill");
+                // Imagen MUY ESTRECHA → estirar para rellenar
                 coverImg.style.width = "100%";
                 coverImg.style.height = "100%";
                 coverImg.style.objectFit = "fill";
                 coverImg.style.left = "0";
                 coverImg.style.right = "auto";
+                coverImg.style.transform = "none";
+            } else if (aspectRatio > targetRatio) {
+                // Imagen CUADRADA u HORIZONTAL → comprimir horizontalmente
+                const compressedWidth = scaledWidth * squeezeRatio;
+                coverImg.style.width = compressedWidth + "px";
+                coverImg.style.height = "100%";
+                coverImg.style.objectFit = "fill";
+                coverImg.style.left = "auto";
+                coverImg.style.right = "0";
+                coverImg.style.transform = "none";
             } else {
-                console.log("6. Imagen ANCHA → aplicando cover");
+                // Proporción CORRECTA → sin tocar
                 coverImg.style.width = "auto";
                 coverImg.style.height = "100%";
                 coverImg.style.objectFit = "cover";
                 coverImg.style.left = "auto";
                 coverImg.style.right = "0";
+                coverImg.style.transform = "none";
             }
-        };
-
-        coverImg.onerror = function() {
-            console.error("ERROR: No se pudo cargar la imagen:", coverUrl);
         };
 
         coverImg.src = coverUrl;
         coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
         coverImg.style.display = "block";
-        console.log("7. src asignado y display:block aplicado");
     } else {
-        console.log("Sin URL de carátula");
         coverImg.style.display = "none";
     }
 }
