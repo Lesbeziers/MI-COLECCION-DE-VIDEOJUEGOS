@@ -958,9 +958,8 @@ body.ficha-final.loading .ficha-cover-wrapper {
     height: auto !important;
 }
 
-/* Cuando la imagen está visible, quitamos el shimmer */
-.ficha-cover[style*="display: block"] ~ .ficha-cover-wrapper::after,
-.ficha-cover[src] + .ficha-cover-wrapper::after {
+/* Cuando la imagen está cargada, quitamos el shimmer */
+.ficha-cover-wrapper.loaded::after {
     display: none;
 }
 
