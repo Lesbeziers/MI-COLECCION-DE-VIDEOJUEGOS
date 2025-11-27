@@ -751,12 +751,10 @@ body.ficha-final .game-nav-arrow--next-real {
 }
 
 .ficha-final .ficha-cover {
-    position: absolute;   /* se posiciona dentro del wrapper */
+    position: absolute;
     top: 0;
-    right: 0;             /* pegada al borde derecho */
-    height: 100%;         /* ocupa todo el alto del wrapper (320px o el que toque) */
-    width: auto;          /* mantiene proporción */
-    display: block;
+    left: 0;
+    height: 100%;
     border-radius: 8px;
     cursor: pointer;
 }
