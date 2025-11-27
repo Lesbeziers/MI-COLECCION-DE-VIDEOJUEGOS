@@ -922,15 +922,15 @@ body.ficha-final #ficha-title {
     }
 
     .ficha-final .ficha-cover {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 3 / 4;
-    }
-
-    .ficha-hero-info #ficha-title {
-        font-size: 24px;
+        height: 320px;     /* o 260px si la quieres un pelín más baja en móvil */
+        width: auto;
+        margin-left: auto;
+        border-radius: 8px;
+        cursor: pointer;
+        /* SIN aspect-ratio */
     }
 }
+
 
 /* ESTADO DE CARGA DE FICHA */
 body.ficha-final.loading .ficha-platform,
