@@ -768,8 +768,9 @@ body.ficha-final #ficha-title {
     margin: 0;
     flex-shrink: 0;
 
-    width: 280px;
-    height: 407px;
+    width: calc(50% - 16px);
+    max-width: 280px;
+    aspect-ratio: 220 / 320;
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
@@ -894,9 +895,9 @@ body.ficha-final #ficha-title {
 @media (max-width: 600px) {
 
   .ficha-hero .ficha-cover-wrapper {
-      /* La carátula ocupa aprox. el 45% del ancho de pantalla */
-      width: 45vw;
-      height: calc(45vw * 320 / 220); /* mantiene proporción 220x320 */
+      width: calc(50% - 16px);
+      max-width: 280px;
+      aspect-ratio: 220 / 320;
       margin-left: 12px;
   }
 
