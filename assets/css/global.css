@@ -751,26 +751,13 @@ body.ficha-final .game-nav-arrow--next-real {
 }
 
 .ficha-final .ficha-cover {
-    height: 320px;      /* 🔸 la carátula se escala hasta 320px de ALTO */
-    width: auto;        /*     y mantiene su proporción original */
+    height: 100%;      /* ocupa todo el alto del wrapper (320px) */
+    width: auto;       /* mantiene proporción */
     display: block;
-    margin-left: auto;  /* 🔸 la empuja hacia la derecha dentro del wrapper */
+    margin-left: auto; /* se pega al borde derecho del wrapper */
     border-radius: 8px;
     cursor: pointer;
-
-    /* Asegúrate de que NO queda nada de esto:
-       object-fit: ...;
-       object-position: ...;
-    */
 }
-
-
-
-.ficha-cover {
-    position: relative;
-    z-index: 5;
-}
-
 
 body.ficha-final #ficha-title {
     text-transform: none;
