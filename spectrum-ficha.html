@@ -68,7 +68,7 @@
 </div>
 
 <!-- SCREENSHOTS -->
-<div class="ficha-screenshots">
+<div class="ficha-screenshots" style="display:none;">
     <div class="screenshot-wrapper">
         <img id="screenshot-1" class="screenshot-img" alt="Screenshot 1" style="display:none;">
     </div>
@@ -524,12 +524,21 @@ function updateScreenshots(game) {
     const screenshot2 = document.getElementById("screenshot-2");
     const wrapper1 = screenshot1?.parentElement;
     const wrapper2 = screenshot2?.parentElement;
+    const container = document.querySelector(".ficha-screenshots");
 
-    if (!screenshot1 || !screenshot2) return;
+    if (!screenshot1 || !screenshot2 || !container) return;
 
     // Parsear URLs separadas por ", "
     const screenshotsRaw = (game.screenshots || "").trim();
     const urls = screenshotsRaw ? screenshotsRaw.split(", ").map(u => u.trim()).filter(u => u) : [];
+
+    // Si hay al menos una URL, mostrar el contenedor
+    if (urls.length > 0) {
+        container.style.display = "flex";
+    } else {
+        container.style.display = "none";
+        return;
+    }
 
     // Screenshot 1
     if (urls[0]) {
