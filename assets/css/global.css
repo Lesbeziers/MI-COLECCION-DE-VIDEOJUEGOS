@@ -751,13 +751,19 @@ body.ficha-final .game-nav-arrow--next-real {
 }
 
 .ficha-final .ficha-cover {
-    height: 100%;     /* 👉 ocupa todo el alto del contenedor (320px) */
-    width: auto;      /* 👉 la anchura sale sola manteniendo proporción */
+    height: 320px;      /* 🔸 la carátula se escala hasta 320px de ALTO */
+    width: auto;        /*     y mantiene su proporción original */
     display: block;
+    margin-left: auto;  /* 🔸 la empuja hacia la derecha dentro del wrapper */
     border-radius: 8px;
     cursor: pointer;
-    /* sin object-fit ni object-position: el recorte lo hace el wrapper + flex */
+
+    /* Asegúrate de que NO queda nada de esto:
+       object-fit: ...;
+       object-position: ...;
+    */
 }
+
 
 
 .ficha-cover {
@@ -787,12 +793,13 @@ body.ficha-final #ficha-title {
     margin: 0;
     flex-shrink: 0;
 
-    max-width: 220px;       /* límite de ancho */
+    width: 220px;          /* ancho fijo del contenedor */
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
     position: relative;
 }
+
 
 /* ========== SKELETON SHIMMER ========== */
 
