@@ -1168,7 +1168,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
    FICHA - SINOPSIS
 ============================================ */
 .ficha-sinopsis {
-    padding: 0 16px 20px 16px;
+    padding: 0 16px 10px 16px;
     margin-top: 12px;
     margin-bottom: 12px; /* Igualar separación con la sección siguiente */
     text-align: left;
