@@ -1153,6 +1153,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 ============================================ */
 .ficha-sinopsis {
     padding: 0 16px 20px 16px;
+    margin-top: 12px;
 }
 
 .ficha-sinopsis-texto {
