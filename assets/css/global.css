@@ -797,7 +797,7 @@ body.ficha-final #ficha-title {
     overflow: hidden;
     position: relative;
     border: 2px solid #666;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 
@@ -1062,9 +1062,8 @@ body.ficha-final.loading .ficha-cover-wrapper {
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     border: 2px solid #666;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .screenshot-img {
