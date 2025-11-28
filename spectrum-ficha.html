@@ -97,7 +97,16 @@
     </div>
 </div>
 
+<!-- SECCIÓN DATOS TÉCNICOS -->
+<div class="ficha-section" id="datos-tecnicos-section" style="display:none;">
+    <h2 class="ficha-section-title">DATOS TÉCNICOS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-datos ficha-datos-tecnicos" id="ficha-datos-tecnicos">
+        <!-- Los datos se rellenan por JS -->
+    </div>
+</div>
 
+    
 </main>
 
    <script>
@@ -267,6 +276,13 @@ function parseSpectrumCSV(text) {
     const idxSubgenero = findColumnIndex(header, ["SUBGÉNERO", "SUBGENERO"]);
     const idxDistribuidoras = findColumnIndex(header, ["DISTRIBUIDORAS"]);
     const idxSinopsis = findColumnIndex(header, ["SINOPSIS"]);
+    const idxJugadores = findColumnIndex(header, ["JUGADORES"]);
+    const idxControles = findColumnIndex(header, ["CONTROLES"]);
+    const idxVersion = findColumnIndex(header, ["VERSIÓN", "VERSION"]);
+    const idxFormato = findColumnIndex(header, ["FORMATO"]);
+    const idxZx2a = findColumnIndex(header, ["ZX +2A", "ZX+2A"]);
+    const idxTspec = findColumnIndex(header, ["TSPEC"]);
+    const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
@@ -303,7 +319,15 @@ function parseSpectrumCSV(text) {
             subgenero: getColumnValue(cols, idxSubgenero),
             distribuidoras: getColumnValue(cols, idxDistribuidoras),
             // Campo Sinopsis
-            sinopsis: getColumnValue(cols, idxSinopsis)
+            sinopsis: getColumnValue(cols, idxSinopsis),
+            // Campos Datos Técnicos
+            jugadores: getColumnValue(cols, idxJugadores),
+            controles: getColumnValue(cols, idxControles),
+            version: getColumnValue(cols, idxVersion),
+            formato: getColumnValue(cols, idxFormato),
+            zx2a: getColumnValue(cols, idxZx2a),
+            tspec: getColumnValue(cols, idxTspec),
+            terminado: getColumnValue(cols, idxTerminado)
         });
     }
 
@@ -682,7 +706,41 @@ function updateSinopsis(game) {
     container.innerHTML = `<p class="ficha-sinopsis-texto">${sinopsis}</p>`;
     section.style.display = "block";
 }
-      
+
+
+// ============================================
+// DATOS TÉCNICOS
+// ============================================
+function updateDatosTecnicos(game) {
+    const section = document.getElementById("datos-tecnicos-section");
+    const container = document.getElementById("ficha-datos-tecnicos");
+    if (!section || !container) return;
+
+    const campos = [
+        { label: "· JUGADORES", value: game.jugadores },
+        { label: "· CONTROLES", value: game.controles },
+        { label: "· VERSIÓN", value: game.version },
+        { label: "· FORMATO", value: game.formato },
+        { label: "· ZX +2A", value: game.zx2a },
+        { label: "· TSPEC", value: game.tspec },
+        { label: "· TERMINADO", value: game.terminado }
+    ];
+
+    const camposConValor = campos.filter(campo => campo.value && campo.value.trim() !== "");
+
+    if (!camposConValor.length) {
+        section.style.display = "none";
+        return;
+    }
+
+    const html = camposConValor
+        .map(campo => `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${campo.value}</p>`)
+        .join("");
+
+    container.innerHTML = html;
+    section.style.display = "block";
+}
+
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
         if (h1) {
@@ -873,6 +931,7 @@ function updateSinopsis(game) {
                 updateScreenshots(game);
                 updateFichaDatos(game);
                 updateSinopsis(game);
+                updateDatosTecnicos(game);
                 } else {
                 showError("Juego no encontrado");
                 }
