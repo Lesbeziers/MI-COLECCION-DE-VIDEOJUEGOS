@@ -1084,8 +1084,14 @@ body.ficha-final.loading .ficha-cover-wrapper {
 /* ============================================
    SECCIONES DE FICHA (títulos + línea)
 ============================================ */
+/* Secciones de ficha: separación general más compacta */
 .ficha-section {
-    margin: 30px 20px 0 20px;
+    margin: 18px 20px 0 20px;   /* separa FICHA→SINOPSIS (y futuras) */
+}
+
+/* Solo la primera sección (FICHA) mantiene el margen grande desde el hero */
+.ficha-section:first-of-type {
+    margin-top: 30px;
 }
 
 .ficha-section-title {
