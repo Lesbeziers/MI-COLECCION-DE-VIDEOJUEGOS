@@ -918,8 +918,8 @@ body.ficha-final #ficha-title {
 
   /* Cada screenshot = mismo ancho que la carátula */
   .screenshot-wrapper {
-      width: calc((100% - 32px - 12px) / 2);
-  }
+    width: calc((100% - 12px) / 2 - 4px);
+}
 
   /* Título un poco más pequeño en móvil */
   .ficha-hero-info #ficha-title {
