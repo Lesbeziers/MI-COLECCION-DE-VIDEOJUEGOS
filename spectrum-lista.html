@@ -283,11 +283,16 @@
         // 🔹 Hacer que toda la tarjeta sea clicable
         // Usamos el ID que viene del CSV (columna "ID")
         card.addEventListener("click", () => {
-          if (game.id) {
-            window.location.href =
-              "spectrum-ficha.html?id=" + encodeURIComponent(game.id);
-          }
-        });
+  if (game.id) {
+    const searchInput = document.querySelector(".spectrum-search-input");
+    const query = searchInput ? searchInput.value.trim() : "";
+    let url = "spectrum-ficha.html?id=" + encodeURIComponent(game.id);
+    if (query) {
+      url += "&search=" + encodeURIComponent(query);
+    }
+    window.location.href = url;
+  }
+});
 
         // Cambiamos el cursor para que se note que es clicable
         card.style.cursor = "pointer";
