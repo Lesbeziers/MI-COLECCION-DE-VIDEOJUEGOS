@@ -716,6 +716,24 @@ function updateDatosTecnicos(game) {
     const container = document.getElementById("ficha-datos-tecnicos");
     if (!section || !container) return;
 
+    const getStatusClass = (label, value) => {
+        const normalized = (value || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        const isCompatibilityField =
+            label.includes("ZX +2A") || label.includes("THE SPECTRUM");
+
+        if (!isCompatibilityField) return "";
+
+        if (normalized === "no probado") return "status status--pending";
+        if (normalized === "no") return "status status--no";
+        if (normalized === "si") return "status status--yes";
+
+        return "";
+    };
+    
     const campos = [
         { label: "· JUGADORES", value: game.jugadores },
         { label: "· CONTROLES", value: game.controles },
@@ -734,7 +752,14 @@ function updateDatosTecnicos(game) {
     }
 
     const html = camposConValor
-        .map(campo => `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${campo.value}</p>`)
+        .map(campo => {
+            const statusClass = getStatusClass(campo.label, campo.value);
+            const valueHtml = statusClass
+                ? `<span class="${statusClass}">${campo.value}</span>`
+                : campo.value;
+
+            return `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${valueHtml}</p>`;
+        })
         .join("");
 
     container.innerHTML = html;
