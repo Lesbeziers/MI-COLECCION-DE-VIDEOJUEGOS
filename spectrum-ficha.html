@@ -25,7 +25,7 @@
              class="game-nav-arrow game-nav-arrow--prev"
              alt="Anterior">
 
-        <span class="game-nav-title">Listado juegos ZX Spectrum</span>
+        <span class="game-nav-title"></span>
 
         <img src="assets/img/ic_back.svg"
              class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
@@ -811,19 +811,31 @@ function openModal(src) {
     // ============================================
     
     document.addEventListener("DOMContentLoaded", () => {
-        // Recuperar contador guardado mientras carga
-        const savedCounter = sessionStorage.getItem("navCounter");
-        if (savedCounter) {
-            const counterEl = document.querySelector(".game-nav-counter");
-            if (counterEl) {
-                counterEl.textContent = savedCounter;
-            }
+    // Mostrar título correcto desde el inicio (evita parpadeo)
+    const titleEl = document.querySelector(".game-nav-title");
+    if (titleEl) {
+        const searchQuery = getQueryParam("search");
+        if (searchQuery) {
+            const searchCapitalized = searchQuery.charAt(0).toUpperCase() + searchQuery.slice(1).toLowerCase();
+            titleEl.textContent = `Listado juegos ${searchCapitalized}`;
+        } else {
+            titleEl.textContent = "Listado juegos ZX Spectrum";
         }
-        
-        loadSpectrumFicha();
-        setupCoverModal();
-        setupSwipeNavigation(); 
-    });
+    }
+
+    // Recuperar contador guardado mientras carga
+    const savedCounter = sessionStorage.getItem("navCounter");
+    if (savedCounter) {
+        const counterEl = document.querySelector(".game-nav-counter");
+        if (counterEl) {
+            counterEl.textContent = savedCounter;
+        }
+    }
+    
+    loadSpectrumFicha();
+    setupCoverModal();
+    setupSwipeNavigation(); 
+});
        // ============================================
 // MODAL CARÁTULA
 // ============================================
