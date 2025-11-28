@@ -903,7 +903,7 @@ body.ficha-final #ficha-title {
 
   /* 🟥 Carátula: mismo ancho que UN screenshot */
   .ficha-hero .ficha-cover-wrapper {
-      width: calc((100vw - 32px - 12px) / 2);
+      width: calc((100% - 32px - 12px) / 2);
       max-width: none;
       margin: 0;
       aspect-ratio: 220 / 320;
@@ -918,7 +918,7 @@ body.ficha-final #ficha-title {
 
   /* Cada screenshot = mismo ancho que la carátula */
   .screenshot-wrapper {
-      width: calc((100vw - 32px - 12px) / 2);
+      width: calc((100% - 32px - 12px) / 2);
   }
 
   /* Título un poco más pequeño en móvil */
