@@ -1057,7 +1057,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
     justify-content: flex-start;
     gap: 12px;
     padding: 0;
-    margin: -5px 0 0 16px;       /* 16px para que screenshots y carátula empiecen igual */
+    margin: -5px 0 26px 16px;    /* 16px para que screenshots y carátula empiecen igual */
 }
 
 .screenshot-wrapper {
@@ -1116,7 +1116,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 
   /* bloque de screenshots con margen simétrico */
   .ficha-screenshots {
-      margin: -5px 16px 0 16px;   /* 16px izq y der */
+      margin: -5px 16px 26px 16px;   /* 16px izq y der */
       display: flex;
       justify-content: flex-start;
       gap: 12px;                  /* separación entre capturas */
