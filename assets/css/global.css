@@ -1134,6 +1134,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .ficha-datos {
     padding: 10px 16px;
     text-align: left;
+    margin-bottom: 5px; /* <-- controla TODO el espacio entre FICHA y SINOPSIS */
 }
 
 .ficha-dato {
