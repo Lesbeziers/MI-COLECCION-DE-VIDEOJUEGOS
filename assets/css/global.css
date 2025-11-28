@@ -709,6 +709,7 @@ body.ficha-final .top-bar--spectrum .top-bar-inner--ficha {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    height: 73px;
 }
 
 body.ficha-final .game-nav-bar--inline {
@@ -717,7 +718,7 @@ body.ficha-final .game-nav-bar--inline {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 12px 0;
+    height: 100%;
 }
 
 body.ficha-final .game-nav-center {
