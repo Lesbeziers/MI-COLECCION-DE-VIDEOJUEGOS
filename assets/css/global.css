@@ -1151,8 +1151,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
    FICHA - SINOPSIS
 ============================================ */
 .ficha-sinopsis {
-    padding: 20px 16px;
-    text-align: left;
+    padding: 0 16px 20px 16px;
 }
 
 .ficha-sinopsis-texto {
