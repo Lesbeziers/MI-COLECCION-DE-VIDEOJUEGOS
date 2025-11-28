@@ -18,20 +18,23 @@
      alt="Atrás"
      onclick="window.location.href='spectrum-lista.html'">
 
-            <!-- Navegación juego a juego (centrada) -->
-            <div class="game-nav-bar game-nav-bar--inline">
-                <div class="game-nav-center">
-                    <img src="assets/img/ic_back.svg"
-                         class="game-nav-arrow game-nav-arrow--prev"
-                         alt="Anterior">
+           <!-- Navegación juego a juego (centrada) -->
+<div class="game-nav-bar game-nav-bar--inline">
+    <div class="game-nav-center">
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--prev"
+             alt="Anterior">
 
-                    <span class="game-nav-counter">- / -</span>
+        <span class="game-nav-title">Listado juegos ZX Spectrum</span>
 
-                    <img src="assets/img/ic_back.svg"
-                         class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
-                         alt="Siguiente">
-                </div>
-            </div>
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
+             alt="Siguiente">
+    </div>
+    <div class="game-nav-counter-line">
+        <span class="game-nav-counter">- / -</span>
+    </div>
+</div>
 
             <!-- Botón HOME (derecha) -->
             <img src="assets/img/ic_home.svg"
@@ -614,16 +617,29 @@ function openModal(src) {
     // ============================================
 
     function updateNavCounter() {
-        const counterEl = document.querySelector(".game-nav-counter");
-        if (counterEl && currentGameIndex >= 0) {
-            const position = currentGameIndex + 1;
-            const total = sortedGamesList.length;
-            const counterText = `${position.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
-            counterEl.textContent = counterText;
-            // Guardar en sessionStorage para la próxima carga
-            sessionStorage.setItem("navCounter", counterText);
+    const counterEl = document.querySelector(".game-nav-counter");
+    const titleEl = document.querySelector(".game-nav-title");
+    
+    if (counterEl && currentGameIndex >= 0) {
+        const position = currentGameIndex + 1;
+        const total = sortedGamesList.length;
+        const counterText = `${position.toLocaleString("es-ES")}/${total.toLocaleString("es-ES")}`;
+        counterEl.textContent = counterText;
+        sessionStorage.setItem("navCounter", counterText);
+    }
+    
+    // Actualizar título según si hay búsqueda o no
+    if (titleEl) {
+        const searchQuery = getQueryParam("search");
+        if (searchQuery) {
+            // Capitalizar primera letra de la búsqueda
+            const searchCapitalized = searchQuery.charAt(0).toUpperCase() + searchQuery.slice(1).toLowerCase();
+            titleEl.textContent = `Listado juegos ${searchCapitalized}`;
+        } else {
+            titleEl.textContent = "Listado juegos ZX Spectrum";
         }
     }
+}
 
     function setupNavigation() {
     const prevArrow = document.querySelector(".game-nav-arrow--prev");
