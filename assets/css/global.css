@@ -1140,3 +1140,17 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .ficha-dato-label {
     font-weight: 600;
 }
+
+/* ============================================
+   FICHA - SINOPSIS
+============================================ */
+.ficha-sinopsis {
+    padding: 20px 16px;
+    text-align: left;
+}
+
+.ficha-sinopsis-texto {
+    font-size: 16px;
+    color: #ddd;
+    line-height: 1.4;
+}
