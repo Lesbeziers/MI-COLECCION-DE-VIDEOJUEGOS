@@ -724,10 +724,11 @@ function updateDatosTecnicos(game) {
 
         const isCompatibilityField =
             label.includes("ZX +2A") || label.includes("THE SPECTRUM");
+            const isCompletionField = label.includes("TERMINADO");
 
-        if (!isCompatibilityField) return "";
+        if (!isCompatibilityField && !isCompletionField) return "";
 
-        if (normalized === "no probado") return "status status--pending";
+        if (normalized === "no probado" && isCompatibilityField) return "status status--pending";
         if (normalized === "no") return "status status--no";
         if (normalized === "si") return "status status--yes";
 
