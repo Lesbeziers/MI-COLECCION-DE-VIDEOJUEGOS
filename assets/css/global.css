@@ -1068,7 +1068,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 
 .imagenes-modal-img {
     max-width: 90%;
-    max-height: 90%;
+    max-height: 90vh;
     object-fit: contain;
     border-radius: 6px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
