@@ -88,6 +88,15 @@
     </div>
 </div>
 
+<!-- SECCIÓN SINOPSIS -->
+<div class="ficha-section" id="sinopsis-section" style="display:none;">
+    <h2 class="ficha-section-title">SINOPSIS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-sinopsis" id="ficha-sinopsis">
+        <!-- El texto se rellena por JS -->
+    </div>
+</div>
+
 
 </main>
 
@@ -257,6 +266,7 @@ function parseSpectrumCSV(text) {
     const idxGenero = findColumnIndex(header, ["GÉNERO", "GENERO"]);
     const idxSubgenero = findColumnIndex(header, ["SUBGÉNERO", "SUBGENERO"]);
     const idxDistribuidoras = findColumnIndex(header, ["DISTRIBUIDORAS"]);
+    const idxSinopsis = findColumnIndex(header, ["SINOPSIS"]);
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
@@ -283,7 +293,7 @@ function parseSpectrumCSV(text) {
             imagenesAdicionales: getColumnValue(cols, idxImgAdic),
             puntuacion: getColumnValue(cols, idxPuntuacion),
             screenshots: getColumnValue(cols, idxScreenshots),
-            // Nuevos campos
+            // Campos Ficha
             anioFicha: getColumnValue(cols, idxAnioFicha),
             editor: getColumnValue(cols, idxEditor),
             desarrollo: getColumnValue(cols, idxDesarrollo),
@@ -292,6 +302,8 @@ function parseSpectrumCSV(text) {
             genero: getColumnValue(cols, idxGenero),
             subgenero: getColumnValue(cols, idxSubgenero),
             distribuidoras: getColumnValue(cols, idxDistribuidoras)
+            // Campo Sinopsis
+            sinopsis: getColumnValue(cols, idxSinopsis)
         });
     }
 
@@ -660,6 +672,25 @@ function updateFichaDatos(game) {
     container.innerHTML = html;
     container.style.display = "block";
 }
+
+// ============================================
+// SINOPSIS
+// ============================================
+function updateSinopsis(game) {
+    const section = document.getElementById("sinopsis-section");
+    const container = document.getElementById("ficha-sinopsis");
+    if (!section || !container) return;
+
+    const sinopsis = (game.sinopsis || "").trim();
+
+    if (!sinopsis) {
+        section.style.display = "none";
+        return;
+    }
+
+    container.innerHTML = `<p class="ficha-sinopsis-texto">${sinopsis}</p>`;
+    section.style.display = "block";
+}
       
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
@@ -850,6 +881,7 @@ function updateFichaDatos(game) {
                 updatePuntuacion(game);
                 updateScreenshots(game);
                 updateFichaDatos(game);
+                updateSinopsis(game);
                 } else {
                 showError("Juego no encontrado");
                 }
