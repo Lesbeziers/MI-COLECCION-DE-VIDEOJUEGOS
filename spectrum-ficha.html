@@ -106,6 +106,19 @@
     </div>
 </div>
 
+   <!-- SECCIÓN GAMEPLAY -->
+<div class="ficha-section" id="gameplay-section" style="display:none;">
+    <h2 class="ficha-section-title">GAMEPLAY</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-gameplay" id="ficha-gameplay">
+        <div class="ficha-gameplay-frame" id="ficha-gameplay-frame">
+            <div class="ficha-gameplay-placeholder" id="ficha-gameplay-placeholder">
+                <div class="ficha-gameplay-play"></div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
     <!-- SECCIÓN IMÁGENES ADICIONALES -->
 <div class="ficha-section" id="imagenes-section" style="display:none;">
     <h2 class="ficha-section-title">IMÁGENES</h2>
@@ -315,6 +328,7 @@ function parseSpectrumCSV(text) {
     const idxZx2a = findColumnIndex(header, ["ZX +2A", "ZX+2A"]);
     const idxTspec = findColumnIndex(header, ["TSPEC"]);
     const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
+    const idxVideo = findColumnIndex(header, ["VIDEO"]);
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
@@ -475,6 +489,16 @@ function parseListaCSV(text) {
 
         return "";
     }
+
+       function getYouTubeThumbnail(embedUrl) {
+        if (!embedUrl) return "";
+        const match = embedUrl.match(/embed\/([^?&#\/]+)/);
+        if (match && match[1]) {
+            return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+        }
+        return "";
+    }
+
 
     // ============================================
     // ACTUALIZACIÓN DE UI
@@ -803,7 +827,51 @@ function updateDatosTecnicos(game) {
     section.style.display = "block";
 }
 
-       // ============================================
+// ============================================
+// GAMEPLAY
+// ============================================
+function updateGameplay(game) {
+    const section = document.getElementById("gameplay-section");
+    const frame = document.getElementById("ficha-gameplay-frame");
+    const placeholder = document.getElementById("ficha-gameplay-placeholder");
+
+    if (!section || !frame || !placeholder) return;
+
+    const videoUrl = (game.videoUrl || "").trim();
+
+    if (!videoUrl) {
+        section.style.display = "none";
+        return;
+    }
+
+    const thumbnail = getYouTubeThumbnail(videoUrl);
+    if (thumbnail) {
+        placeholder.style.backgroundImage = `url('${thumbnail}')`;
+    } else {
+        placeholder.style.backgroundImage = "";
+    }
+
+    if (!placeholder.dataset.bound) {
+        placeholder.dataset.bound = "true";
+        placeholder.addEventListener("click", () => {
+            const iframe = document.createElement("iframe");
+            const separator = videoUrl.includes("?") ? "&" : "?";
+            iframe.src = `${videoUrl}${separator}autoplay=1`;
+            iframe.className = "ficha-gameplay-iframe";
+            iframe.title = "Gameplay";
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+            iframe.allowFullscreen = true;
+            iframe.loading = "lazy";
+
+            frame.innerHTML = "";
+            frame.appendChild(iframe);
+        });
+    }
+
+    section.style.display = "block";
+}
+
+// ============================================
 // IMÁGENES ADICIONALES
 // ============================================
 function renderAdditionalImage() {
@@ -1159,6 +1227,7 @@ function updateImagenesAdicionales(game) {
                 updateFichaDatos(game);
                 updateSinopsis(game);
                 updateDatosTecnicos(game);
+                updateGameplay(game);
                 updateImagenesAdicionales(game);
                 } else {
                 showError("Juego no encontrado");
