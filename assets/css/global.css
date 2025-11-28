@@ -1148,6 +1148,22 @@ body.ficha-final.loading .ficha-cover-wrapper {
     font-weight: 600;
 }
 
+.status {
+    font-weight: 600;
+}
+
+.status--pending {
+    color: #f1c40f;
+}
+
+.status--no {
+    color: #e74c3c;
+}
+
+.status--yes {
+    color: #2ecc71;
+}
+
 /* ============================================
    FICHA - SINOPSIS
 ============================================ */
