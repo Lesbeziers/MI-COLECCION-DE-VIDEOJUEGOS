@@ -789,17 +789,18 @@ body.ficha-final #ficha-title {
 }
 
 .ficha-hero .ficha-cover-wrapper {
-    margin: 0;
-    flex-shrink: 0;
-
-    width: 200px;
-    max-width: 200px;
-    aspect-ratio: 220 / 320;
+    width: 220px;
+    height: 320px;
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
-    position: relative;
+
+    border: 2px solid #666;
+    /* ⬇️ ESTA LÍNEA GARANTIZA REDONDEADO PERFECTO DEL MARCO */
+    box-sizing: border-box;
 }
+
+
 
 
 
@@ -1060,15 +1061,17 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .screenshot-wrapper {
     width: 200px;
     aspect-ratio: 4 / 3;
+
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
+
+    border: 2px solid #666;
+    /* ⬇️ MISMA CORRECCIÓN */
+    box-sizing: border-box;
+
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-
-    /* margen interno para que se vea el macro gris */
-    padding: 6px;
 }
-
 
 .screenshot-img {
     width: 100%;
