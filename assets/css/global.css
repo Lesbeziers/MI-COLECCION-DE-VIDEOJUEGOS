@@ -714,19 +714,35 @@ body.ficha-final .top-bar--spectrum .top-bar-inner--ficha {
 body.ficha-final .game-nav-bar--inline {
     flex: 1;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
 }
 
 body.ficha-final .game-nav-center {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+body.ficha-final .game-nav-title {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+body.ficha-final .game-nav-counter-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 0px;
 }
 
 body.ficha-final .game-nav-counter {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 400;
+    color: #aaa;
     letter-spacing: 0.02em;
 }
 
