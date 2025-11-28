@@ -916,11 +916,6 @@ body.ficha-final #ficha-title {
       gap: 12px;  /* separación visual entre las dos imágenes */
   }
 
-/* Cada screenshot = mismo ancho que la carátula */
-.screenshot-wrapper {
-  width: calc((100% - 12px) / 2);
-}
-
   /* Título un poco más pequeño en móvil */
   .ficha-hero-info #ficha-title {
       font-size: 24px;
