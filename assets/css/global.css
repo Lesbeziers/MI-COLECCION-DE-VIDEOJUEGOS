@@ -916,9 +916,9 @@ body.ficha-final #ficha-title {
       gap: 12px;  /* separación visual entre las dos imágenes */
   }
 
-  /* Cada screenshot = mismo ancho que la carátula */
-  .screenshot-wrapper {
-    width: calc((100% - 12px) / 2 - 4px);
+/* Cada screenshot = mismo ancho que la carátula */
+.screenshot-wrapper {
+  width: calc((100% - 12px) / 2);
 }
 
   /* Título un poco más pequeño en móvil */
@@ -1094,11 +1094,9 @@ body.ficha-final.loading .ficha-cover-wrapper {
       justify-content: flex-start;
       gap: 12px;                  /* separación entre capturas */
   }
-
-  /* cada screenshot = misma anchura, dejando aire a la derecha */
+   
+  /* cada screenshot = misma anchura que la carátula */
   .ficha-screenshots .screenshot-wrapper {
-      width: calc((100% - 12px) / 2 - 4px);
-      /* si ves demasiado margen, prueba con -2px; 
-         si sigue muy pegado, -6px u -8px */
-  }
+      width: calc((100% - 12px) / 2);
+}
 }
