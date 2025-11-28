@@ -599,7 +599,7 @@ body:not(.spectrum-lista):not(.ficha-final) main.platforms-content {
     border-radius: 6px;
     overflow: hidden;
     background-color: #3a3a3a;
-    border: 2px solid #666;
+    /*border: 2px solid #666;*/
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
