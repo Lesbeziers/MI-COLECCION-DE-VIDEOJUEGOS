@@ -615,6 +615,52 @@ function openModal(src) {
     }
 }
 
+function openModal(src) {
+    const modal = document.getElementById("cover-modal");
+    const modalImg = document.getElementById("cover-modal-img");
+    if (modal && modalImg) {
+        modalImg.src = src;
+        modal.classList.add("active");
+    }
+}
+
+// ============================================
+// DATOS DE LA FICHA
+// ============================================
+function updateFichaDatos(game) {
+    const container = document.getElementById("ficha-datos");
+    if (!container) return;
+
+    // Definir los campos a mostrar (etiqueta, valor)
+    const campos = [
+        { label: "AÑO", value: game.anioFicha },
+        { label: "EDITOR", value: game.editor },
+        { label: "DESARROLLO", value: game.desarrollo },
+        { label: "AUTOR", value: game.autor },
+        { label: "CONTRIBUCIONES", value: game.contribuciones },
+        { label: "GÉNERO", value: game.genero },
+        { label: "SUBGÉNERO", value: game.subgenero },
+        { label: "DISTRIBUIDORAS", value: game.distribuidoras }
+    ];
+
+    // Filtrar solo los que tienen valor
+    const camposConValor = campos.filter(c => c.value && c.value.trim() !== "");
+
+    if (camposConValor.length === 0) {
+        container.style.display = "none";
+        return;
+    }
+
+    // Generar HTML
+    let html = "";
+    camposConValor.forEach(campo => {
+        html += `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${campo.value}</p>`;
+    });
+
+    container.innerHTML = html;
+    container.style.display = "block";
+}
+      
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
         if (h1) {
