@@ -83,6 +83,9 @@
 <div class="ficha-section">
     <h2 class="ficha-section-title">FICHA</h2>
     <div class="ficha-section-line"></div>
+    <div class="ficha-datos" id="ficha-datos" style="display:none;">
+        <!-- Los datos se rellenan por JS -->
+    </div>
 </div>
 
 
@@ -219,74 +222,81 @@ function parseCSV(text) {
     return rows;
 }
 
-       // ============================================
-    // PARSER CSV - FICHA (datos completos) con soporte de filas partidas
-    // ============================================
-    function parseSpectrumCSV(text) {
-        const lines = text.trim().split(/\r?\n/);
-        if (!lines.length) return [];
+// ============================================
+// PARSER CSV - FICHA (datos completos) con soporte de filas partidas
+// ============================================
+function parseSpectrumCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (!lines.length) return [];
 
-        const header = parseCSVLine(lines[0]);
-        console.log("Columnas del CSV:", header);
-        const expectedCols = header.length;
-        const rows = [];
+    const header = parseCSVLine(lines[0]);
+    console.log("Columnas del CSV:", header);
+    const expectedCols = header.length;
+    const rows = [];
 
-        const idxID = header.indexOf("ID");
-        const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
-        const idxPub = header.indexOf("PUBLISHER_MOSTRAR");
-        const idxAnio = header.indexOf("AÑO_MOSTRAR");
-        const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
-        const idxImgAdic = findColumnIndex(header, [
-            "IMÁGENES",
-            "IMAGENES",
-            "IMAGENES_ADICIONALES",
-            "IMÁGENES_ADICIONALES"
-        ]);
-        const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
-        const idxScreenshots = findColumnIndex(header, ["SCREENSHOTS"]);
-        console.log("Índice de PUNTUACIÓN:", idxPuntuacion);
+    const idxID = header.indexOf("ID");
+    const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
+    const idxPub = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio = header.indexOf("AÑO_MOSTRAR");
+    const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
+    const idxImgAdic = findColumnIndex(header, [
+        "IMÁGENES",
+        "IMAGENES",
+        "IMAGENES_ADICIONALES",
+        "IMÁGENES_ADICIONALES"
+    ]);
+    const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
+    const idxScreenshots = findColumnIndex(header, ["SCREENSHOTS"]);
+    
+    // Nuevos campos para la sección FICHA
+    const idxAnioFicha = findColumnIndex(header, ["AÑO"]);
+    const idxEditor = findColumnIndex(header, ["PUBLISHER"]);
+    const idxDesarrollo = findColumnIndex(header, ["DESARROLLADOR"]);
+    const idxAutor = findColumnIndex(header, ["AUTOR"]);
+    const idxContribuciones = findColumnIndex(header, ["CONTRIBUCIONES"]);
+    const idxGenero = findColumnIndex(header, ["GÉNERO", "GENERO"]);
+    const idxSubgenero = findColumnIndex(header, ["SUBGÉNERO", "SUBGENERO"]);
+    const idxDistribuidoras = findColumnIndex(header, ["DISTRIBUIDORAS"]);
 
-        for (let i = 1; i < lines.length; i++) {
-            if (!lines[i].trim()) continue;
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
 
-            let rawLine = lines[i];
-            let cols = parseCSVLine(rawLine);
+        let rawLine = lines[i];
+        let cols = parseCSVLine(rawLine);
 
-            // Si la fila viene "rota" en varias líneas (REVISTAS, SINOPSIS, etc.),
-            // vamos pegando líneas hasta tener el número correcto de columnas
-            while (cols.length < expectedCols && i + 1 < lines.length) {
-                rawLine += "\n" + lines[i + 1];
-                i++;
-                cols = parseCSVLine(rawLine);
-            }
-
-            const thisId = getColumnValue(cols, idxID);
-
-            // DEBUG opcional: dejamos "3" mientras probamos con 10th frame
-            const debugId = "3";
-            if (thisId === debugId) {
-                console.log("===== DEBUG FILA PUNTUACIÓN =====");
-                console.log("ID de la fila:", thisId);
-                console.log("Array completo de columnas:", cols);
-                console.log("Nº columnas:", cols.length);
-                console.log("Valor en índice PUNTUACIÓN (" + idxPuntuacion + "):", cols[idxPuntuacion]);
-                console.log("=================================");
-            }
-
-            rows.push({
-                id: thisId,
-                titulo: getColumnValue(cols, idxTit),
-                pub: getColumnValue(cols, idxPub),
-                anio: getColumnValue(cols, idxAnio),
-                caratula: getColumnValue(cols, idxCaratula),
-                imagenesAdicionales: getColumnValue(cols, idxImgAdic),
-                puntuacion: getColumnValue(cols, idxPuntuacion),
-                screenshots: getColumnValue(cols, idxScreenshots) 
-            });
+        // Si la fila viene "rota" en varias líneas (REVISTAS, SINOPSIS, etc.),
+        // vamos pegando líneas hasta tener el número correcto de columnas
+        while (cols.length < expectedCols && i + 1 < lines.length) {
+            rawLine += "\n" + lines[i + 1];
+            i++;
+            cols = parseCSVLine(rawLine);
         }
 
-        return rows;
+        const thisId = getColumnValue(cols, idxID);
+
+        rows.push({
+            id: thisId,
+            titulo: getColumnValue(cols, idxTit),
+            pub: getColumnValue(cols, idxPub),
+            anio: getColumnValue(cols, idxAnio),
+            caratula: getColumnValue(cols, idxCaratula),
+            imagenesAdicionales: getColumnValue(cols, idxImgAdic),
+            puntuacion: getColumnValue(cols, idxPuntuacion),
+            screenshots: getColumnValue(cols, idxScreenshots),
+            // Nuevos campos
+            anioFicha: getColumnValue(cols, idxAnioFicha),
+            editor: getColumnValue(cols, idxEditor),
+            desarrollo: getColumnValue(cols, idxDesarrollo),
+            autor: getColumnValue(cols, idxAutor),
+            contribuciones: getColumnValue(cols, idxContribuciones),
+            genero: getColumnValue(cols, idxGenero),
+            subgenero: getColumnValue(cols, idxSubgenero),
+            distribuidoras: getColumnValue(cols, idxDistribuidoras)
+        });
     }
+
+    return rows;
+}
 
     // ============================================
     // PARSER CSV - LISTA (para navegación)
@@ -788,14 +798,15 @@ function openModal(src) {
             const games = parseSpectrumCSV(text);
             const game = games.find(row => row.id === gameId);
 
-            if (game) {
-    updateTitle(game);
-    updateCover(game);
-    updatePuntuacion(game);
-    updateScreenshots(game);
-} else {
-    showError("Juego no encontrado");
-}
+                if (game) {
+                updateTitle(game);
+                updateCover(game);
+                updatePuntuacion(game);
+                updateScreenshots(game);
+                updateFichaDatos(game);
+                } else {
+                showError("Juego no encontrado");
+                }
 
             // Cargar lista para navegación
             await loadGamesList(gameId);
