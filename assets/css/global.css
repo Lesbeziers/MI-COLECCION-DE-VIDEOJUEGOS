@@ -796,7 +796,7 @@ body.ficha-final #ficha-title {
     border-radius: 8px;
     overflow: hidden;
     position: relative;
-    border: 2px solid #666;
+    /*border: 2px solid #666;*/
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -1062,7 +1062,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
     background-color: #666;
     border-radius: 8px;
     overflow: hidden;
-    border: 2px solid #666;
+    /*border: 2px solid #666;*/
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
