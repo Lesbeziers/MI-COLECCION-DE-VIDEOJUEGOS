@@ -155,6 +155,13 @@
         return match[2] + ", " + match[1];
     }
 
+    function normalizeText(str) {
+    return (str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
 // ============================================
 // PARSER CSV GENERAL (soporta saltos de línea dentro de comillas)
 // ============================================
@@ -281,38 +288,53 @@ function parseCSV(text) {
     // ============================================
     // PARSER CSV - LISTA (para navegación)
     // ============================================
-    function parseListaCSV(text) {
-        const lines = text.trim().split(/\r?\n/);
-        if (!lines.length) return [];
+    // ============================================
+// PARSER CSV - LISTA (para navegación)
+// ============================================
+function parseListaCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (!lines.length) return [];
 
-        const header = parseCSVLine(lines[0]);
-        const rows = [];
+    const header = parseCSVLine(lines[0]);
+    const rows = [];
 
-        const idxID = header.indexOf("ID");
-        const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+    const idxID     = header.indexOf("ID");
+    const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+    const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio   = header.indexOf("AÑO_MOSTRAR");
+    const idxAutor  = header.indexOf("AUTOR_MOSTRAR");
+    const idxDes    = header.indexOf("DESARROLLO");
+    const idxContr  = header.indexOf("CONTRIBUCIONES");
+    const idxGenero = header.indexOf("GENERO_MOSTRAR");
 
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (!line.trim()) continue;
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
 
-            const cols = parseCSVLine(line);
-            const id = getColumnValue(cols, idxID);
-            const titulo = getColumnValue(cols, idxTitulo);
+        const cols = parseCSVLine(line);
+        const id     = getColumnValue(cols, idxID);
+        const titulo = getColumnValue(cols, idxTitulo);
 
-            if (!titulo) continue;
+        if (!titulo) continue;
 
-            const displayTitulo = formatTitleWithArticle(titulo);
+        const displayTitulo = formatTitleWithArticle(titulo);
 
-            rows.push({
-                id,
-                titulo,
-                displayTitulo,
-                sortKey: displayTitulo.toLowerCase()
-            });
-        }
-
-        return rows;
+        rows.push({
+            id,
+            titulo,
+            displayTitulo,
+            sortKey: displayTitulo.toLowerCase(),
+            pub:    getColumnValue(cols, idxPub),
+            anio:   getColumnValue(cols, idxAnio),
+            autor:  getColumnValue(cols, idxAutor),
+            des:    getColumnValue(cols, idxDes),
+            contr:  getColumnValue(cols, idxContr),
+            genero: getColumnValue(cols, idxGenero)
+        });
     }
+
+    return rows;
+}
 
 
 
@@ -648,33 +670,74 @@ function openModal(src) {
     }
 
     async function loadGamesList(gameId) {
-        try {
-            const response = await fetch(ZX_LISTA_CSV_URL);
-            if (!response.ok) {
-                throw new Error("No se pudo cargar la lista");
-            }
-
-            const text = await response.text();
-            const games = parseListaCSV(text);
-
-            // Ordenar alfabéticamente
-            games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
-
-            sortedGamesList = games;
-
-            // Encontrar posición del juego actual
-            currentGameIndex = games.findIndex(g => g.id === gameId);
-
-            // Actualizar contador
-            updateNavCounter();
-
-            // Configurar flechas
-            setupNavigation();
-
-        } catch (err) {
-            console.error("Error cargando lista para navegación:", err);
+    try {
+        const response = await fetch(ZX_LISTA_CSV_URL);
+        if (!response.ok) {
+            throw new Error("No se pudo cargar la lista");
         }
+
+        const text = await response.text();
+        const games = parseListaCSV(text);
+
+        // Ordenar alfabéticamente
+        games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+        // Comprobar si hay filtro de búsqueda
+        const searchQuery = getQueryParam("search");
+        
+        let filteredGames = games;
+        
+        if (searchQuery) {
+            const qNorm = normalizeText(searchQuery);
+            
+            // Comprobar si es búsqueda por letra (ej: "B+")
+            const letterMatch = searchQuery.match(/^([a-zñáéíóúü])\+$/i);
+            
+            if (letterMatch) {
+                const letter = normalizeText(letterMatch[1]);
+                filteredGames = games.filter(game => {
+                    const titleNorm = normalizeText(game.sortKey || "");
+                    return titleNorm.startsWith(letter);
+                });
+            } else {
+                // Búsqueda normal en todos los campos
+                filteredGames = games.filter(game => {
+                    const titleNorm = normalizeText(game.sortKey || "");
+                    const pubNorm = normalizeText(game.pub || "");
+                    const yearNorm = normalizeText(game.anio || "");
+                    const autorNorm = normalizeText(game.autor || "");
+                    const desNorm = normalizeText(game.des || "");
+                    const contrNorm = normalizeText(game.contr || "");
+                    const generoNorm = normalizeText(game.genero || "");
+
+                    return (
+                        titleNorm.includes(qNorm) ||
+                        pubNorm.includes(qNorm) ||
+                        yearNorm.includes(qNorm) ||
+                        autorNorm.includes(qNorm) ||
+                        desNorm.includes(qNorm) ||
+                        contrNorm.includes(qNorm) ||
+                        generoNorm.includes(qNorm)
+                    );
+                });
+            }
+        }
+
+        sortedGamesList = filteredGames;
+
+        // Encontrar posición del juego actual
+        currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
+
+        // Actualizar contador
+        updateNavCounter();
+
+        // Configurar flechas
+        setupNavigation();
+
+    } catch (err) {
+        console.error("Error cargando lista para navegación:", err);
     }
+}
 
     // ============================================
     // CARGA PRINCIPAL
