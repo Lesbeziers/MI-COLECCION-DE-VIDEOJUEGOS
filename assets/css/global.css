@@ -723,11 +723,11 @@ body.ficha-final .game-nav-center {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 6px;
+    margin-top: 0;
 }
 
 body.ficha-final .game-nav-title {
-    color: #fff;
+    color: #ff8800;
     font-size: 17px;
     font-weight: 500;
     white-space: nowrap;
