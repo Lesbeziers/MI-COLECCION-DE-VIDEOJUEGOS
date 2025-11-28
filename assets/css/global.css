@@ -936,7 +936,7 @@ body.ficha-final #ficha-title {
 
   /* 🟦 Screenshots: mismo margen 16px a izquierda y derecha */
   .ficha-screenshots {
-      margin: -5px 16px 0 16px;
+      margin: -5px 16px 26px 16px;
       display: flex;
       gap: 12px;  /* separación visual entre las dos imágenes */
   }
