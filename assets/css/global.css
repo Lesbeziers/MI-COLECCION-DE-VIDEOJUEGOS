@@ -1311,16 +1311,12 @@ body.ficha-final.loading .ficha-cover-wrapper {
 
 
 .utiles-button--active:hover .utiles-icon,
-.utiles-button--active:active .utiles-icon
-.utiles-button--active.is-pressed .utiles-icon,
-.utiles-button--active:focus-visible .utiles-icon {
+.utiles-button--active.is-pressed .utiles-icon {
     border-radius: 50%;
 }
 
 .utiles-button--active:hover .utiles-icon::after,
-.utiles-button--active:active .utiles-icon::after,
-.utiles-button--active.is-pressed .utiles-icon::after,
-.utiles-button--active:focus-visible .utiles-icon::after {
+.utiles-button--active.is-pressed .utiles-icon::after {
     opacity: 1;
     transform: scale(1);
 }
@@ -1332,6 +1328,14 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .utiles-button:focus,
 .utiles-button:active {
     outline: none;
+}
+
+.utiles-button--active:focus {
+    outline: none;
+}
+
+.utiles-button--active:focus .utiles-icon::after {
+    opacity: 0;
 }
 
 @media (max-width: 600px) {
