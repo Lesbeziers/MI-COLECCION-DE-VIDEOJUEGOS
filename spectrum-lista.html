@@ -74,61 +74,7 @@
   // Lista global con TODOS los juegos (para el buscador)
   let allGames = [];
 
-  // =========================================
-  // TAP SIN HIGHLIGHT (usado en tarjetas)
-  // =========================================
-  function bindTapAction(element, handler) {
-    if (!element || typeof handler !== "function") return;
-
-    const MOVE_THRESHOLD = 8;
-    let touchStart = null;
-    let lastTouchTime = 0;
-
-    element.classList.add("no-tap-highlight");
-
-    element.addEventListener("touchstart", (event) => {
-      const touch = event.touches[0];
-      touchStart = {
-        x: touch.clientX,
-        y: touch.clientY,
-        moved: false,
-      };
-    }, { passive: true });
-
-    element.addEventListener("touchmove", (event) => {
-      if (!touchStart) return;
-      const touch = event.touches[0];
-      if (Math.abs(touch.clientX - touchStart.x) > MOVE_THRESHOLD ||
-          Math.abs(touch.clientY - touchStart.y) > MOVE_THRESHOLD) {
-        touchStart.moved = true;
-      }
-    }, { passive: true });
-
-    element.addEventListener("touchend", (event) => {
-      if (!touchStart) return;
-      const touch = event.changedTouches[0];
-      const movedTooMuch = touchStart.moved ||
-        Math.abs(touch.clientX - touchStart.x) > MOVE_THRESHOLD ||
-        Math.abs(touch.clientY - touchStart.y) > MOVE_THRESHOLD;
-
-      touchStart = null;
-      if (movedTooMuch) return;
-
-      lastTouchTime = Date.now();
-      event.preventDefault();
-      handler(event);
-    }, { passive: false });
-
-    element.addEventListener("touchcancel", () => {
-      touchStart = null;
-    });
-
-    element.addEventListener("click", (event) => {
-      if (Date.now() - lastTouchTime < 500) return;
-      handler(event);
-    });
-  }
-
+ 
   // =========================================
   // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
   // =========================================
@@ -267,7 +213,7 @@
   // =========================================
   function createGameCard(game) {
     const card = document.createElement("article");
-   card.className = "zx-card no-tap-highlight";
+    card.className = "zx-card";
 
     // --- Thumb ---
     const thumbWrapper = document.createElement("div");
@@ -340,7 +286,7 @@
 
         // 🔹 Hacer que toda la tarjeta sea clicable
         // Usamos el ID que viene del CSV (columna "ID")
-       bindTapAction(card, () => {
+        card.addEventListener("click", () => {
   if (game.id) {
     const searchInput = document.querySelector(".spectrum-search-input");
     const query = searchInput ? searchInput.value.trim() : "";
