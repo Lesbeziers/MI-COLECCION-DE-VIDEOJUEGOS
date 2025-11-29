@@ -1195,7 +1195,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    gap: 8px;
+    gap: 0;
 }
 
 .utiles-circle {
@@ -1205,15 +1205,14 @@ body.ficha-final.loading .ficha-cover-wrapper {
     border: 2px solid #bbb;
     background-color: transparent;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+    margin-bottom: 14px;
 }
 
 .utiles-label {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
-    color: #ccc;
-    text-transform: uppercase;
+    color: #ddd;
     text-align: center;
-    letter-spacing: 0.02em;
 }
 
 .utiles-button--active {
@@ -1226,10 +1225,18 @@ body.ficha-final.loading .ficha-cover-wrapper {
 }
 
 .utiles-button--inactive .utiles-circle {
-    opacity: 0.4;
+    opacity: 0.2;
 }
 
 .utiles-button--active .utiles-circle {
+    opacity: 1;
+}
+
+.utiles-button--inactive .utiles-label {
+    opacity: 0.2;
+}
+
+.utiles-button--active .utiles-label {
     opacity: 1;
 }
 
@@ -1243,6 +1250,11 @@ body.ficha-final.loading .ficha-cover-wrapper {
     color: #ff8800;
 }
 
+.utiles-button:focus,
+.utiles-button:active {
+    outline: none;
+}
+
 @media (max-width: 600px) {
   .utiles-buttons-row {
       gap: 22px;
@@ -1253,9 +1265,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
       height: 86px;
   }
 
-  .utiles-label {
-      font-size: 13px;
-  }
+
 }
 
 /* ============================================
