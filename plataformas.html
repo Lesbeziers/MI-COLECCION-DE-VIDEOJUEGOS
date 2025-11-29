@@ -301,8 +301,29 @@
 
     </div>
 </section>
-        
+    
     </main>
+    
+<script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const applyPressHandlers = (elements) => {
+                elements.forEach(el => {
+                    const setPressed = () => el.classList.add("is-pressed");
+                    const clearPressed = () => {
+                        el.classList.remove("is-pressed");
+                        el.blur();
+                    };
+
+                    el.addEventListener("pointerdown", setPressed);
+                    ["pointerup", "pointerleave", "pointercancel", "lostpointercapture", "blur"].forEach(evt => {
+                        el.addEventListener(evt, clearPressed);
+                    });
+                });
+            };
+
+            applyPressHandlers(document.querySelectorAll(".platform-card"));
+        });
+    </script>
 
 </body>
 </html>
