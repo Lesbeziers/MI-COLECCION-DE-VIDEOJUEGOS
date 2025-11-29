@@ -189,6 +189,7 @@
     let additionalImages = [];
     let additionalImageIndex = 0;
     let additionalImagesKeydownBound = false;
+    let modalAbierta = false;
 
     // ============================================
     // UTILIDADES
@@ -1101,6 +1102,7 @@ function changeAdditionalImage(step) {
 
     additionalImageIndex = (additionalImageIndex + step + additionalImages.length) % additionalImages.length;
     renderAdditionalImage();
+    modalAbierta = true;
 }
 
 function openAdditionalImagesModal() {
@@ -1116,6 +1118,7 @@ function closeAdditionalImagesModal() {
     if (modal) {
         modal.classList.remove("active");
     }
+    modalAbierta = false;
 }
 
 function setupAdditionalImagesModalControls() {
@@ -1135,6 +1138,12 @@ function setupAdditionalImagesModalControls() {
             if (e.target === modal) {
                 closeAdditionalImagesModal();
             }
+        });
+
+        ["touchstart", "touchmove", "touchend"].forEach(eventName => {
+            modal.addEventListener(eventName, (e) => {
+                e.stopPropagation();
+            }, { passive: true });
         });
     }
 
@@ -1170,10 +1179,12 @@ function setupAdditionalImagesModalControls() {
     if (modal && !modal.dataset.swipeBound) {
         modal.dataset.swipeBound = "true";
         modal.addEventListener("touchstart", (e) => {
+            e.stopPropagation();
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
         modal.addEventListener("touchend", (e) => {
+            e.stopPropagation();
             touchEndX = e.changedTouches[0].screenX;
             const distance = touchEndX - touchStartX;
 
@@ -1632,24 +1643,33 @@ function setupCoverModal() {
     coverImg.addEventListener("click", function() {
         modalImg.src = coverImg.src;
         modal.classList.add("active");
+        modalAbierta = true;
     });
 
     // Cerrar con la X
     closeBtn.addEventListener("click", function() {
         modal.classList.remove("active");
+        modalAbierta = false;
     });
 
     // Cerrar clicando fuera de la imagen
     modal.addEventListener("click", function(e) {
         if (e.target === modal) {
             modal.classList.remove("active");
+            modalAbierta = false;
         }
+    });
+     ["touchstart", "touchmove", "touchend"].forEach(eventName => {
+        modal.addEventListener(eventName, (e) => {
+            e.stopPropagation();
+        }, { passive: true });
     });
 
     // Cerrar con ESC
     document.addEventListener("keydown", function(e) {
         if (e.key === "Escape" && modal.classList.contains("active")) {
             modal.classList.remove("active");
+            modalAbierta = false;
         }
     });
 }
@@ -1675,6 +1695,7 @@ function setupSwipeNavigation() {
     }, { passive: true });
 
     function handleSwipe() {
+        if (modalAbierta) return;
         const distance = touchEndX - touchStartX;
 
         if (Math.abs(distance) < minSwipeDistance) return;
