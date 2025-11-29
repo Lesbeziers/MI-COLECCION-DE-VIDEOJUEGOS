@@ -172,7 +172,7 @@ p {
 .stat-circle::after {
     content: "";
     position: absolute;
-    inset: 0%;
+    inset: 5%;
     border-radius: 50%;
     box-shadow: 0 0 14px 10px rgba(255, 136, 0, 0.28);
     opacity: 0;
