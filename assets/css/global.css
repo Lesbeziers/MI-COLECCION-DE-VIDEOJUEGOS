@@ -1217,7 +1217,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
     overflow: visible;
     overflow: visible;
     transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-    margin-bottom: 14px;
+    margin-bottom: 5px;
 }
 
 .utiles-icon::after {
