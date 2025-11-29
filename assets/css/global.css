@@ -1223,11 +1223,11 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .utiles-icon::after {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: -8px;
     border-radius: 50%;
-    box-shadow: 0 0 14px rgba(255, 136, 0, 0.35);
+    box-shadow: 0 0 18px 10px rgba(255, 136, 0, 0.35);
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.95);
     transition: opacity 0.25s ease, transform 0.25s ease;
     pointer-events: none;
 }
@@ -1290,7 +1290,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .utiles-button--active:active .utiles-icon::after,
 .utiles-button--active:focus-visible .utiles-icon::after {
     opacity: 1;
-    transform: scale(0.8);
+    transform: scale(1);
 }
 
 .utiles-button--active:hover .utiles-label {
