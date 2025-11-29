@@ -12,66 +12,6 @@
     box-sizing: border-box;
 }
 
-/* ============================================
-   AJUSTES DE INTERACCIÓN EN ENTORNOS TÁCTILES
-   Sustituye el foco azul por un halo negro
-   discreto en iconos y tarjetas interactivas
-============================================ */
-/* Marca genérica para elementos que gestionan su tap vía JS */
-.no-tap-highlight {
-    -webkit-tap-highlight-color: transparent;
-}
-
-.no-tap-highlight:focus {
-    outline: none;
-}
-
-@media (hover: none) and (pointer: coarse) {
-    .platform-card,
-    .spectrum-lista a,
-    .spectrum-lista button,
-    .spectrum-lista .zx-card,
-    .spectrum-lista .top-bar-back,
-    .spectrum-lista .top-bar-home,
-    .spectrum-ficha a,
-    .spectrum-ficha button,
-    .spectrum-ficha .top-bar-back,
-    .spectrum-ficha .top-bar-home,
-    .spectrum-ficha .utiles-button--active,
-    .spectrum-ficha .game-nav-arrow {
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.35);
-        outline-color: rgba(0, 0, 0, 0.6);
-        outline-offset: 3px;
-    }
-
-    .platform-card:focus,
-    .platform-card:active,
-    .spectrum-lista a:focus,
-    .spectrum-lista a:active,
-    .spectrum-lista button:focus,
-    .spectrum-lista button:active,
-    .spectrum-lista .zx-card:focus,
-    .spectrum-lista .zx-card:active,
-    .spectrum-lista .top-bar-back:focus,
-    .spectrum-lista .top-bar-back:active,
-    .spectrum-lista .top-bar-home:focus,
-    .spectrum-lista .top-bar-home:active,
-    .spectrum-ficha a:focus,
-    .spectrum-ficha a:active,
-    .spectrum-ficha button:focus,
-    .spectrum-ficha button:active,
-    .spectrum-ficha .top-bar-back:focus,
-    .spectrum-ficha .top-bar-back:active,
-    .spectrum-ficha .top-bar-home:focus,
-    .spectrum-ficha .top-bar-home:active,
-    .spectrum-ficha .utiles-button--active:focus,
-    .spectrum-ficha .utiles-button--active:active,
-    .spectrum-ficha .game-nav-arrow:focus,
-    .spectrum-ficha .game-nav-arrow:active {
-        outline: 2px solid rgba(0, 0, 0, 0.6);
-        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.18);
-    }
-}
 
 html,
 body {
