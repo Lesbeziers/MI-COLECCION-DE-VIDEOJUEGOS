@@ -137,6 +137,13 @@
     </div>
 </div>
 
+<!-- SECCIÓN REVISTAS -->
+<div class="ficha-section" id="revistas-section" style="display:none;">
+    <h2 class="ficha-section-title">REVISTAS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-revistas" id="ficha-revistas"></div>
+</div>
+
 
     
 </main>
@@ -284,7 +291,29 @@ function parseCSV(text) {
         .filter(line => line !== "");
 }
 
+function parseRevistasList(text) {
+    return (text || "")
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line !== "")
+        .map(line => {
+            const markdownMatch = line.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+            if (markdownMatch) {
+                return {
+                    texto: markdownMatch[1].trim(),
+                    url: markdownMatch[2].trim()
+                };
+            }
 
+            return {
+                texto: line,
+                url: ""
+            };
+        })
+        .filter(entry => entry.texto);
+}
+
+       
 // ============================================
 // PARSER CSV - FICHA (datos completos) con soporte de filas partidas
 // ============================================
@@ -329,6 +358,7 @@ function parseSpectrumCSV(text) {
     const idxTspec = findColumnIndex(header, ["TSPEC"]);
     const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
     const idxVideo = findColumnIndex(header, ["VIDEO"]);
+    const idxRevistas = findColumnIndex(header, ["REVISTAS"]);
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
@@ -378,7 +408,9 @@ function parseSpectrumCSV(text) {
             zx2a: getColumnValue(cols, idxZx2a),
             tspec: getColumnValue(cols, idxTspec),
             terminado: getColumnValue(cols, idxTerminado),
-            videoUrl: getColumnValue(cols, idxVideo)
+            videoUrl: getColumnValue(cols, idxVideo),
+            revistasTexto: getColumnValue(cols, idxRevistas),
+            revistas: parseRevistasList(getColumnValue(cols, idxRevistas))
         });
     }
 
@@ -1166,6 +1198,72 @@ function updateImagenesAdicionales(game) {
     renderAdditionalImage();
 }
 
+function splitRevistaTexto(texto) {
+    const separator = " - ";
+    const idx = texto.indexOf(separator);
+
+    if (idx >= 0) {
+        return {
+            titulo: texto.slice(0, idx).trim(),
+            detalle: texto.slice(idx + separator.length).trim()
+        };
+    }
+
+    return {
+        titulo: (texto || "").trim(),
+        detalle: ""
+    };
+}
+
+function updateRevistas(game) {
+    const section = document.getElementById("revistas-section");
+    const container = document.getElementById("ficha-revistas");
+    if (!section || !container) return;
+
+    const revistas = Array.isArray(game.revistas)
+        ? game.revistas
+        : parseRevistasList(game.revistasTexto);
+
+    const revistasValidas = (revistas || []).filter(entry => entry && entry.texto);
+
+    if (!revistasValidas.length) {
+        section.style.display = "none";
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = "";
+
+    revistasValidas.forEach((entry) => {
+        const { titulo, detalle } = splitRevistaTexto(entry.texto || "");
+
+        const linea = document.createElement("p");
+        linea.className = "ficha-revista-item";
+
+        const enlace = entry.url ? document.createElement("a") : document.createElement("span");
+        enlace.className = "ficha-revista-link";
+        if (entry.url) {
+            enlace.href = entry.url;
+            enlace.target = "_blank";
+            enlace.rel = "noopener noreferrer";
+        }
+
+        enlace.appendChild(document.createTextNode("· "));
+
+        const strong = document.createElement("strong");
+        strong.textContent = titulo;
+        enlace.appendChild(strong);
+
+        if (detalle) {
+            enlace.appendChild(document.createTextNode(` – ${detalle}`));
+        }
+
+        linea.appendChild(enlace);
+        container.appendChild(linea);
+    });
+
+    section.style.display = "block";
+}
 
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
@@ -1385,6 +1483,7 @@ function attachVoiceStopToNavigation() {
                 updateDatosTecnicos(game);
                 updateGameplay(game);
                 updateImagenesAdicionales(game);
+                updateRevistas(game);
                 } else {
                 showError("Juego no encontrado");
                 }
