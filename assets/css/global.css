@@ -207,6 +207,7 @@ p {
 
 .stat-block:hover .stat-circle::after,
 .stat-block:active .stat-circle::after,
+.stat-block.is-pressed .stat-circle::after,
 .stat-block:focus-visible .stat-circle::after {
     opacity: 1;
     transform: scale(1);
@@ -337,6 +338,14 @@ p {
 .platform-card .stat-label {
     font-size: 14px;
     white-space: nowrap;
+}
+
+.platform-card:hover .stat-circle::after,
+.platform-card:active .stat-circle::after,
+.platform-card.is-pressed .stat-circle::after,
+.platform-card:focus-visible .stat-circle::after {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .platform-card:hover .platform-icon-circle {
@@ -1302,13 +1311,15 @@ body.ficha-final.loading .ficha-cover-wrapper {
 
 
 .utiles-button--active:hover .utiles-icon,
-.utiles-button--active:active .utiles-icon,
+.utiles-button--active:active .utiles-icon
+.utiles-button--active.is-pressed .utiles-icon,
 .utiles-button--active:focus-visible .utiles-icon {
     border-radius: 50%;
 }
 
 .utiles-button--active:hover .utiles-icon::after,
 .utiles-button--active:active .utiles-icon::after,
+.utiles-button--active.is-pressed .utiles-icon::after,
 .utiles-button--active:focus-visible .utiles-icon::after {
     opacity: 1;
     transform: scale(1);
