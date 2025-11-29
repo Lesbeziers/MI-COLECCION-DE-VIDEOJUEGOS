@@ -597,68 +597,75 @@ function updateTitle(game) {
     document.body.classList.remove("loading");
 }
 
- function updateCover(game) {
+function updateCover(game) {
     const coverImg = document.getElementById("ficha-cover");
     const wrapper = document.querySelector(".ficha-cover-wrapper");
     if (!coverImg || !wrapper) return;
 
-    const coverUrl = getCoverURL(game);
+  const fallbackCover = "assets/img/CaratulaNoDisponible.png";
+    const coverUrl = (getCoverURL(game) || "").trim();
+    const hasValidCover = coverUrl && coverUrl.toLowerCase() !== "null";
+    const finalCoverUrl = hasValidCover ? coverUrl : fallbackCover;
 
-    if (coverUrl) {
-        coverImg.onload = function() {
-            const naturalW = coverImg.naturalWidth;
-            const naturalH = coverImg.naturalHeight;
-            const aspectRatio = naturalW / naturalH;
-            
-            // Obtener tamaño REAL del wrapper (funciona en móvil y PC)
-            const wrapperWidth = wrapper.offsetWidth;
-            const wrapperHeight = wrapper.offsetHeight;
-            const targetRatio = wrapperWidth / wrapperHeight;
-            
-            // Calcular qué ancho tendría al escalar al alto del wrapper
-            const scaledWidth = wrapperHeight * aspectRatio;
+    coverImg.onload = function() {
+        const naturalW = coverImg.naturalWidth;
+        const naturalH = coverImg.naturalHeight;
+        const aspectRatio = naturalW / naturalH;
 
-            // ====================================
-            // VALOR AJUSTABLE: compresión horizontal
-            // 1.0 = sin comprimir, 0.9 = 90% del ancho, 0.85 = 85%, etc.
-            // ====================================
-            const squeezeRatio = 0.97;
+        // Obtener tamaño REAL del wrapper (funciona en móvil y PC)
+        const wrapperWidth = wrapper.offsetWidth;
+        const wrapperHeight = wrapper.offsetHeight;
+        const targetRatio = wrapperWidth / wrapperHeight;
 
-            if (scaledWidth < wrapperWidth) {
-                // Imagen MUY ESTRECHA → estirar para rellenar
-                coverImg.style.width = "100%";
-                coverImg.style.height = "100%";
-                coverImg.style.objectFit = "fill";
-                coverImg.style.left = "0";
-                coverImg.style.right = "auto";
-                coverImg.style.transform = "none";
-            } else if (aspectRatio > targetRatio) {
-                // Imagen CUADRADA u HORIZONTAL → comprimir horizontalmente
-                const compressedWidth = scaledWidth * squeezeRatio;
-                coverImg.style.width = compressedWidth + "px";
-                coverImg.style.height = "100%";
-                coverImg.style.objectFit = "fill";
-                coverImg.style.left = "auto";
-                coverImg.style.right = "0";
-                coverImg.style.transform = "none";
-            } else {
-                // Proporción CORRECTA → sin tocar
-                coverImg.style.width = "auto";
-                coverImg.style.height = "100%";
-                coverImg.style.objectFit = "cover";
-                coverImg.style.left = "auto";
-                coverImg.style.right = "0";
-                coverImg.style.transform = "none";
-            }
-            wrapper.classList.add("loaded");
-        };
+        // Calcular qué ancho tendría al escalar al alto del wrapper
+        const scaledWidth = wrapperHeight * aspectRatio;
 
-        coverImg.src = coverUrl;
-        coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
-        coverImg.style.display = "block";
-    } else {
-        coverImg.style.display = "none";
-    }
+        // ====================================
+        // VALOR AJUSTABLE: compresión horizontal
+        // 1.0 = sin comprimir, 0.9 = 90% del ancho, 0.85 = 85%, etc.
+        // ====================================
+        const squeezeRatio = 0.97;
+
+        if (scaledWidth < wrapperWidth) {
+            // Imagen MUY ESTRECHA → estirar para rellenar
+            coverImg.style.width = "100%";
+            coverImg.style.height = "100%";
+            coverImg.style.objectFit = "fill";
+            coverImg.style.left = "0";
+            coverImg.style.right = "auto";
+            coverImg.style.transform = "none";
+        } else if (aspectRatio > targetRatio) {
+            // Imagen CUADRADA u HORIZONTAL → comprimir horizontalmente
+            const compressedWidth = scaledWidth * squeezeRatio;
+            coverImg.style.width = compressedWidth + "px";
+            coverImg.style.height = "100%";
+            coverImg.style.objectFit = "fill";
+            coverImg.style.left = "auto";
+            coverImg.style.right = "0";
+            coverImg.style.transform = "none";
+        } else {
+            // Proporción CORRECTA → sin tocar
+            coverImg.style.width = "auto";
+            coverImg.style.height = "100%";
+            coverImg.style.objectFit = "cover";
+            coverImg.style.left = "auto";
+            coverImg.style.right = "0";
+            coverImg.style.transform = "none";
+        }
+        wrapper.classList.add("loaded");
+    };
+
+       coverImg.onerror = function() {
+        const fallbackAbsolute = new URL(fallbackCover, window.location.href).href;
+        if (coverImg.src !== fallbackAbsolute) {
+            coverImg.onerror = null;
+            coverImg.src = fallbackCover;
+        }
+    };
+
+       coverImg.src = finalCoverUrl;
+    coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
+    coverImg.style.display = "block";
 }
 
 function updatePuntuacion(game) {
