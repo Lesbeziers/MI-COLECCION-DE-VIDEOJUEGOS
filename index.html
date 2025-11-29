@@ -48,6 +48,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Elemento donde pondremos el número
     const countEl = document.getElementById("platform-count");
     if (!countEl) return;
+  
+    const applyPressHandlers = (elements) => {
+        elements.forEach(el => {
+            const setPressed = () => el.classList.add("is-pressed");
+            const clearPressed = () => {
+                el.classList.remove("is-pressed");
+                el.blur();
+            };
+
+            el.addEventListener("pointerdown", setPressed);
+            ["pointerup", "pointerleave", "pointercancel", "lostpointercapture", "blur"].forEach(evt => {
+                el.addEventListener(evt, clearPressed);
+            });
+        });
+    };
+
+    applyPressHandlers(document.querySelectorAll(".stat-block"));
 
     try {
         // Cargar plataformas.html como texto
