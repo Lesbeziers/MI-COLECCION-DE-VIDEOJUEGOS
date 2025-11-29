@@ -335,6 +335,10 @@ p {
     margin: 0 auto 4px auto;
 }
 
+.platform-icon-circle::after {
+    inset: 10%;
+}
+
 .platform-card .stat-label {
     font-size: 14px;
     white-space: nowrap;
