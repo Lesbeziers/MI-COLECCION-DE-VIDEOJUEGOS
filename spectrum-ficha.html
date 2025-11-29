@@ -145,7 +145,30 @@
 </div>
 
 
-    
+   <!-- SECCIÓN ÚTILES -->
+<div class="ficha-section" id="utiles-section" style="display:none;">
+    <h2 class="ficha-section-title">ÚTILES</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-utiles" id="ficha-utiles">
+        <div class="utiles-buttons-row">
+            <div class="utiles-button" data-type="mapa">
+                <div class="utiles-circle"></div>
+                <div class="utiles-label">MAPA</div>
+            </div>
+            <div class="utiles-button" data-type="instrucciones">
+                <div class="utiles-circle"></div>
+                <div class="utiles-label">INSTRUCCIONES</div>
+            </div>
+            <div class="utiles-button" data-type="enlace">
+                <div class="utiles-circle"></div>
+                <div class="utiles-label">ENLACE</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+ 
 </main>
 
    <script>
@@ -212,6 +235,11 @@
 
     function getColumnValue(cols, idx) {
         return idx >= 0 && cols[idx] !== undefined ? cols[idx].trim() : "";
+    }
+       
+function normalizeUrlValue(value) {
+        const trimmed = (value || "").trim();
+        return trimmed ? trimmed : "";
     }
 
     function formatTitleWithArticle(title) {
@@ -359,6 +387,9 @@ function parseSpectrumCSV(text) {
     const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
     const idxVideo = findColumnIndex(header, ["VIDEO"]);
     const idxRevistas = findColumnIndex(header, ["REVISTAS"]);
+    const idxMapa = findColumnIndex(header, ["MAPA"]);
+    const idxInstrucciones = findColumnIndex(header, ["INSTRUCCIONES"]);
+    const idxEnlace = findColumnIndex(header, ["LINK"]);
 
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
@@ -410,7 +441,10 @@ function parseSpectrumCSV(text) {
             terminado: getColumnValue(cols, idxTerminado),
             videoUrl: getColumnValue(cols, idxVideo),
             revistasTexto: getColumnValue(cols, idxRevistas),
-            revistas: parseRevistasList(getColumnValue(cols, idxRevistas))
+            revistas: parseRevistasList(getColumnValue(cols, idxRevistas)),
+            mapaUrl: normalizeUrlValue(getColumnValue(cols, idxMapa)),
+            instruccionesUrl: normalizeUrlValue(getColumnValue(cols, idxInstrucciones)),
+            enlaceUrl: normalizeUrlValue(getColumnValue(cols, idxEnlace))
         });
     }
 
@@ -1265,6 +1299,51 @@ function updateRevistas(game) {
     section.style.display = "block";
 }
 
+       function updateUtiles(game) {
+    const section = document.getElementById("utiles-section");
+    const container = document.getElementById("ficha-utiles");
+    if (!section || !container) return;
+
+    const items = [
+        { key: "mapa", label: "MAPA", url: game.mapaUrl },
+        { key: "instrucciones", label: "INSTRUCCIONES", url: game.instruccionesUrl },
+        { key: "enlace", label: "ENLACE", url: game.enlaceUrl }
+    ];
+
+    container.innerHTML = "";
+
+    const row = document.createElement("div");
+    row.className = "utiles-buttons-row";
+
+    items.forEach(item => {
+        const hasUrl = !!(item.url && item.url.trim());
+        const element = document.createElement(hasUrl ? "a" : "div");
+        element.className = "utiles-button " + (hasUrl ? "utiles-button--active" : "utiles-button--inactive");
+        element.dataset.type = item.key;
+
+        if (hasUrl) {
+            element.href = item.url;
+            element.target = "_blank";
+            element.rel = "noopener noreferrer";
+        }
+
+        const circle = document.createElement("div");
+        circle.className = "utiles-circle";
+
+        const label = document.createElement("div");
+        label.className = "utiles-label";
+        label.textContent = item.label;
+
+        element.appendChild(circle);
+        element.appendChild(label);
+        row.appendChild(element);
+    });
+
+    container.appendChild(row);
+    section.style.display = "block";
+}
+
+
     function showError(message) {
         const h1 = document.getElementById("ficha-title");
         if (h1) {
@@ -1484,6 +1563,7 @@ function attachVoiceStopToNavigation() {
                 updateGameplay(game);
                 updateImagenesAdicionales(game);
                 updateRevistas(game);
+                updateUtiles(game);
                 } else {
                 showError("Juego no encontrado");
                 }
