@@ -1223,11 +1223,11 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .utiles-icon::after {
     content: "";
     position: absolute;
-    inset: -8px;
+    inset: 0;
     border-radius: 50%;
-    box-shadow: 0 0 18px 10px rgba(255, 136, 0, 0.35);
+    box-shadow: 0 0 14px 10px rgba(255, 136, 0, 0.28);
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.98);
     transition: opacity 0.25s ease, transform 0.25s ease;
     pointer-events: none;
 }
