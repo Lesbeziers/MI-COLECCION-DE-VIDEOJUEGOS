@@ -771,6 +771,8 @@ body.ficha-final .game-nav-arrow--next-real {
     object-fit: cover;
     border-radius: 8px;
     cursor: pointer;
+       -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
 
 
@@ -1143,6 +1145,8 @@ body.ficha-final.loading .ficha-cover-wrapper {
     height: 100%;
     object-fit: cover;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
 
 .screenshot-wrapper.empty {
