@@ -150,17 +150,17 @@
     <h2 class="ficha-section-title">ÚTILES</h2>
     <div class="ficha-section-line"></div>
     <div class="ficha-utiles" id="ficha-utiles">
-        <div class="utiles-buttons-row">
+            <div class="utiles-buttons-row">
             <div class="utiles-button" data-type="mapa">
-                <div class="utiles-circle"></div>
+                <div class="utiles-icon"></div>
                 <div class="utiles-label">MAPA</div>
             </div>
             <div class="utiles-button" data-type="instrucciones">
-                <div class="utiles-circle"></div>
+                <div class="utiles-icon"></div>
                 <div class="utiles-label">INSTRUCCIONES</div>
             </div>
             <div class="utiles-button" data-type="enlace">
-                <div class="utiles-circle"></div>
+                <div class="utiles-icon"></div>
                 <div class="utiles-label">ENLACE</div>
             </div>
         </div>
@@ -1341,7 +1341,7 @@ function updateRevistas(game) {
         }
 
         const circle = document.createElement("div");
-        circle.className = "utiles-circle";
+        circle.className = "utiles-icon";
 
         const label = document.createElement("div");
         label.className = "utiles-label";
