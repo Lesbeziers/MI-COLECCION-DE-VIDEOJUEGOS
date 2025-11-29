@@ -1207,13 +1207,27 @@ body.ficha-final.loading .ficha-cover-wrapper {
     width: 77px;
     height: 77px;
     display: block;
+    position: relative;
+    border-radius: 50%;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% 100%;
+    overflow: visible;
     transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
     margin-bottom: 14px;
 }
 
+.utiles-icon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 14px rgba(255, 136, 0, 0.35);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+}
 .utiles-button[data-type="mapa"] .utiles-icon {
     background-image: url("../icons/ic_mapa.svg");
 }
@@ -1259,9 +1273,21 @@ body.ficha-final.loading .ficha-cover-wrapper {
 }
 
 .utiles-button--active:hover .utiles-icon {
-    box-shadow: 0 0 14px rgba(255, 136, 0, 0.35);
     transform: translateY(-3px) scale(1.02);
 }
+.utiles-button--active:hover .utiles-icon,
+.utiles-button--active:active .utiles-icon,
+.utiles-button--active:focus-visible .utiles-icon {
+    border-radius: 50%;
+}
+
+.utiles-button--active:hover .utiles-icon::after,
+.utiles-button--active:active .utiles-icon::after,
+.utiles-button--active:focus-visible .utiles-icon::after {
+    opacity: 1;
+    transform: scale(0.8);
+}
+
 
 .utiles-button--active:hover .utiles-label {
     color: #ff8800;
