@@ -17,6 +17,15 @@
    Sustituye el foco azul por un halo negro
    discreto en iconos y tarjetas interactivas
 ============================================ */
+/* Marca genérica para elementos que gestionan su tap vía JS */
+.no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.no-tap-highlight:focus {
+    outline: none;
+}
+
 @media (hover: none) and (pointer: coarse) {
     .platform-card,
     .spectrum-lista a,
