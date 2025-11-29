@@ -14,8 +14,8 @@
 
 /* ============================================
    AJUSTES DE INTERACCIÓN EN ENTORNOS TÁCTILES
-   Evita el destello azul de foco/tap en iconos
-   y tarjetas interactivas de Spectrum y listas
+   Sustituye el foco azul por un halo negro
+   discreto en iconos y tarjetas interactivas
 ============================================ */
 @media (hover: none) and (pointer: coarse) {
     .platform-card,
@@ -30,7 +30,9 @@
     .spectrum-ficha .top-bar-home,
     .spectrum-ficha .utiles-button--active,
     .spectrum-ficha .game-nav-arrow {
-        -webkit-tap-highlight-color: transparent;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.35);
+        outline-color: rgba(0, 0, 0, 0.6);
+        outline-offset: 3px;
     }
 
     .platform-card:focus,
@@ -57,7 +59,8 @@
     .spectrum-ficha .utiles-button--active:active,
     .spectrum-ficha .game-nav-arrow:focus,
     .spectrum-ficha .game-nav-arrow:active {
-        outline: none;
+        outline: 2px solid rgba(0, 0, 0, 0.6);
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.18);
     }
 }
 
