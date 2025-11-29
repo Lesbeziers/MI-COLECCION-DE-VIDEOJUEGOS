@@ -1363,10 +1363,19 @@ function updateRevistas(game) {
                 element.addEventListener(evt, clearPressed);
             });
 
-            const clearFocus = () => element.blur();
-            element.addEventListener("mouseup", clearFocus);
-            element.addEventListener("mouseleave", clearFocus);
-            element.addEventListener("touchend", clearFocus);
+            // Limpiar estado después de hacer clic (para enlaces externos)
+            element.addEventListener("click", () => {
+                setTimeout(() => {
+                    element.classList.remove("is-pressed");
+                    element.blur();
+                }, 100);
+            });
+
+            element.addEventListener("mouseup", clearPressed);
+            element.addEventListener("mouseleave", clearPressed);
+            element.addEventListener("touchend", () => {
+                setTimeout(clearPressed, 100);
+            });
         }
     });
 
