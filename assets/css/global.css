@@ -1203,14 +1203,27 @@ body.ficha-final.loading .ficha-cover-wrapper {
     gap: 0;
 }
 
-.utiles-circle {
+.utiles-icon {
     width: 77px;
     height: 77px;
-    border-radius: 50%;
-    border: 2px solid #bbb;
-    background-color: transparent;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
     margin-bottom: 14px;
+}
+
+.utiles-button[data-type="mapa"] .utiles-icon {
+    background-image: url("../icons/ic_mapa.svg");
+}
+
+.utiles-button[data-type="instrucciones"] .utiles-icon {
+    background-image: url("../icons/ic_instrucciones.svg");
+}
+
+.utiles-button[data-type="enlace"] .utiles-icon {
+    background-image: url("../icons/ic_enlace.svg");
 }
 
 .utiles-label {
@@ -1229,11 +1242,11 @@ body.ficha-final.loading .ficha-cover-wrapper {
     pointer-events: none;
 }
 
-.utiles-button--inactive .utiles-circle {
+.utiles-button--inactive .utiles-icon {
     opacity: 0.2;
 }
 
-.utiles-button--active .utiles-circle {
+.utiles-button--active .utiles-icon {
     opacity: 1;
 }
 
@@ -1245,8 +1258,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
     opacity: 1;
 }
 
-.utiles-button--active:hover .utiles-circle {
-    border-color: #ff8800;
+.utiles-button--active:hover .utiles-icon {
     box-shadow: 0 0 14px rgba(255, 136, 0, 0.35);
     transform: translateY(-3px) scale(1.02);
 }
@@ -1265,7 +1277,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
       gap: 22px;
   }
 
-  .utiles-circle {
+  .utiles-icon {
       width: 69px;
       height: 69px;
   }
