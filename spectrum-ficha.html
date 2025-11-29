@@ -190,61 +190,7 @@
     let additionalImageIndex = 0;
     let additionalImagesKeydownBound = false;
     let modalAbierta = false;
-       
-   // ============================================
-    // TAP SIN HIGHLIGHT (para iconos y tarjetas)
-    // ============================================
-    function bindTapAction(element, handler) {
-        if (!element || typeof handler !== "function") return;
 
-        const MOVE_THRESHOLD = 8;
-        let touchStart = null;
-        let lastTouchTime = 0;
-
-        element.classList.add("no-tap-highlight");
-
-        element.addEventListener("touchstart", (event) => {
-            const touch = event.touches[0];
-            touchStart = {
-                x: touch.clientX,
-                y: touch.clientY,
-                moved: false,
-            };
-        }, { passive: true });
-
-        element.addEventListener("touchmove", (event) => {
-            if (!touchStart) return;
-            const touch = event.touches[0];
-            if (Math.abs(touch.clientX - touchStart.x) > MOVE_THRESHOLD ||
-                Math.abs(touch.clientY - touchStart.y) > MOVE_THRESHOLD) {
-                touchStart.moved = true;
-            }
-        }, { passive: true });
-
-        element.addEventListener("touchend", (event) => {
-            if (!touchStart) return;
-            const touch = event.changedTouches[0];
-            const movedTooMuch = touchStart.moved ||
-                Math.abs(touch.clientX - touchStart.x) > MOVE_THRESHOLD ||
-                Math.abs(touch.clientY - touchStart.y) > MOVE_THRESHOLD;
-
-            touchStart = null;
-            if (movedTooMuch) return;
-
-            lastTouchTime = Date.now();
-            event.preventDefault();
-            handler(event);
-        }, { passive: false });
-
-        element.addEventListener("touchcancel", () => {
-            touchStart = null;
-        });
-
-        element.addEventListener("click", (event) => {
-            if (Date.now() - lastTouchTime < 500) return;
-            handler(event);
-        });
-    }
 
     // ============================================
     // UTILIDADES
@@ -956,10 +902,7 @@ function toggleSynopsisVoice() {
 function setupVoiceButton() {
     if (!sinopsisVoiceButton || !speechSupported) return;
 
-    bindTapAction(sinopsisVoiceButton, (event) => {
-        event?.preventDefault?.();
-        toggleSynopsisVoice();
-    });
+    sinopsisVoiceButton.addEventListener("click", toggleSynopsisVoice);
 
     window.speechSynthesis.addEventListener("voiceschanged", () => {
         if (isReadingSinopsis && currentUtterance) {
@@ -1112,7 +1055,7 @@ function updateGameplay(game) {
 
     if (!placeholder.dataset.bound) {
         placeholder.dataset.bound = "true";
-        bindTapAction(placeholder, () => {
+        placeholder.addEventListener("click", () => {
             const iframe = document.createElement("iframe");
             const separator = videoUrl.includes("?") ? "&" : "?";
             iframe.src = `${videoUrl}${separator}autoplay=1`;
@@ -1388,7 +1331,7 @@ function updateRevistas(game) {
     items.forEach(item => {
         const hasUrl = !!(item.url && item.url.trim());
         const element = document.createElement(hasUrl ? "a" : "div");
-        element.className = "utiles-button no-tap-highlight " + (hasUrl ? "utiles-button--active" : "utiles-button--inactive");
+        element.className = "utiles-button " + (hasUrl ? "utiles-button--active" : "utiles-button--inactive");
         element.dataset.type = item.key;
 
         if (hasUrl) {
@@ -1409,10 +1352,6 @@ function updateRevistas(game) {
         row.appendChild(element);
         
         if (hasUrl) {
-            bindTapAction(element, (event) => {
-                event?.preventDefault?.();
-                window.open(item.url, "_blank", "noopener");
-            });
             const clearFocus = () => element.blur();
             element.addEventListener("mouseup", clearFocus);
             element.addEventListener("mouseleave", clearFocus);
