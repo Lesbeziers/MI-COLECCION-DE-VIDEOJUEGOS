@@ -752,6 +752,133 @@ function updateFichaDatos(game) {
 // ============================================
 // SINOPSIS
 // ============================================
+let sinopsisVoiceButton = null;
+let sinopsisVoiceOnIcon = null;
+let sinopsisVoiceOffIcon = null;
+let currentUtterance = null;
+let isReadingSinopsis = false;
+const speechSupported =
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    typeof SpeechSynthesisUtterance !== "undefined";
+
+function resetVoiceIcons() {
+    if (!sinopsisVoiceButton) return;
+    if (sinopsisVoiceOnIcon && sinopsisVoiceOffIcon) {
+        sinopsisVoiceOnIcon.style.display = isReadingSinopsis ? "none" : "block";
+        sinopsisVoiceOffIcon.style.display = isReadingSinopsis ? "block" : "none";
+    }
+}
+
+function stopSynopsisVoice() {
+    if (!speechSupported) return;
+    window.speechSynthesis.cancel();
+    currentUtterance = null;
+    isReadingSinopsis = false;
+    resetVoiceIcons();
+}
+
+function getPreferredSpanishVoice() {
+    if (!speechSupported) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || !voices.length) return null;
+
+    const preferred = voices.find(voice =>
+        voice.lang && voice.lang.toLowerCase().startsWith("es-es")
+    );
+    if (preferred) return preferred;
+
+    const anySpanish = voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith("es"));
+    return anySpanish || voices[0];
+}
+
+function handleVoiceEnd() {
+    isReadingSinopsis = false;
+    currentUtterance = null;
+    resetVoiceIcons();
+}
+
+function startSynopsisVoice() {
+    if (!speechSupported) return;
+    const text = getSynopsisText();
+    if (!text) return;
+
+    stopSynopsisVoice();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = 1;
+    utterance.volume = 1;
+    const voice = getPreferredSpanishVoice();
+    if (voice) {
+        utterance.voice = voice;
+    }
+    utterance.onend = handleVoiceEnd;
+    utterance.onerror = handleVoiceEnd;
+
+    currentUtterance = utterance;
+    isReadingSinopsis = true;
+    resetVoiceIcons();
+    window.speechSynthesis.speak(utterance);
+}
+
+function toggleSynopsisVoice() {
+    if (!speechSupported) return;
+    if (isReadingSinopsis) {
+        stopSynopsisVoice();
+    } else {
+        startSynopsisVoice();
+    }
+}
+
+function setupVoiceButton() {
+    if (!sinopsisVoiceButton || !speechSupported) return;
+    sinopsisVoiceButton.addEventListener("click", toggleSynopsisVoice);
+
+    window.speechSynthesis.addEventListener("voiceschanged", () => {
+        if (isReadingSinopsis && currentUtterance) {
+            const updatedVoice = getPreferredSpanishVoice();
+            if (updatedVoice) {
+                currentUtterance.voice = updatedVoice;
+            }
+        }
+    });
+}
+
+function renderVoiceButton(container) {
+    sinopsisVoiceButton = document.createElement("button");
+    sinopsisVoiceButton.type = "button";
+    sinopsisVoiceButton.className = "sinopsis-voice-button";
+    sinopsisVoiceButton.setAttribute("aria-label", "Leer sinopsis en voz alta");
+
+    sinopsisVoiceOnIcon = document.createElement("img");
+    sinopsisVoiceOnIcon.src = "assets/img/ic_voz_ON.svg";
+    sinopsisVoiceOnIcon.alt = "Reproducir voz";
+    sinopsisVoiceOnIcon.className = "sinopsis-voice-icon sinopsis-voice-icon--on";
+
+    sinopsisVoiceOffIcon = document.createElement("img");
+    sinopsisVoiceOffIcon.src = "assets/img/ic_voz_OFF.svg";
+    sinopsisVoiceOffIcon.alt = "Detener voz";
+    sinopsisVoiceOffIcon.className = "sinopsis-voice-icon sinopsis-voice-icon--off";
+
+    sinopsisVoiceButton.appendChild(sinopsisVoiceOnIcon);
+    sinopsisVoiceButton.appendChild(sinopsisVoiceOffIcon);
+    container.appendChild(sinopsisVoiceButton);
+    resetVoiceIcons();
+
+    if (!speechSupported) {
+        sinopsisVoiceButton.style.display = "none";
+        return;
+    }
+
+    setupVoiceButton();
+}
+
+function getSynopsisText() {
+    const textEl = document.querySelector(".ficha-sinopsis-texto");
+    return textEl ? textEl.textContent.trim() : "";
+}
+
 function updateSinopsis(game) {
     const section = document.getElementById("sinopsis-section");
     const container = document.getElementById("ficha-sinopsis");
@@ -764,7 +891,12 @@ function updateSinopsis(game) {
         return;
     }
 
-    container.innerHTML = `<p class="ficha-sinopsis-texto">${sinopsis}</p>`;
+    const textParagraph = document.createElement("p");
+    textParagraph.className = "ficha-sinopsis-texto";
+    textParagraph.textContent = sinopsis;
+    container.appendChild(textParagraph);
+    renderVoiceButton(container);
+    
     section.style.display = "block";
 }
 
@@ -1073,6 +1205,27 @@ function updateImagenesAdicionales(game) {
     }
 }
 
+function attachVoiceStopToNavigation() {
+    const navSelectors = [
+        ".top-bar-back",
+        ".top-bar-home",
+        ".game-nav-arrow--prev",
+        ".game-nav-arrow--next"
+    ];
+
+    navSelectors.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.addEventListener("click", () => stopSynopsisVoice(), { capture: true });
+        }
+    });
+
+    window.addEventListener("beforeunload", () => {
+        stopSynopsisVoice();
+    });
+}
+
+       
     function setupNavigation() {
     const prevArrow = document.querySelector(".game-nav-arrow--prev");
     const nextArrow = document.querySelector(".game-nav-arrow--next");
@@ -1084,6 +1237,7 @@ function updateImagenesAdicionales(game) {
     if (prevArrow) {
         prevArrow.addEventListener("click", () => {
             if (currentGameIndex > 0) {
+                stopSynopsisVoice();
                 const newPosition = currentGameIndex;
                 const total = sortedGamesList.length;
                 const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
@@ -1106,6 +1260,7 @@ function updateImagenesAdicionales(game) {
     if (nextArrow) {
         nextArrow.addEventListener("click", () => {
             if (currentGameIndex < sortedGamesList.length - 1) {
+                stopSynopsisVoice();
                 const newPosition = currentGameIndex + 2;
                 const total = sortedGamesList.length;
                 const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
@@ -1271,7 +1426,8 @@ function updateImagenesAdicionales(game) {
     
     loadSpectrumFicha();
     setupCoverModal();
-    setupSwipeNavigation(); 
+    setupSwipeNavigation();
+    attachVoiceStopToNavigation();
 });
        // ============================================
 // MODAL CARÁTULA
@@ -1344,6 +1500,7 @@ function setupSwipeNavigation() {
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
+                stopSynopsisVoice();
                 window.location.href = url;
             }
         } else {
@@ -1354,6 +1511,7 @@ function setupSwipeNavigation() {
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
+                stopSynopsisVoice();
                 window.location.href = url;
             }
         }
