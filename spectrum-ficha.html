@@ -1337,9 +1337,17 @@ function updateRevistas(game) {
         element.appendChild(circle);
         element.appendChild(label);
         row.appendChild(element);
+        
+        if (hasUrl) {
+            const clearFocus = () => element.blur();
+            element.addEventListener("mouseup", clearFocus);
+            element.addEventListener("mouseleave", clearFocus);
+            element.addEventListener("touchend", clearFocus);
+        }
     });
 
     container.appendChild(row);
+    container.querySelectorAll(".utiles-button").forEach(btn => btn.blur());
     section.style.display = "block";
 }
 
