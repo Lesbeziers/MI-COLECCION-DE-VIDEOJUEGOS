@@ -1352,6 +1352,17 @@ function updateRevistas(game) {
         row.appendChild(element);
         
         if (hasUrl) {
+            const setPressed = () => element.classList.add("is-pressed");
+            const clearPressed = () => {
+                element.classList.remove("is-pressed");
+                element.blur();
+            };
+
+            element.addEventListener("pointerdown", setPressed);
+            ["pointerup", "pointerleave", "pointercancel", "lostpointercapture", "blur"].forEach(evt => {
+                element.addEventListener(evt, clearPressed);
+            });
+
             const clearFocus = () => element.blur();
             element.addEventListener("mouseup", clearFocus);
             element.addEventListener("mouseleave", clearFocus);
