@@ -1210,6 +1210,21 @@ body.ficha-final.loading .ficha-cover-wrapper {
     background-color: #666;
 }
 
+.ficha-section--flush .ficha-section-line {
+    display: none;
+}
+
+.ficha-section--flush .ficha-section-title {
+    margin-bottom: 0;
+    transform: translateY(2px);
+}
+
+.ficha-section--flush .ficha-gameplay,
+.ficha-section--flush .ficha-imagenes {
+    padding-top: 6px;
+}
+
+
 /* ============================================
    FICHA - SECCIÓN ÚTILES
 ============================================ */
