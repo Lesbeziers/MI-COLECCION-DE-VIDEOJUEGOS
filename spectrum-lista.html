@@ -127,6 +127,7 @@
     const idxDes     = header.indexOf("DESARROLLO");
     const idxContr   = header.indexOf("CONTRIBUCIONES");
     const idxGenero  = header.indexOf("GENERO_MOSTRAR");
+    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
@@ -144,6 +145,7 @@
       const des    = (idxDes     >= 0 && cols[idxDes]     !== undefined) ? cols[idxDes].trim()     : "";
       const contr  = (idxContr   >= 0 && cols[idxContr]   !== undefined) ? cols[idxContr].trim()   : "";
       const genero = (idxGenero  >= 0 && cols[idxGenero]  !== undefined) ? cols[idxGenero].trim()  : "";
+      const subgenero = (idxSubgenero >= 0 && cols[idxSubgenero] !== undefined) ? cols[idxSubgenero].trim() : "";
 
 
       // Si no hay título, descartamos la fila
@@ -163,6 +165,7 @@
       des,
       contr,
       genero,
+      subgenero,
       sortKey: displayTitulo.toLowerCase()
       });
 
@@ -355,7 +358,7 @@ if (letterMatch) {
 
       const qNorm = normalizeText(trimmed);
 
-      const filtered = allGames.filter(game => {
+     const filtered = allGames.filter(game => {
      const titleNorm  = normalizeText(game.displayTitulo || game.titulo);
      const pubNorm    = normalizeText(game.pub);
      const yearNorm   = normalizeText(game.anio);
@@ -365,6 +368,7 @@ if (letterMatch) {
      const desNorm    = normalizeText(game.des);
      const contrNorm  = normalizeText(game.contr);
      const generoNorm = normalizeText(game.genero);
+     const subgeneroNorm = normalizeText(game.subgenero);
 
      return (
     titleNorm.includes(qNorm)  ||
@@ -373,7 +377,8 @@ if (letterMatch) {
     autorNorm.includes(qNorm)  ||
     desNorm.includes(qNorm)    ||
     contrNorm.includes(qNorm)  ||
-    generoNorm.includes(qNorm)
+    generoNorm.includes(qNorm) ||
+    subgeneroNorm.includes(qNorm)
   );
 });
 
