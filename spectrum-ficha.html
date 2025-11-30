@@ -626,13 +626,17 @@ function updateCover(game) {
         // ====================================
         const squeezeRatio = 0.97;
 
-        if (scaledWidth < wrapperWidth) {
-            // Imagen MUY ESTRECHA → estirar para rellenar
+        // Tolerancia para considerar aspect ratios "iguales" (3%)
+        const ratioDiff = Math.abs(aspectRatio - targetRatio) / targetRatio;
+        const isMatchingRatio = ratioDiff < 0.03;
+
+        if (scaledWidth < wrapperWidth || isMatchingRatio) {
+            // Imagen ESTRECHA o ASPECT RATIO COINCIDENTE → rellenar todo
             coverImg.style.width = "100%";
             coverImg.style.height = "100%";
             coverImg.style.objectFit = "fill";
-            coverImg.style.left = "0";
-            coverImg.style.right = "auto";
+            coverImg.style.left = "auto";
+            coverImg.style.right = "0";
             coverImg.style.transform = "none";
         } else if (aspectRatio > targetRatio) {
             // Imagen CUADRADA u HORIZONTAL → comprimir horizontalmente
@@ -644,7 +648,7 @@ function updateCover(game) {
             coverImg.style.right = "0";
             coverImg.style.transform = "none";
         } else {
-            // Proporción CORRECTA → sin tocar
+            // Proporción MÁS VERTICAL que el contenedor → ajustar al alto
             coverImg.style.width = "auto";
             coverImg.style.height = "100%";
             coverImg.style.objectFit = "cover";
