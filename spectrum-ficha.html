@@ -1709,27 +1709,32 @@ function setupCoverModal() {
 function setupSwipeNavigation() {
     let touchStartX = 0;
     let touchEndX = 0;
-    const minSwipeDistance = 50;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const minSwipeDistance = 60;
     
     // Obtener el parámetro search actual
     const searchQuery = getQueryParam("search");
 
     document.addEventListener("touchstart", function(e) {
         touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
     }, { passive: true });
 
     document.addEventListener("touchend", function(e) {
         touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
         handleSwipe();
     }, { passive: true });
 
     function handleSwipe() {
         if (modalAbierta) return;
-        const distance = touchEndX - touchStartX;
+        const distanceX = touchEndX - touchStartX;
+        const distanceY = touchEndY - touchStartY;
 
-        if (Math.abs(distance) < minSwipeDistance) return;
+        if (Math.abs(distanceX) < Math.abs(distanceY) * 2) return;
 
-        if (distance < 0) {
+        if (distanceX < 0) {
             // Swipe hacia la izquierda → siguiente ficha
             if (currentGameIndex < sortedGamesList.length - 1) {
                 const nextGame = sortedGamesList[currentGameIndex + 1];
