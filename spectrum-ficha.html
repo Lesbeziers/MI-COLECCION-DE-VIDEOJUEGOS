@@ -51,6 +51,7 @@
 <!-- BLOQUE SUPERIOR: Carátula + Info básica -->
 <div class="ficha-hero">
     <div class="ficha-cover-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Carátula</span>
         <img id="ficha-cover"
              class="ficha-cover"
              alt="Carátula del juego"
@@ -72,9 +73,11 @@
 <!-- SCREENSHOTS -->
 <div class="ficha-screenshots" style="display:none;">
     <div class="screenshot-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Loading Screen</span>
         <img id="screenshot-1" class="screenshot-img" alt="Screenshot 1" style="display:none;">
     </div>
     <div class="screenshot-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Gameplay Screen</span>
         <img id="screenshot-2" class="screenshot-img" alt="Screenshot 2" style="display:none;">
     </div>
 </div>
@@ -661,8 +664,10 @@ function updateCover(game) {
             coverImg.style.transform = "none";
         }
         
-        // Mostrar imagen ya procesada
+        // Mostrar imagen ya procesada y ocultar label
         coverImg.style.opacity = "1";
+        const coverLabel = wrapper.querySelector(".skeleton-label");
+        if (coverLabel) coverLabel.style.display = "none";
         wrapper.classList.add("loaded");
     };
 
@@ -772,6 +777,8 @@ function updateScreenshots(game) {
         screenshot1.style.display = "block";
         screenshot1.onclick = () => openModal(urls[0]);
         wrapper1.classList.remove("empty");
+        const label1 = wrapper1.querySelector(".skeleton-label");
+        if (label1) label1.style.display = "none";
     } else {
         screenshot1.style.display = "none";
         wrapper1.classList.add("empty");
@@ -783,6 +790,8 @@ function updateScreenshots(game) {
         screenshot2.style.display = "block";
         screenshot2.onclick = () => openModal(urls[1]);
         wrapper2.classList.remove("empty");
+        const label2 = wrapper2.querySelector(".skeleton-label");
+        if (label2) label2.style.display = "none";
     } else {
         screenshot2.style.display = "none";
         wrapper2.classList.add("empty");
