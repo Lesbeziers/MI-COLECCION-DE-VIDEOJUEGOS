@@ -1711,7 +1711,12 @@ function setupSwipeNavigation() {
     let touchEndX = 0;
     let touchStartY = 0;
     let touchEndY = 0;
-    const minSwipeDistance = 60;
+    let touchStartTime = 0;
+    
+    // Configuración de sensibilidad
+    const minSwipeDistance = 100;  // Distancia mínima horizontal (px)
+    const maxSwipeTime = 500;      // Tiempo máximo para el swipe (ms)
+    const maxVerticalRatio = 0.5;  // El movimiento vertical no puede superar el 50% del horizontal
     
     // Obtener el parámetro search actual
     const searchQuery = getQueryParam("search");
@@ -1719,6 +1724,7 @@ function setupSwipeNavigation() {
     document.addEventListener("touchstart", function(e) {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
+        touchStartTime = Date.now();
     }, { passive: true });
 
     document.addEventListener("touchend", function(e) {
@@ -1729,10 +1735,20 @@ function setupSwipeNavigation() {
 
     function handleSwipe() {
         if (modalAbierta) return;
+        
         const distanceX = touchEndX - touchStartX;
         const distanceY = touchEndY - touchStartY;
-
-        if (Math.abs(distanceX) < Math.abs(distanceY) * 2) return;
+        const elapsedTime = Date.now() - touchStartTime;
+        
+        // Validaciones para evitar swipes accidentales:
+        // 1. La distancia horizontal debe superar el mínimo
+        if (Math.abs(distanceX) < minSwipeDistance) return;
+        
+        // 2. El swipe no debe ser demasiado lento
+        if (elapsedTime > maxSwipeTime) return;
+        
+        // 3. El movimiento debe ser principalmente horizontal
+        if (Math.abs(distanceY) > Math.abs(distanceX) * maxVerticalRatio) return;
 
         if (distanceX < 0) {
             // Swipe hacia la izquierda → siguiente ficha
