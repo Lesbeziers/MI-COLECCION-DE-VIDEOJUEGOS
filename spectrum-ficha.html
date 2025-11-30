@@ -1432,9 +1432,15 @@ function updateRevistas(game) {
     if (titleEl) {
         const searchQuery = getQueryParam("search");
         if (searchQuery) {
-            // Capitalizar primera letra de la búsqueda
-            const searchCapitalized = searchQuery.charAt(0).toUpperCase() + searchQuery.slice(1).toLowerCase();
-            titleEl.textContent = `Juegos ${searchCapitalized}`;
+            // Comprobar si es un solo carácter (letra o número)
+            const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+            if (singleCharMatch) {
+                // Una sola letra/número → "Letra X"
+                titleEl.textContent = `Letra ${searchQuery.toUpperCase()}`;
+            } else {
+                // Búsqueda normal → "búsqueda" (con comillas)
+                titleEl.textContent = `"${searchQuery}"`;
+            }
         } else {
             titleEl.textContent = "Juegos ZX Spectrum";
         }
@@ -1538,14 +1544,14 @@ function attachVoiceStopToNavigation() {
         if (searchQuery) {
             const qNorm = normalizeText(searchQuery);
             
-            // Comprobar si es búsqueda por letra (ej: "B+")
-            const letterMatch = searchQuery.match(/^([a-zñáéíóúü])\+$/i);
+            // Comprobar si es búsqueda por un solo carácter (letra o número)
+            const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
             
-            if (letterMatch) {
-                const letter = normalizeText(letterMatch[1]);
+            if (singleCharMatch) {
+                const char = normalizeText(singleCharMatch[1]);
                 filteredGames = games.filter(game => {
                     const titleNorm = normalizeText(game.sortKey || "");
-                    return titleNorm.startsWith(letter);
+                    return titleNorm.startsWith(char);
                 });
             } else {
                 // Búsqueda normal en todos los campos
