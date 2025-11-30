@@ -54,7 +54,7 @@
         <img id="ficha-cover"
              class="ficha-cover"
              alt="Carátula del juego"
-             style="display:none;">
+             style="display:none; opacity:0; transition:opacity 0.2s ease-in-out;">
     </div>
     <div class="ficha-hero-info">
         <h1 id="ficha-title" class="loading-title">Cargando ficha...</h1>
@@ -607,6 +607,10 @@ function updateCover(game) {
     const hasValidCover = coverUrl && coverUrl.toLowerCase() !== "null";
     const finalCoverUrl = hasValidCover ? coverUrl : fallbackCover;
 
+    // Ocultar imagen mientras se procesa
+    coverImg.style.opacity = "0";
+    coverImg.style.display = "block";
+
     coverImg.onload = function() {
         const naturalW = coverImg.naturalWidth;
         const naturalH = coverImg.naturalHeight;
@@ -656,6 +660,9 @@ function updateCover(game) {
             coverImg.style.right = "0";
             coverImg.style.transform = "none";
         }
+        
+        // Mostrar imagen ya procesada
+        coverImg.style.opacity = "1";
         wrapper.classList.add("loaded");
     };
 
