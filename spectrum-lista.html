@@ -291,20 +291,23 @@
     const container = document.getElementById("zx-spectrum-list");
     if (!container) return;
 
-    const scrollableParent = container.closest(".platforms-content");
+    requestAnimationFrame(() => {
+      container.scrollTop = 0;
 
-    if (
-      scrollableParent &&
-      scrollableParent.scrollHeight > scrollableParent.clientHeight
-    ) {
-      scrollableParent.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
+      const scrollableParent = container.closest(".platforms-content");
+      if (scrollableParent) {
+        scrollableParent.scrollTop = 0;
+      }
 
-    const scrollingElement = document.scrollingElement || document.documentElement;
-    if (scrollingElement) {
-      scrollingElement.scrollTo({ top: 0, behavior: "smooth" });
-    }
+      const scrollingElement = document.scrollingElement || document.documentElement;
+      if (scrollingElement) {
+        scrollingElement.scrollTop = 0;
+      }
+
+      if (typeof window !== "undefined" && window.scrollTo) {
+        window.scrollTo(0, 0);
+      }
+    });
   }
 
   function renderGames(gamesToRender, query = "") {
@@ -356,12 +359,12 @@
         " REGISTROS";
       }
     }
-}
 
     // Tras cada render de la lista (p. ej., al aplicar un filtro),
     // llevamos el contenedor que hace scroll al inicio para que se vean
     // los primeros resultados del listado.
     resetListScroll();
+      
   // =========================================
   // CONFIGURAR BUSCADOR
   // =========================================
