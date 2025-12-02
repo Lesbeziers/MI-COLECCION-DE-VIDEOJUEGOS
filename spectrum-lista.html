@@ -219,12 +219,25 @@
     const thumbWrapper = document.createElement("div");
     thumbWrapper.className = "zx-thumb-wrapper";
 
-    // Normalizamos el thumb: si viene con varias URLs separadas por coma, usamos la primera
-    let thumbUrl = (game.thumb || "").trim();
-    if (thumbUrl.includes(",")) {
-      thumbUrl = thumbUrl.split(",")[0].trim();
-    }
+     // Normalizamos el thumb siguiendo la convención de los slots separados por coma
+    // y el placeholder "--" en el primer slot para indicar que debe usarse el segundo.
+    const rawThumb = (game.thumb || "").trim();
+    const thumbParts = rawThumb ? rawThumb.split(",").map(p => p.trim()) : [];
 
+    let thumbUrl = "";
+
+    if (thumbParts.length > 0) {
+      const first = thumbParts[0];
+
+      if (first && first !== "--") {
+        thumbUrl = first;
+      } else {
+        const second = thumbParts[1];
+        if (second && second !== "--") {
+          thumbUrl = second;
+        }
+      }
+        
     if (thumbUrl) {
       const img = document.createElement("img");
       img.className = "zx-thumb-img";
