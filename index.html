@@ -1,110 +1,94 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Colección de Videojuegos</title>
+    <link rel="stylesheet" href="assets/css/global.css">
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="es"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Mi Colección de Videojuegos&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="assets/css/global.css"&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Icono placeholder del mando --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="hero-icon"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Título principal --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;h1&gt;MI COLECCIÓN DE VIDEOJUEGOS&lt;/h1&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Bloque de estadísticas --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="stats"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;a href="plataformas.html" class="stat-block" style="text-decoration:none; color:inherit;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stat-circle"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stat-label"&gt;PLATAFORMAS&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stat-value"&gt;&lt;span id="platform-count"&gt;X&lt;/span&gt;&lt;/div&gt;</p>
-<p class="p1">&lt;/a&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stat-block"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="stat-circle"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="stat-label"&gt;&lt;strong&gt;COLECCIÓN&lt;/strong&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="stat-value"&gt;3.767&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Bloque de búsqueda --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="search-section"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="search-label"&gt;BÚSQUEDA&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="search-box"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" placeholder="Buscar en mi colección..." /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="footer-note"&gt;LesBeziers, 2025&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">document.addEventListener("DOMContentLoaded", async () =&gt; {</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// Elemento donde pondremos el número</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const countEl = document.getElementById("platform-count");</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!countEl) return;</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const applyPressHandlers = (elements) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>elements.forEach(el =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const setPressed = () =&gt; el.classList.add("is-pressed");</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const clearPressed = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>el.classList.remove("is-pressed");</p>
-<p class="p1"><span class="Apple-converted-space">                </span>el.blur();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>el.addEventListener("pointerdown", setPressed);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>["pointerup", "pointerleave", "pointercancel", "lostpointercapture", "blur"].forEach(evt =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>el.addEventListener(evt, clearPressed);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>applyPressHandlers(document.querySelectorAll(".stat-block"));</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Cargar plataformas.html como texto</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const resp = await fetch("plataformas.html");</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const html = await resp.text();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Crear DOM temporal para analizarlo</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const temp = document.createElement("div");</p>
-<p class="p1"><span class="Apple-converted-space">        </span>temp.innerHTML = html;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Contar TODOS los iconos de plataformas</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const total = temp.querySelectorAll(".platform-card").length;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Pintar el número real</p>
-<p class="p1"><span class="Apple-converted-space">        </span>countEl.textContent = total;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>} catch (err) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>console.error("Error contando plataformas:", err);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Si falla, dejamos la X o no mostramos nada</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1">});</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;/html&gt;</p>
+
+  <!-- Icono placeholder del mando -->
+  <div class="hero-icon"></div>
+
+  <!-- Título principal -->
+  <h1>MI COLECCIÓN DE VIDEOJUEGOS</h1>
+
+  <!-- Bloque de estadísticas -->
+  <div class="stats">
+
+    <a href="plataformas.html" class="stat-block" style="text-decoration:none; color:inherit;">
+    <div class="stat-circle"></div>
+    <div class="stat-label">PLATAFORMAS</div>
+    <div class="stat-value"><span id="platform-count">X</span></div>
+</a>
+
+    <div class="stat-block">
+        <div class="stat-circle"></div>
+        <div class="stat-label"><strong>COLECCIÓN</strong></div>
+        <div class="stat-value">3.767</div>
+    </div>
+
+  </div>
+
+  <!-- Bloque de búsqueda -->
+  <div class="search-section">
+
+    <div class="search-label">BÚSQUEDA</div>
+
+    <div class="search-box">
+      <input type="text" placeholder="Buscar en mi colección..." />
+    </div>
+  </div>
+  <div class="footer-note">LesBeziers, 2025</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // Elemento donde pondremos el número
+    const countEl = document.getElementById("platform-count");
+    if (!countEl) return;
+  
+    const applyPressHandlers = (elements) => {
+        elements.forEach(el => {
+            const setPressed = () => el.classList.add("is-pressed");
+            const clearPressed = () => {
+                el.classList.remove("is-pressed");
+                el.blur();
+            };
+
+            el.addEventListener("pointerdown", setPressed);
+            ["pointerup", "pointerleave", "pointercancel", "lostpointercapture", "blur"].forEach(evt => {
+                el.addEventListener(evt, clearPressed);
+            });
+        });
+    };
+
+    applyPressHandlers(document.querySelectorAll(".stat-block"));
+
+    try {
+        // Cargar plataformas.html como texto
+        const resp = await fetch("plataformas.html");
+        const html = await resp.text();
+
+        // Crear DOM temporal para analizarlo
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+
+        // Contar TODOS los iconos de plataformas
+        const total = temp.querySelectorAll(".platform-card").length;
+
+        // Pintar el número real
+        countEl.textContent = total;
+
+    } catch (err) {
+        console.error("Error contando plataformas:", err);
+        // Si falla, dejamos la X o no mostramos nada
+    }
+});
+</script>
+
+  
 </body>
+
 </html>
