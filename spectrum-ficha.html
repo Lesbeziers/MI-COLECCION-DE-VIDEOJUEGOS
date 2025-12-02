@@ -759,12 +759,27 @@ function updateScreenshots(game) {
 
     if (!screenshot1 || !screenshot2 || !container) return;
 
-    // Parsear URLs separadas por ", "
     const screenshotsRaw = (game.screenshots || "").trim();
-    const urls = screenshotsRaw ? screenshotsRaw.split(", ").map(u => u.trim()).filter(u => u) : [];
+    const startsWithSkip = screenshotsRaw.startsWith("--");
+    const parts = screenshotsRaw
+        ? screenshotsRaw.split(",").map(u => u.trim())
+        : [];
 
+    let screenshot1Url = "";
+    let screenshot2Url = "";
+
+    if (startsWithSkip) {
+        const [, ...rest] = parts;
+        const remainingUrls = rest.filter(u => u && u !== "--");
+        screenshot2Url = remainingUrls[0] || "";
+    } else {
+        const validUrls = parts.filter(u => u);
+        screenshot1Url = validUrls[0] || "";
+        screenshot2Url = validUrls[1] || "";
+    }
+    
     // Si hay al menos una URL, mostrar el contenedor
-    if (urls.length > 0) {
+    if (screenshot1Url || screenshot2Url) {
         container.style.display = "flex";
     } else {
         container.style.display = "none";
@@ -772,10 +787,10 @@ function updateScreenshots(game) {
     }
 
     // Screenshot 1
-    if (urls[0]) {
-        screenshot1.src = urls[0];
+    if (screenshot1Url) {
+        screenshot1.src = screenshot1Url;
         screenshot1.style.display = "block";
-        screenshot1.onclick = () => openModal(urls[0]);
+        screenshot1.onclick = () => openModal(screenshot1Url);
         wrapper1.classList.remove("empty");
         const label1 = wrapper1.querySelector(".skeleton-label");
         if (label1) label1.style.display = "none";
@@ -783,12 +798,11 @@ function updateScreenshots(game) {
         screenshot1.style.display = "none";
         wrapper1.classList.add("empty");
     }
-
     // Screenshot 2
-    if (urls[1]) {
-        screenshot2.src = urls[1];
+    if (screenshot2Url) {
+        screenshot2.src = screenshot2Url;
         screenshot2.style.display = "block";
-        screenshot2.onclick = () => openModal(urls[1]);
+        screenshot2.onclick = () => openModal(screenshot2Url);
         wrapper2.classList.remove("empty");
         const label2 = wrapper2.querySelector(".skeleton-label");
         if (label2) label2.style.display = "none";
