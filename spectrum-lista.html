@@ -287,6 +287,26 @@
   // =========================================
   // PINTAR LISTA + ACTUALIZAR CONTADOR
   // =========================================
+  function resetListScroll() {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    const scrollableParent = container.closest(".platforms-content");
+
+    if (
+      scrollableParent &&
+      scrollableParent.scrollHeight > scrollableParent.clientHeight
+    ) {
+      scrollableParent.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const scrollingElement = document.scrollingElement || document.documentElement;
+    if (scrollingElement) {
+      scrollingElement.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
   function renderGames(gamesToRender, query = "") {
     const container = document.getElementById("zx-spectrum-list");
     if (!container) return;
@@ -333,11 +353,14 @@
           current.toLocaleString("es-ES") +
           " DE " +
           total.toLocaleString("es-ES") +
-          " REGISTROS";
+        " REGISTROS";
       }
     }
-  }
 
+    // Tras cada render de la lista (p. ej., al aplicar un filtro),
+    // llevamos el contenedor que hace scroll al inicio para que se vean
+    // los primeros resultados del listado.
+    resetListScroll();
   // =========================================
   // CONFIGURAR BUSCADOR
   // =========================================
