@@ -1,0 +1,2075 @@
+/**
+ * ============================================
+ * GENERADOR DE FICHAS ZX SPECTRUM - v2.0
+ * ============================================
+ * 
+ * PARTE 1: CONSTANTES, MENÚS Y FUNCIÓN PRINCIPAL
+ * 
+ * Este archivo contiene:
+ * - Configuración global
+ * - Menús de Google Sheets
+ * - Función principal de preview de fichas
+ * 
+ * ============================================
+ */
+
+// ============================================
+// CONSTANTES GLOBALES
+// ============================================
+
+const FALLBACK_COVER_URL = 'https://raw.githubusercontent.com/Lesbeziers/MI-COLECCION-DE-VIDEOJUEGOS/main/assets/img/CaratulaNoDisponible.png';
+
+// ============================================
+// MENÚS DE GOOGLE SHEETS
+// ============================================
+
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  
+  ui.createMenu('Fichas')
+    .addItem('Vista previa de ficha (fila actual)', 'menuPreviewFichaActual')
+    .addToUi();
+  
+  ui.createMenu('ID')
+    .addItem('Rellenar IDs', 'rellenarIdsZXLista')
+    .addToUi();
+}
+
+// ============================================
+// FUNCIÓN PRINCIPAL - PREVIEW DE FICHA
+// ============================================
+
+function menuPreviewFichaActual() {
+  const ui = SpreadsheetApp.getUi();
+  const sh = SpreadsheetApp.getActiveSheet();
+  const row = sh.getActiveCell() ? sh.getActiveCell().getRow() : 0;
+  
+  // Validaciones básicas
+  if (!row || row === 1) {
+    return uiAlert_('Selecciona una fila con datos (no la cabecera).');
+  }
+
+  const headers = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0];
+  const get = (h) => {
+    const i = headers.indexOf(h);
+    return i > -1 ? sh.getRange(row, i + 1).getValue() : '';
+  };
+
+  const isZX = /spectrum/i.test(sh.getName());
+  const titulo = get('TÍTULO');
+  
+  if (!titulo) return uiAlert_('Falta el campo "TÍTULO" en la fila.');
+  if (!isZX) return uiAlert_('Esta vista previa está pensada para la hoja "ZX Spectrum".');
+
+  const link = get('LINK');
+  if (!link) return uiAlert_('Falta el campo "LINK".');
+
+  // ====================================
+  // LEER DATOS TÉCNICOS DESDE LA HOJA
+  // ====================================
+  const tecnicos = {
+    formato: String(get('FORMATO') || '').trim(),
+    zx2a: String(get('ZX +2A') || '').trim(),
+    tspec: String(get('TSPEC') || '').trim(),
+    terminado: normalizarTerminado_(get('TERMINADO'))
+  };
+
+  // ====================================
+  // LEER OVERRIDES MANUALES DESDE LA HOJA
+  // ====================================
+  const overrides = {
+    caratula: String(get('CARÁTULA') || '').trim(),
+    anio: String(get('AÑO') || '').trim(),
+    publisher: String(get('PUBLISHER') || '').trim(),
+    autor: String(get('AUTOR') || '').trim(),
+    desarrollador: String(get('DESARROLLADOR') || '').trim(),
+    video: String(get('VIDEO') || '').trim(),
+    genero: String(get('GÉNERO') || '').trim(),
+    subgenero: String(get('SUBGÉNERO') || '').trim(),
+    contribuciones: String(get('CONTRIBUCIONES') || '').trim(),
+    jugadores: String(get('JUGADORES') || '').trim(),
+    controles: String(get('CONTROLES') || '').trim(),
+    version: String(get('VERSIÓN') || get('VERSION') || '').trim(),
+    distribuidoras: String(get('DISTRIBUIDORAS') || '').trim(),
+    screenshots: String(get('SCREENSHOTS') || '').trim(),
+    imagenesExtra: String(get('IMÁGENES') || get('IMAGENES') || '').trim(),
+    mapa: String(get('MAPA') || '').trim(),
+    instrucciones: String(get('INSTRUCCIONES') || '').trim(),
+    puntuacion: String(get('PUNTUACIÓN') || get('PUNTUACION') || '').trim(),
+    sinopsis: String(get('SINOPSIS') || '').trim(),
+    revistas: String(get('REVISTAS') || '').trim()
+  };
+
+  // ====================================
+  // SCRAPING DE SPECTRUM COMPUTING
+  // ====================================
+  const data = fetchZX_fromSpectrumComputing_(titulo, link, overrides.caratula);
+  
+  // Guardamos screenshots auto-detectados ANTES de aplicar overrides
+  const autoScreens = Array.isArray(data.screenshots) ? data.screenshots.slice(0, 2) : [];
+
+  // ====================================
+  // APLICAR OVERRIDES MANUALES
+  // ====================================
+  aplicarOverrides_(data, overrides, link);
+
+  // ====================================
+  // OBTENER DESARROLLADOR DESDE ZXART
+  // ====================================
+  if (!overrides.desarrollador) {
+    const zx = getDeveloperFromZXART_(titulo);
+    if (zx && zx.text) {
+      data.desarrolladorAnchors = splitByCommaToAnchors_(zx.text, link);
+    }
+  }
+
+  // ====================================
+  // OBTENER PUNTUACIÓN
+  // ====================================
+  if (overrides.puntuacion) {
+    data.ratingDisplay = overrides.puntuacion;
+  } else {
+    data.ratingDisplay = formatRatingDisplay_(data.ratingScore10, data.ratingVotes);
+  }
+
+  // ====================================
+  // OBTENER SINOPSIS (PRIORIDAD: HOJA > ZXART)
+  // ====================================
+  let sinopsisText = overrides.sinopsis || obtenerSinopsisZXArt_(titulo);
+
+  // ====================================
+  // PROCESAR IMÁGENES ADICIONALES
+  // ====================================
+  const imagenesInput = overrides.imagenesExtra || (data.imagenesAdicionales || []).join('\n');
+  data.imagenesAdicionales = getExtraImagesForGame(imagenesInput, data.caratula, data.screenshots);
+
+  // ====================================
+  // COMBINAR REVISTAS (AUTO + MANUAL)
+  // ====================================
+  const revistasUser = parseSheetRevistas_(overrides.revistas);
+  if (Array.isArray(data.revistas)) {
+    data.revistas = data.revistas.concat(revistasUser);
+  } else {
+    data.revistas = revistasUser;
+  }
+
+  // ====================================
+  // ESCRIBIR DATOS EN LA HOJA (SOLO CELDAS VACÍAS)
+  // ====================================
+  writeBackZXRowFromData_(sh, row, headers, data, {
+    autoScreenshots: autoScreens,
+    sinopsis: sinopsisText
+  });
+
+  // ====================================
+  // GENERAR Y MOSTRAR FICHA HTML
+  // ====================================
+  const html = buildPreviewHtml_(titulo, 'ZX Spectrum', link, data, tecnicos, sinopsisText);
+  SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha'));
+}
+
+// ============================================
+// HELPER: APLICAR OVERRIDES MANUALES
+// ============================================
+
+function aplicarOverrides_(data, overrides, link) {
+  // Año
+  if (overrides.anio) data.anio = overrides.anio;
+  
+  // Vídeo
+  if (overrides.video) data.video = overrides.video;
+
+  // Publisher (con normalización)
+  if (overrides.publisher) {
+    data.publisherAnchors = splitByCommaToAnchors_(overrides.publisher, link, 'Publisher')
+      .map(a => ({ ...a, text: normalizePublisherName_(a.text) }));
+  } else if (Array.isArray(data.publisherAnchors)) {
+    data.publisherAnchors = data.publisherAnchors.map(a => ({ ...a, text: normalizePublisherName_(a.text) }));
+  }
+
+  // Autor
+  if (overrides.autor) {
+    data.autorAnchors = splitByCommaToAnchors_(overrides.autor, link);
+  }
+
+  // Desarrollador
+  if (overrides.desarrollador) {
+    data.desarrolladorAnchors = splitByCommaToAnchors_(overrides.desarrollador, link);
+  }
+
+  // Contribuciones
+  if (overrides.contribuciones) {
+    data.contributorsAnchors = splitByCommaToAnchors_(overrides.contribuciones, link);
+  }
+
+  // Género
+  if (overrides.genero) {
+    data.generoAnchors = splitByCommaToAnchors_(overrides.genero.replace(/;/g, ','), link);
+  }
+
+  // Subgénero
+  if (overrides.subgenero) {
+    data.subgeneroAnchors = splitByCommaToAnchors_(overrides.subgenero.replace(/;/g, ','), link);
+  }
+
+  // Jugadores
+  if (overrides.jugadores) {
+    data.jugadoresAnchors = splitByCommaToAnchors_(overrides.jugadores.replace(/;/g, ','), link, 'Maximum Players');
+  }
+
+  // Controles
+  if (overrides.controles) {
+    data.controlesAnchors = splitByCommaToAnchors_(overrides.controles.replace(/;/g, ','), link, 'Controls');
+  }
+
+  // Versión
+  if (overrides.version) {
+    data.versionAnchors = splitByCommaToAnchors_(overrides.version.replace(/;/g, ','), link, 'Machine Type');
+  }
+
+  // Distribuidoras
+  if (overrides.distribuidoras) {
+    data.distribuidorasAnchors = splitByCommaToAnchors_(overrides.distribuidoras.replace(/;/g, ','), link, 'Publisher');
+  }
+
+  // Mapa
+  if (overrides.mapa) {
+    data.mapa = overrides.mapa;
+  }
+
+  // Instrucciones
+  if (overrides.instrucciones) {
+    data.instrucciones = overrides.instrucciones;
+  }
+
+  // Screenshots (si el usuario pone algo manual, reemplaza los auto-detectados)
+  if (overrides.screenshots) {
+    const parts = overrides.screenshots.split(/\s*,\s*/).map(x => x.trim()).filter(Boolean);
+    data.screenshots = parts.slice(0, 2);
+  }
+}
+
+// ============================================
+// HELPER: NORMALIZAR CAMPO "TERMINADO"
+// ============================================
+
+function normalizarTerminado_(valor) {
+  const v = String(valor || '').trim();
+  if (!v) return '';
+  if (/^si$/i.test(v)) return 'SI';
+  if (/^no$/i.test(v)) return 'NO';
+  return v;
+}
+
+// ============================================
+// HELPER: OBTENER SINOPSIS DESDE ZXART
+// ============================================
+
+function obtenerSinopsisZXArt_(titulo) {
+  try {
+    const zxSyn = getZXArtSynopsisTranslated_(titulo);
+    if (zxSyn) {
+      if (zxSyn.es && String(zxSyn.es).trim()) {
+        return String(zxSyn.es).trim();
+      } else if (zxSyn.en && String(zxSyn.en).trim()) {
+        return String(zxSyn.en).trim();
+      }
+    }
+  } catch (e) {
+    Logger.log('[ERROR] obtenerSinopsisZXArt_: ' + e);
+  }
+  return 'Sinopsis no disponible en ZXArt.';
+}
+
+/**
+ * ============================================
+ * PARTE 2: SCRAPING SPECTRUM COMPUTING
+ * ============================================
+ * 
+ * Extrae todos los datos desde SpectrumComputing.co.uk:
+ * - Datos básicos (año, género, publisher, autor)
+ * - Carátula (Inlay - Front)
+ * - Screenshots (Loading + Running)
+ * - Puntuación (User Score)
+ * - Imágenes adicionales
+ * - Instrucciones, mapa, vídeo
+ * - Revistas (Magazine Reviews)
+ * 
+ * ============================================
+ */
+
+function fetchZX_fromSpectrumComputing_(titulo, link, coverManual) {
+  try {
+    const res = UrlFetchApp.fetch(link, { muteHttpExceptions: true });
+    const html = res.getContentText();
+    const data = {};
+
+    // ====================================
+    // HELPERS PARA EXTRAER DATOS DEL HTML
+    // ====================================
+    
+    // Extrae texto plano de un campo
+    const rowVal = (labels) => {
+      const alts = (Array.isArray(labels) ? labels : [labels]).map(escapeRegex_).join('|');
+      const patterns = [
+        `<div\\s+class="col-sm-4">\\s*<b>\\s*(?:${alts})\\s*:?\\s*</b>\\s*</div>\\s*<div\\s+class="col-sm-8">([\\s\\S]*?)</div>`,
+        `<dt[^>]*>\\s*(?:${alts})\\s*:?\\s*<\\/dt>\\s*<dd[^>]*>([\\s\\S]*?)<\\/dd>`,
+        `<t[hd][^>]*>\\s*(?:${alts})\\s*:?\\s*<\\/t[hd]>\\s*<t[hd][^>]*>([\\s\\S]*?)<\\/t[hd]>`
+      ];
+      
+      for (const pattern of patterns) {
+        const m = new RegExp(pattern, 'i').exec(html);
+        if (m) return stripTags_(m[1]).replace(/\s+/g, ' ').trim();
+      }
+      return '';
+    };
+
+    // Extrae HTML interno de un campo (con enlaces)
+    const rowValHtml = (labels) => {
+      const alts = (Array.isArray(labels) ? labels : [labels]).map(escapeRegex_).join('|');
+      const patterns = [
+        `<div\\s+class="col-sm-4">\\s*<b>\\s*(?:${alts})\\s*:?\\s*</b>\\s*</div>\\s*<div\\s+class="col-sm-8">([\\s\\S]*?)</div>`,
+        `<dt[^>]*>\\s*(?:${alts})\\s*:?\\s*<\\/dt>\\s*<dd[^>]*>([\\s\\S]*?)<\\/dd>`,
+        `<t[hd][^>]*>\\s*(?:${alts})\\s*:?\\s*<\\/t[hd]>\\s*<t[hd][^>]*>([\\s\\S]*?)<\\/t[hd]>`
+      ];
+      
+      for (const pattern of patterns) {
+        const m = new RegExp(pattern, 'i').exec(html);
+        if (m) return m[1];
+      }
+      return '';
+    };
+
+    // ====================================
+    // EXTRAER DATOS BÁSICOS
+    // ====================================
+    
+    data.anio = rowVal(['Release Date', 'Release']);
+    data.generoAnchors = parseAnchors_(rowValHtml('Genre'), link);
+    
+    // Themes / Subgénero
+    let themesHtml = rowValHtml(['Themes?', 'Theme', 'Themes']);
+    if (!themesHtml) themesHtml = findLabelBlock_(html, 'Themes?');
+    data.subgeneroAnchors = parseAnchors_(themesHtml, link);
+
+    // ====================================
+    // PUBLISHER (CON NORMALIZACIÓN)
+    // ====================================
+    
+    const pubHtml = rowValHtml(['Original Publisher', 'Original\\s*Publisher']);
+    data.publisherAnchors = parseAnchors_(pubHtml, link);
+    
+    if (!data.publisherAnchors.length) {
+      const pubText = rowVal(['Original Publisher', 'Original\\s*Publisher']);
+      data.publisherAnchors = splitByCommaToAnchors_(pubText, link);
+    }
+    
+    // Normalizar nombres de publishers
+    data.publisherAnchors = data.publisherAnchors.map(a => ({
+      ...a,
+      text: normalizePublisherName_(a.text)
+    }));
+
+    // ====================================
+    // AUTORES Y CONTRIBUCIONES
+    // ====================================
+    
+    // Autores (Creators)
+    data.autorAnchors = parseAnchors_(rowValHtml(['Creator', 'Creators']), link);
+    if (!data.autorAnchors.length) {
+      data.autorAnchors = splitByCommaToAnchors_(rowVal(['Creator', 'Creators']), link);
+    }
+
+    // Contribuciones (Contributors)
+    data.contributorsAnchors = parseAnchors_(rowValHtml(['Contributor', 'Contributors']), link);
+    if (!data.contributorsAnchors.length) {
+      data.contributorsAnchors = splitByCommaToAnchors_(rowVal(['Contributor', 'Contributors']), link);
+    }
+
+    // ====================================
+    // JUGADORES, CONTROLES, VERSIÓN
+    // ====================================
+    
+    const jugadoresTxt = rowVal(['Maximum Players', 'Players', 'Max. Players', 'Number of Players']);
+    data.jugadoresAnchors = splitByCommaToAnchors_(jugadoresTxt, link, 'Maximum Players');
+
+    data.controlesAnchors = parseAnchors_(rowValHtml(['Controls?', 'Controls']), link);
+    if (!data.controlesAnchors.length) {
+      data.controlesAnchors = splitByCommaToAnchors_(rowVal(['Controls?', 'Controls']), link, 'Controls');
+    }
+
+    data.versionAnchors = splitByCommaToAnchors_(rowVal('Machine Type'), link, 'Machine Type');
+
+    // ====================================
+    // DISTRIBUIDORAS (RE-RELEASES)
+    // ====================================
+    
+    data.releases = [];
+    const reRe = /<div class="hidden-xs col-md-2">Re-release[^<]*<\/div>\s*<div class="col-sm-4 col-md-3">[\s\S]*?>([^<]+)<\/a>/ig;
+    let rm;
+    while ((rm = reRe.exec(html))) {
+      data.releases.push(stripTags_(rm[1]).trim());
+    }
+    data.distribuidorasAnchors = splitByCommaToAnchors_(data.releases.join(', '), link, 'Publisher');
+
+    // ====================================
+    // PUNTUACIÓN (USER SCORE)
+    // ====================================
+    
+    const scoreTxt = rowVal(['Score']);
+    const votesTxt = rowVal(['Total votes', 'Votes']);
+    
+    if (scoreTxt) {
+      const m = scoreTxt.replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+      if (m) data.ratingScore10 = parseFloat(m[0]);
+    }
+    
+    if (votesTxt) {
+      const m2 = votesTxt.match(/\d+/);
+      if (m2) data.ratingVotes = parseInt(m2[0], 10);
+    }
+
+    // ====================================
+    // CARÁTULA (INLAY - FRONT)
+    // ====================================
+    
+    let autoCover = '';
+
+    // Estrategia 1: <a href="URL.jpg">...<small>Inlay - Front</small>
+    const pattern1 = /<a[^>]+href=["']([^"']+\.(?:jpg|jpeg|png|webp))["'][^>]*>[\s\S]*?<small>Inlay\s*-\s*Front<\/small>/i;
+    const match1 = pattern1.exec(html);
+    
+    if (match1 && match1[1]) {
+      autoCover = absolutize_(link, match1[1]);
+    }
+
+    // Estrategia 2: Loop por todos los <a> que contengan "Inlay - Front"
+    if (!autoCover) {
+      const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+      let linkMatch;
+      
+      while ((linkMatch = linkRegex.exec(html)) !== null) {
+        const href = linkMatch[1];
+        const content = linkMatch[2];
+        
+        if (/Inlay\s*-\s*Front/i.test(content) && /\.(?:jpg|jpeg|png|webp|gif)$/i.test(href)) {
+          autoCover = absolutize_(link, href);
+          break;
+        }
+      }
+    }
+
+    // Prioridad: Manual > Auto > Fallback
+    const manualTrim = String(coverManual || '').trim();
+    if (manualTrim) {
+      data.caratula = manualTrim;
+    } else if (autoCover) {
+      data.caratula = autoCover;
+    } else {
+      data.caratula = FALLBACK_COVER_URL;
+    }
+
+    // ====================================
+    // SCREENSHOTS (LOADING + RUNNING)
+    // ====================================
+    
+    const top2 = extractTopScreens_(html, link);
+    data.screenshots = top2.slice(0, 2);
+
+    // ====================================
+    // IMÁGENES ADICIONALES
+    // ====================================
+    
+    const addImgs = new Map();
+    
+    const pushAdditional = (u) => {
+      if (!u) return;
+      const abs = absolutize_(link, u);
+      const imgSrc = scrToImg_(abs);
+      const key = normalizeKey_(imgSrc);
+      const isTop = (data.screenshots || []).some(s => normalizeKey_(s) === key);
+      if (!isTop && !addImgs.has(key)) addImgs.set(key, imgSrc);
+    };
+
+    // Buscar en panel de Screenshots
+    const shotsPanel = getPanel_(html, 'Screenshots');
+    if (shotsPanel) {
+      [...shotsPanel.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>/ig)].forEach(m => pushAdditional(m[1]));
+      [...shotsPanel.matchAll(/<img[^>]+src=["']([^"']+)["']/ig)].forEach(m => pushAdditional(m[1]));
+    }
+
+    // Buscar todas las imágenes .scr, .png, .jpg en el HTML
+    [...html.matchAll(/<a[^>]+href=["']([^"']+\.(?:scr|png|jpe?g|webp|gif))["'][^>]*>/ig)]
+      .forEach(m => pushAdditional(m[1]));
+    
+    data.imagenesAdicionales = Array.from(addImgs.values());
+
+    // ====================================
+    // INSTRUCCIONES (PDF O TXT)
+    // ====================================
+    
+    const instPdf = /<a[^>]+href=["']([^"']+\.(?:pdf))["'][^>]*>[\s\S]*?<small>\s*Instructions\s*<\/small>/i.exec(html);
+    const instTxt = /<a[^>]+href=["']([^"']+\.(?:txt))["'][^>]*>[\s\S]*?<small>\s*Instructions\s*<\/small>/i.exec(html);
+    
+    if (instPdf && instPdf[1]) {
+      data.instrucciones = absolutize_(link, instPdf[1]);
+    } else if (instTxt && instTxt[1]) {
+      data.instrucciones = absolutize_(link, instTxt[1]);
+    } else {
+      data.instrucciones = '';
+    }
+
+    // ====================================
+    // MAPA
+    // ====================================
+    
+    const mapsPanel = getPanel_(html, 'Speccy\\s*Screenshot\\s*Maps');
+    if (mapsPanel) {
+      const m = /<a[^>]+href=["']([^"']+)["'][^>]*>/i.exec(mapsPanel);
+      if (m && m[1]) {
+        data.mapa = absolutize_(link, m[1]);
+      } else {
+        data.mapa = '';
+      }
+    } else {
+      data.mapa = '';
+    }
+
+    // ====================================
+    // VÍDEO (YOUTUBE)
+    // ====================================
+    
+    const y1 = /<iframe[^>]+src=["']([^"']*youtube[^"']+)["']/i.exec(html);
+    data.video = (y1 && y1[1]) ? y1[1] : '';
+
+    // ====================================
+    // REVISTAS (MAGAZINE REVIEWS)
+    // ====================================
+    
+    data.revistas = extractSCMagazineReviewsFromHtml_(html);
+
+    return data;
+    
+  } catch (e) {
+    Logger.log('[ERROR] fetchZX_fromSpectrumComputing_: ' + e);
+    return {};
+  }
+}
+
+// ====================================
+// HELPER: EXTRAER LOADING + RUNNING SCREENS
+// ====================================
+
+function extractTopScreens_(html, link) {
+  const found = new Map();
+  const re = /<a[^>]+href=["']([^"']+)["'][^>]*>\s*<div[^>]*>\s*<div[^>]*title=["'](Loading screen|Running screen)["'][^>]*><\/div>[\s\S]*?<\/div>\s*<\/a>/ig;
+  let m;
+  
+  while ((m = re.exec(html))) {
+    const href = absolutize_(link, m[1]);
+    const key = /loading/i.test(m[2]) ? 'loading' : 'running';
+    const existing = found.get(key);
+    
+    if (!existing) {
+      found.set(key, href);
+    } else if (isScr_(href) && !isScr_(existing)) {
+      // Priorizar archivos .scr sobre otros formatos
+      found.set(key, href);
+    }
+  }
+  
+  const list = [];
+  ['loading', 'running'].forEach(k => {
+    const u = found.get(k);
+    if (u) list.push(scrToImg_(u));
+  });
+  
+  return list;
+}
+
+// ====================================
+// HELPER: PROCESAR IMÁGENES ADICIONALES
+// ====================================
+
+function getExtraImagesForGame(rawCellValue, caratulaUrl, screenshotUrls) {
+  if (!rawCellValue) return [];
+  
+  // Separar URLs por saltos de línea, comas o punto y coma
+  let urls = rawCellValue
+    .split(/[\n,;]+/g)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  // Filtrar solo URLs válidas de imágenes
+  urls = urls.filter(url => 
+    /^https?:\/\//i.test(url) && 
+    /\.(jpg|jpeg|png|gif|webp|scr)$/i.test(url)
+  );
+
+  // Eliminar duplicados
+  const seen = new Set();
+  urls = urls.filter(url => {
+    const key = url.toLowerCase().replace(/(\?|\#).*/, '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Excluir la carátula
+  if (caratulaUrl) {
+    const cKey = caratulaUrl.toLowerCase().replace(/(\?|\#).*/, '');
+    urls = urls.filter(url => url.toLowerCase().replace(/(\?|\#).*/, '') !== cKey);
+  }
+
+  // Excluir screenshots principales
+  if (Array.isArray(screenshotUrls)) {
+    const sKeys = screenshotUrls.map(s => s.toLowerCase().replace(/(\?|\#).*/, ''));
+    urls = urls.filter(url => !sKeys.includes(url.toLowerCase().replace(/(\?|\#).*/, '')));
+  }
+
+  // Limitar a 40 imágenes máximo
+  if (urls.length > 40) urls = urls.slice(0, 40);
+  
+  return urls;
+}
+
+/**
+ * ============================================
+ * PARTE 3: SCRAPING DE REVISTAS
+ * ============================================
+ * 
+ * Extrae información de revistas desde dos fuentes:
+ * 1. SpectrumComputing (Magazine Reviews) - Automático
+ * 2. Columna REVISTAS de la hoja - Manual
+ * 
+ * Formato de salida:
+ * { mag: "CRASH", title: "Nº48 (1985/Oct).", href: "URL" }
+ * 
+ * ============================================
+ */
+
+// ====================================
+// REVISTAS DESDE SPECTRUM COMPUTING
+// ====================================
+
+function extractSCMagazineReviewsFromHtml_(html) {
+  if (!html) return [];
+
+  const block = extractMagazineReviewsBlock_(html);
+  if (!block) return [];
+
+  const reviewsRaw = extractMagazineReviewsFromBlock_(block);
+  if (!reviewsRaw || !reviewsRaw.length) return [];
+
+  const out = [];
+  for (const r of reviewsRaw) {
+    if (!r) continue;
+    
+    const revista = String(r.revista || '').trim();
+    const href = String(r.enlace || '').trim();
+    const label = formatReviewLabelForFicha_(r);
+    
+    if (revista && href && label) {
+      out.push({
+        mag: revista,      // "Sinclair User"
+        title: label,      // "Nº55 (1986/Oct)."
+        href: href         // URL al PDF/VIEW
+      });
+    }
+  }
+  
+  return out;
+}
+
+// ====================================
+// EXTRAER BLOQUE "MAGAZINE REVIEWS"
+// ====================================
+
+function extractMagazineReviewsBlock_(html) {
+  const markerStart = "Magazine Reviews";
+  const startIdx = html.indexOf(markerStart);
+  
+  if (startIdx < 0) return null;
+
+  // Buscar dónde termina el bloque (siguiente sección)
+  const endMarkers = [
+    "Magazine References",
+    "Magazine Advertisements",
+    "Related Magazine References",
+    "Magazine related titles",
+    "Scrapped File Downloads"
+  ];
+  
+  let endIdx = html.length;
+  endMarkers.forEach(m => {
+    const idx = html.indexOf(m, startIdx + markerStart.length);
+    if (idx > 0 && idx < endIdx) endIdx = idx;
+  });
+
+  return html.substring(startIdx, endIdx);
+}
+
+// ====================================
+// EXTRAER FILAS DE REVISTAS
+// ====================================
+
+function extractMagazineReviewsFromBlock_(block) {
+  const results = [];
+  
+  // Localizar todas las filas <div class="row zxdb_stripes">
+  const rowOpenRegex = /<div[^>]*class="[^"]*\brow\b[^"]*\bzxdb_stripes\b[^"]*"[^>]*>/gi;
+  const rowStarts = [];
+  let m;
+  
+  while ((m = rowOpenRegex.exec(block)) !== null) {
+    rowStarts.push(m.index);
+  }
+
+  // Procesar cada fila
+  for (let i = 0; i < rowStarts.length; i++) {
+    const start = rowStarts[i];
+    const end = (i + 1 < rowStarts.length) ? rowStarts[i + 1] : block.length;
+    const rowHtml = block.substring(start, end);
+
+    // Extraer columnas <div class="...col-md-X...">
+    const cols = [];
+    const colRegex = /<div[^>]*class="[^"]*col-md-[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
+    let colMatch;
+    
+    while ((colMatch = colRegex.exec(rowHtml)) !== null) {
+      cols.push(colMatch[1]);
+    }
+
+    // Necesitamos al menos 4 columnas: Magazine, Issue, Page, Type
+    if (cols.length < 4) continue;
+
+    // Columna 1: Revista
+    const revista = cleanupText_(stripTags_(cols[0]));
+
+    // Columna 2: Issue + Fecha (formato: "#55 - 1986/Oct")
+    const rawIssue = cleanupText_(stripTags_(cols[1]));
+    let issue = "", fecha = "";
+    
+    if (rawIssue) {
+      const parts = rawIssue.split(" - ");
+      if (parts.length >= 2) {
+        issue = parts[0].trim();
+        fecha = parts.slice(1).join(" - ").trim();
+      } else {
+        issue = rawIssue;
+      }
+    }
+
+    // Columna 3: Página
+    const pageCellHtml = cols[2];
+    const pageText = cleanupText_(stripTags_(pageCellHtml));
+    const firstNumMatch = pageText.match(/\d+(?:-\d+)?/);
+    const pagina = firstNumMatch ? firstNumMatch[0] : pageText;
+
+    // Columna 4: Tipo (Review, Preview, etc.)
+    const tipo = cleanupText_(stripTags_(cols[3]));
+
+    // Columna 5 (opcional): Score
+    const score = cols.length >= 5 ? cleanupText_(stripTags_(cols[4])) : "";
+
+    // Extraer enlace PDF/VIEW desde la celda de página
+    let enlace = "";
+    const linkMatch = pageCellHtml.match(/href="([^"]+)"/i);
+    if (linkMatch && linkMatch[1]) {
+      const href = linkMatch[1];
+      enlace = /^https?:\/\//i.test(href) 
+        ? href 
+        : "https://spectrumcomputing.co.uk" + href;
+    }
+
+    results.push({
+      revista: revista,
+      issue: issue,
+      fecha: fecha,
+      pagina: pagina,
+      tipo: tipo,
+      score: score,
+      enlace: enlace
+    });
+  }
+
+  return results;
+}
+
+// ====================================
+// FORMATEAR LABEL PARA LA FICHA
+// ====================================
+
+function formatReviewLabelForFicha_(r) {
+  if (!r) return "";
+  
+  const issue = String(r.issue || "").trim();
+  const fecha = String(r.fecha || "").trim();
+  
+  // Extraer solo el número del issue (ej: "#48" → "48")
+  const num = issue.match(/\d+/);
+  const parts = [];
+  
+  if (num) parts.push("Nº" + num[0]);
+  if (fecha) parts.push("(" + fecha + ")");
+  
+  let label = parts.join(" ");
+  if (label && !label.endsWith(".")) label += ".";
+  
+  return label.trim();
+}
+
+// ====================================
+// REVISTAS DESDE LA HOJA (MANUAL)
+// ====================================
+
+function parseSheetRevistas_(cellText) {
+  const s = String(cellText || '').trim();
+  if (!s) return [];
+  
+  // Separar por saltos de línea o punto y coma
+  const items = s.split(/\n|;/).map(x => String(x).trim()).filter(Boolean);
+  const out = [];
+  
+  // Detectar nombre de revista desde texto o URL
+  const detectMag = (txt, url) => {
+    const hay = (re) => re.test(txt) || re.test(url);
+    
+    if (hay(/\bcrash\b/i)) return 'CRASH';
+    if (hay(/sinclair\s*user/i)) return 'SINCLAIR USER';
+    if (hay(/your\s*computer/i)) return 'YOUR COMPUTER';
+    if (hay(/your\s*spectrum/i)) return 'YOUR SPECTRUM';
+    if (hay(/(?:micro\s*hobby|microhobby)/i)) return 'MICROHOBBY';
+    if (hay(/microman[ií]a/i)) return 'MICROMANÍA';
+    
+    // Si no coincide con ninguna conocida, usar el dominio
+    try {
+      const h = (new URL(url)).hostname.replace(/^www\./, '');
+      return h.toUpperCase();
+    } catch (_) {
+      return 'REVISTA';
+    }
+  };
+
+  // Parsear cada línea
+  for (const it of items) {
+    let label = '', url = '';
+    
+    // Formato 1: [texto](URL)
+    let m = it.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/i);
+    if (m) {
+      label = m[1].trim();
+      url = m[2].trim();
+    } else {
+      // Formato 2: texto | URL
+      m = it.match(/^(.+?)\|\s*(https?:\/\/\S+)/i);
+      if (m) {
+        label = m[1].trim();
+        url = m[2].trim();
+      } else {
+        // Formato 3: solo URL (o texto + URL sin separador claro)
+        m = it.match(/(https?:\/\/\S+)/i);
+        if (m) {
+          url = m[1];
+          label = it.replace(m[1], '').trim() || m[1];
+        }
+      }
+    }
+    
+    if (!url) continue;
+    
+    const mag = detectMag(label, url);
+    out.push({
+      mag: mag,
+      title: label || url,
+      href: url
+    });
+  }
+  
+  return out;
+}
+
+// ====================================
+// HELPER: LIMPIAR TEXTO
+// ====================================
+
+function cleanupText_(s) {
+  return String(s || "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * ============================================
+ * PARTE 4: SCRAPING ZXART
+ * ============================================
+ * 
+ * Extrae dos datos principales desde ZXArt.ee:
+ * 1. Desarrollador (campo "Produced by")
+ * 2. Sinopsis (traducida de EN a ES)
+ * 
+ * Estrategias de búsqueda (en orden):
+ * - API de ZXArt
+ * - Búsqueda web en el sitio
+ * - Slug heurístico
+ * 
+ * ============================================
+ */
+
+// ====================================
+// OBTENER DESARROLLADOR DESDE ZXART
+// ====================================
+
+function getDeveloperFromZXART_(title) {
+  try {
+    const q = String(title || '').trim();
+
+    // ESTRATEGIA 1: API de ZXArt
+    const apiSearchUrl = `https://zxart.ee/api/search/software?query=${encodeURIComponent(q)}`;
+    const searchRes = UrlFetchApp.fetch(apiSearchUrl, { muteHttpExceptions: true });
+    
+    if (searchRes.getResponseCode() === 200) {
+      let hits = [];
+      try {
+        hits = JSON.parse(searchRes.getContentText());
+      } catch (_) {}
+      
+      if (Array.isArray(hits) && hits.length > 0 && hits[0] && hits[0].id) {
+        const dataUrl = `https://zxart.ee/api/software/${hits[0].id}`;
+        const dataRes = UrlFetchApp.fetch(dataUrl, { muteHttpExceptions: true });
+        
+        if (dataRes.getResponseCode() === 200) {
+          try {
+            const j = JSON.parse(dataRes.getContentText());
+            const raw = (j && (j.producedBy || j.productedBy || j.producer || j.author)) || "";
+            const text = normalizeProducedBy_(raw);
+            if (text) return { text, source: 'zxart_api' };
+          } catch (_) {}
+        }
+      }
+    }
+
+    // ESTRATEGIA 2: Búsqueda web en ZXArt
+    const webResults = findZxartSoftwarePage_(q);
+    if (webResults && webResults.url) {
+      const text = fetchZxartProducedByFromPage_(webResults.url);
+      if (text) return { text, source: 'zxart_web' };
+    }
+
+    // ESTRATEGIA 3: Slug heurístico
+    const slug = makeZxartSlug_(q);
+    const guessUrl = `https://zxart.ee/eng/software/games/${slug}/`;
+    const text3 = fetchZxartProducedByFromPage_(guessUrl);
+    if (text3) return { text: text3, source: 'zxart_slug' };
+
+    return { text: "", source: 'none' };
+    
+  } catch (e) {
+    Logger.log('[ERROR] getDeveloperFromZXART_: ' + e);
+    return { text: "", source: 'error' };
+  }
+}
+
+// ====================================
+// BUSCAR PÁGINA DE SOFTWARE EN ZXART (WEB)
+// ====================================
+
+function findZxartSoftwarePage_(title) {
+  try {
+    const q = String(title || '').trim();
+    const searchUrl = `https://zxart.ee/eng/search/?form=software&query=${encodeURIComponent(q)}`;
+    const res = UrlFetchApp.fetch(searchUrl, { muteHttpExceptions: true });
+    
+    if (res.getResponseCode() !== 200) return null;
+    
+    const html = res.getContentText();
+    const m = html.match(/href=["'](\/eng\/software\/[^"']+)["']/i);
+    
+    if (m && m[1]) {
+      const url = `https://zxart.ee${m[1]}`.replace(/([^:])\/{2,}/g, '$1/').replace('https:/', 'https://');
+      return { url, via: 'web_search' };
+    }
+    
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
+// ====================================
+// EXTRAER "PRODUCED BY" DE UNA PÁGINA ZXART
+// ====================================
+
+function fetchZxartProducedByFromPage_(url) {
+  try {
+    const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) return "";
+    
+    const html = res.getContentText();
+    
+    // Buscar el campo "Produced by"
+    let cell = findLabelBlock_(html, 'Produced\\s*by');
+    if (!cell) cell = findLabelBlock_(html, 'Producido\\s*por');
+
+    if (!cell) {
+      const re = /Produced\s*by\s*:<\/[^>]+>\s*<[^>]+>([\s\S]*?)<\/[^>]+>/i;
+      const m = re.exec(html);
+      if (m) cell = m[1];
+    }
+
+    if (!cell) {
+      const m2 = /<td[^>]*>\s*Produced\s*by\s*:\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i.exec(html);
+      if (m2) cell = m2[1];
+    }
+
+    if (!cell) return "";
+
+    // Extraer nombres desde enlaces <a>
+    const anchors = [];
+    for (const a of String(cell).matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/ig)) {
+      const text = stripTags_(a[2]).replace(/\s+/g, ' ').trim();
+      if (text) anchors.push(text);
+    }
+    
+    if (anchors.length) return cleanDeveloperList_(anchors.join(', '));
+    
+    // Si no hay enlaces, usar el texto plano
+    const plain = stripTags_(cell).replace(/\s+/g, ' ').trim();
+    return cleanDeveloperList_(plain);
+    
+  } catch (_) {
+    return "";
+  }
+}
+
+// ====================================
+// GENERAR SLUG PARA URL ZXART
+// ====================================
+
+function makeZxartSlug_(title) {
+  return String(title || '')
+    .toLowerCase()
+    .replace(/[''`´]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/--+/g, '-');
+}
+
+// ====================================
+// NORMALIZAR DATOS DE "PRODUCED BY"
+// ====================================
+
+function normalizeProducedBy_(raw) {
+  if (!raw) return "";
+  let list = "";
+  
+  if (Array.isArray(raw)) {
+    const names = raw.map(x => 
+      (typeof x === 'string') ? x : (x && (x.name || x.title || x.nickname) || '')
+    ).filter(Boolean);
+    list = names.join(', ');
+  } else if (typeof raw === 'object' && raw) {
+    list = raw.name || raw.title || raw.nickname || "";
+  } else {
+    list = String(raw || '');
+  }
+  
+  return cleanDeveloperList_(list);
+}
+
+// ====================================
+// LIMPIAR LISTA DE DESARROLLADORES
+// ====================================
+
+function cleanDeveloperList_(raw) {
+  return String(raw || '')
+    .split(/[,/]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+    .map(s => toTitleCase_(s))
+    .join(', ');
+}
+
+function toTitleCase_(str) {
+  return String(str || '').replace(/\w\S*/g, w => 
+    w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+  );
+}
+
+// ====================================
+// OBTENER SINOPSIS DESDE ZXART (CON TRADUCCIÓN)
+// ====================================
+
+function getZXArtSynopsisTranslated_(titulo) {
+  const title = (titulo || '').trim();
+  
+  // Resolver URL del juego en ZXArt
+  const url = resolveZXArtUrlForTitle_(title);
+  if (!url) {
+    return { en: '', es: '', preview: '' };
+  }
+
+  // Extraer sinopsis en inglés
+  const sinEN = extractZXArtSynopsisFromUrl_(url);
+  if (!sinEN || !String(sinEN).trim()) {
+    return { en: '', es: '', preview: '' };
+  }
+
+  // Normalizar saltos de línea
+  const normalizedEn = String(sinEN)
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim();
+
+  // Separar en párrafos
+  const paragraphsEn = normalizedEn
+    .split(/\n\s*\n+/)
+    .map(p => p.replace(/\s+/g, ' ').trim())
+    .filter(p => p.length > 0);
+
+  // Si no hay párrafos pero sí texto, usar todo como un párrafo
+  if (!paragraphsEn.length && normalizedEn.length) {
+    paragraphsEn.push(normalizedEn);
+  }
+
+  // Traducir cada párrafo
+  let sinES = '';
+  if (paragraphsEn.length) {
+    const translated = [];
+    
+    for (let i = 0; i < paragraphsEn.length; i++) {
+      const p = paragraphsEn[i];
+      let t = '';
+      
+      try {
+        t = LanguageApp.translate(p, 'en', 'es');
+      } catch (err) {
+        Logger.log('[WARN] Falló traducción de párrafo ' + i + ': ' + err);
+        t = p; // Usar original si falla
+      }
+      
+      translated.push(String(t || '').trim());
+    }
+    
+    sinES = translated.join('\n\n');
+  } else {
+    // Traducción global si no hay párrafos
+    try {
+      sinES = LanguageApp.translate(normalizedEn, 'en', 'es');
+    } catch (err2) {
+      Logger.log('[WARN] Falló traducción global: ' + err2);
+      sinES = '';
+    }
+  }
+
+  sinES = String(sinES || '').trim();
+
+  // Si la traducción falla, usar el inglés original
+  if (!sinES) {
+    sinES = normalizedEn;
+  }
+
+  return {
+    en: normalizedEn,
+    es: sinES,
+    preview: normalizedEn.substring(0, 500)
+  };
+}
+
+// ====================================
+// RESOLVER URL DE ZXART PARA UN TÍTULO
+// ====================================
+
+function resolveZXArtUrlForTitle_(rawTitle) {
+  const title = (rawTitle || "").trim();
+  if (!title) return "";
+
+  const base = "https://zxart.ee";
+
+  // ESTRATEGIA 1: API de ZXArt
+  try {
+    const apiUrl = base + "/api/search/software?query=" + encodeURIComponent(title);
+    const apiResp = UrlFetchApp.fetch(apiUrl, { muteHttpExceptions: true });
+    const code = apiResp.getResponseCode();
+    const text = apiResp.getContentText("UTF-8") || "";
+
+    const match = text.match(/"?(\/eng\/software\/[^"]+)"/);
+    if (code === 200 && match && match[1]) {
+      const candidate = base + match[1];
+      if (urlExists_(candidate)) return candidate;
+    }
+  } catch (e) {}
+
+  // ESTRATEGIA 2: Búsqueda web
+  try {
+    const sUrl = base + "/eng/search/?form=software&query=" + encodeURIComponent(title);
+    const resp = UrlFetchApp.fetch(sUrl, { muteHttpExceptions: true });
+    const code = resp.getResponseCode();
+    const html = resp.getContentText("UTF-8") || "";
+
+    const p = findFirstSoftwareUrlInHtml_(html);
+    if (p) {
+      const candidate = base + p;
+      if (urlExists_(candidate)) return candidate;
+    }
+  } catch (e) {}
+
+  // ESTRATEGIA 3: Slug heurístico
+  try {
+    const slug = slugifyForZXArt_(title);
+    const candidate = base + "/eng/software/games/" + slug + "/";
+    if (urlExists_(candidate)) return candidate;
+  } catch (e) {}
+
+  return "";
+}
+
+// ====================================
+// EXTRAER SINOPSIS DESDE URL DE ZXART
+// ====================================
+
+function extractZXArtSynopsisFromUrl_(url) {
+  try {
+    const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const code = resp.getResponseCode();
+    const html = resp.getContentText("UTF-8") || "";
+
+    if (code !== 200 || !html.length) return "";
+
+    // Buscar bloque de descripción larga
+    const block = extractLongBlock_(html);
+    if (block) return cleanSynopsisText_(block);
+
+    // Buscar og:description
+    const og = extractMetaContent_(html, "property", "og:description");
+    if (og) return cleanSynopsisText_(og);
+
+    // Buscar meta description
+    const meta = extractMetaContent_(html, "name", "description");
+    if (meta) return cleanSynopsisText_(meta);
+
+    return "";
+  } catch (e) {
+    Logger.log('[ERROR] extractZXArtSynopsisFromUrl_: ' + e);
+    return "";
+  }
+}
+
+// ====================================
+// EXTRAER BLOQUE DE DESCRIPCIÓN LARGA
+// ====================================
+
+function extractLongBlock_(html) {
+  const regex = /<div class="zxprod_details_description"[^>]*>([\s\S]*?)<\/div>/i;
+  const m = html.match(regex);
+  if (!m) return "";
+
+  let t = m[1];
+  t = t.replace(/<br\s*\/?>/gi, "\n");
+  t = t.replace(/<\/p>/gi, "\n\n");
+  t = t.replace(/<[^>]+>/g, "");
+  
+  return t;
+}
+
+// ====================================
+// EXTRAER META TAG CONTENT
+// ====================================
+
+function extractMetaContent_(html, attrName, attrValue) {
+  const regex = new RegExp(`<meta[^>]+${attrName}="${attrValue}"[^>]+content="([^"]+)"`, "i");
+  const m = html.match(regex);
+  return m ? m[1] : "";
+}
+
+// ====================================
+// LIMPIAR TEXTO DE SINOPSIS
+// ====================================
+
+function cleanSynopsisText_(text) {
+  if (!text) return '';
+
+  const raw = String(text)
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+
+  const paragraphs = raw
+    .split(/\n\s*\n+/)
+    .map(p => p.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim())
+    .filter(p => p.length > 0);
+
+  if (!paragraphs.length) {
+    return raw.replace(/\s+/g, ' ').trim();
+  }
+
+  return paragraphs.join('\n\n');
+}
+
+// ====================================
+// HELPERS AUXILIARES
+// ====================================
+
+function urlExists_(u) {
+  try {
+    const r = UrlFetchApp.fetch(u, { muteHttpExceptions: true });
+    return r.getResponseCode() === 200;
+  } catch (e) {
+    return false;
+  }
+}
+
+function findFirstSoftwareUrlInHtml_(html) {
+  const re = /href="(\/eng\/software\/[^"]+)"/g;
+  let m;
+  while ((m = re.exec(html)) !== null) return m[1];
+  return "";
+}
+
+function slugifyForZXArt_(title) {
+  let s = title.toLowerCase();
+  const accentMap = {
+    "á": "a", "à": "a", "ä": "a", "â": "a",
+    "é": "e", "è": "e", "ë": "e", "ê": "e",
+    "í": "i", "ì": "i", "ï": "i", "î": "i",
+    "ó": "o", "ò": "o", "ö": "o", "ô": "o",
+    "ú": "u", "ù": "u", "ü": "u", "û": "u",
+    "ñ": "n", "ç": "c"
+  };
+  s = s.split("").map(ch => accentMap[ch] || ch).join("");
+  s = s.replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+  return s.replace(/ /g, "-");
+}
+
+/**
+ * ============================================
+ * PARTE 5: GENERACIÓN HTML DE LA FICHA
+ * ============================================
+ * 
+ * Genera el HTML completo de la ficha con:
+ * - Información básica (año, publisher, autor, etc.)
+ * - Sinopsis (con párrafos)
+ * - Datos técnicos
+ * - Screenshots
+ * - Imágenes adicionales
+ * - Gameplay (YouTube)
+ * - Revistas
+ * - Útiles (mapa, instrucciones, enlace fuente)
+ * 
+ * ============================================
+ */
+
+function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisText) {
+  
+  // ====================================
+  // CSS DE LA FICHA
+  // ====================================
+  const css = `
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 14px;
+      }
+      .h1 {
+        font-weight: 700;
+        font-size: 20px;
+        margin: 0 0 6px;
+      }
+      .meta {
+        color: #666;
+        font-size: 12px;
+        margin: 0 0 10px;
+      }
+      .row {
+        margin: 8px 0;
+      }
+      .cover {
+        max-width: 100%;
+        border-radius: 8px;
+      }
+      .section-title {
+        font-weight: 700;
+        margin-top: 10px;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      .shots img, .addimgs img {
+        width: 100%;
+        border-radius: 6px;
+        display: block;
+        border: 1px solid #ddd;
+      }
+      .info {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #222;
+        margin-top: 8px;
+      }
+      .info .line {
+        margin: 2px 0;
+      }
+      .info b {
+        font-weight: 700;
+      }
+      .video {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+      }
+      .video iframe {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 8px;
+      }
+      a {
+        word-break: break-word;
+        text-decoration: none;
+      }
+    </style>`;
+
+  // ====================================
+  // HELPERS INTERNOS
+  // ====================================
+  
+  // Convierte array de anchors a HTML con enlaces
+  const toJoinedLinks = (arr) => (arr && arr.length)
+    ? arr.map(a => `<a href="${escapeAttr_(a.href)}" target="_blank">${escapeHtml_(a.text)}</a>`).join(', ')
+    : '';
+
+  // Crea anchors locales desde texto simple
+  const makeLocalAnchors = (txt) => {
+    const s = String(txt || '').trim();
+    if (!s) return [];
+    return s.split(/\s*,\s*/).map(t => t.trim()).filter(Boolean).map(t => ({ text: t, href: '#' }));
+  };
+
+  // Renderiza una línea con enlaces
+  const renderLineLinks = (label, anchors) => {
+    if (!anchors || !anchors.length) return '';
+    return `<div class="line">· <b>${escapeHtml_(label)}:</b> ${toJoinedLinks(anchors)}</div>`;
+  };
+
+  // Renderiza una línea con texto plano
+  const renderLineText = (label, text) => {
+    return `<div class="line">· <b>${escapeHtml_(label)}:</b> ${escapeHtml_(text || '')}</div>`;
+  };
+
+  // ====================================
+  // CARÁTULA
+  // ====================================
+  const cover = d.caratula 
+    ? `<div class="row"><img class="cover" src="${escapeAttr_(d.caratula)}" alt="CARÁTULA"/></div>` 
+    : '';
+
+  // ====================================
+  // PLATAFORMA
+  // ====================================
+  const plataformaMeta = plataforma 
+    ? `<div class="meta">${escapeHtml_(plataforma)}</div>` 
+    : '';
+
+  // ====================================
+  // SINOPSIS (RESPETA PÁRRAFOS)
+  // ====================================
+  const sinopsisBlock = (() => {
+    const raw = sinopsisText && String(sinopsisText).trim();
+    if (!raw) return '';
+
+    // Separar por párrafos (saltos de línea dobles)
+    const paragraphs = raw
+      .split(/\n\s*\n+/)
+      .map(p => p.trim())
+      .filter(Boolean);
+
+    const htmlParagraphs = paragraphs
+      .map(p => `<div class="line">${escapeHtml_(p)}</div>`)
+      .join('');
+
+    return `<div class="row"><div class="section-title">Sinopsis</div><div class="info">${htmlParagraphs}</div></div>`;
+  })();
+
+  // ====================================
+  // INFORMACIÓN
+  // ====================================
+  const infoLinesArr = [
+    renderLineLinks('Año', splitByCommaToAnchors_(d.anio, fuenteUrl)),
+    renderLineLinks('Publisher', d.publisherAnchors),
+    renderLineLinks('Desarrollo', d.desarrolladorAnchors),
+    renderLineLinks('Autor', d.autorAnchors),
+    renderLineLinks('Contribuciones', d.contributorsAnchors),
+    renderLineLinks('Género', d.generoAnchors),
+    renderLineLinks('Subgénero', d.subgeneroAnchors),
+    renderLineLinks('Jugadores', d.jugadoresAnchors),
+    renderLineLinks('Controles', d.controlesAnchors),
+    renderLineLinks('Versión', d.versionAnchors),
+    renderLineLinks('Distribuidoras', d.distribuidorasAnchors),
+    renderLineText('Puntuación', (d.ratingDisplay && String(d.ratingDisplay).trim()) ? d.ratingDisplay : 'Dato no disponible')
+  ].filter(Boolean);
+
+  const infoHtml = infoLinesArr.length
+    ? `<div class="row"><div class="section-title">Información</div><div class="info">${infoLinesArr.join('')}</div></div>`
+    : '';
+
+  // ====================================
+  // DATOS TÉCNICOS
+  // ====================================
+  const tecnicosLines = [
+    renderLineLinks('Formato', makeLocalAnchors(tecnicos && tecnicos.formato)),
+    renderLineLinks('ZX +2A', makeLocalAnchors(tecnicos && tecnicos.zx2a)),
+    renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
+    renderLineText('Terminado', tecnicos && tecnicos.terminado)
+  ].filter(Boolean).join('');
+
+  const tecnicosHtml = tecnicosLines
+    ? `<div class="row"><div class="section-title">Datos Técnicos</div><div class="info">${tecnicosLines}</div></div>`
+    : '';
+
+  // ====================================
+  // SCREENSHOTS
+  // ====================================
+  const shotsHtml = (d.screenshots && d.screenshots.length)
+    ? `<div class="row"><div class="section-title">Screenshots</div><div class="grid2 shots">${
+        d.screenshots.map(u => `<img src="${escapeAttr_(u)}" alt="">`).join('')
+      }</div></div>`
+    : '';
+
+  // ====================================
+  // IMÁGENES ADICIONALES
+  // ====================================
+  const addHtml = (d.imagenesAdicionales && d.imagenesAdicionales.length)
+    ? `<div class="row"><div class="section-title">Imágenes adicionales</div><div class="grid2 addimgs">${
+        d.imagenesAdicionales.map(u => `<img src="${escapeAttr_(u)}" alt="">`).join('')
+      }</div></div>`
+    : '';
+
+  // ====================================
+  // GAMEPLAY (YOUTUBE)
+  // ====================================
+  const videoBlock = d.video && /youtube\.com|youtu\.be/i.test(d.video)
+    ? `<div class="row">
+         <div class="section-title">Gameplay</div>
+         <div class="video"><iframe src="${escapeAttr_(youtubeEmbedUrl_(d.video))}" allowfullscreen loading="lazy"></iframe></div>
+       </div>`
+    : (d.video
+        ? `<div class="row">
+             <div class="section-title">Gameplay</div>
+             <a href="${escapeAttr_(d.video)}" target="_blank">▶ Gameplay (YouTube)</a>
+           </div>`
+        : '');
+
+  // ====================================
+  // REVISTAS
+  // ====================================
+  const revistasLines = (d.revistas || []).map(it =>
+    `<div class="line"><b>· ${escapeHtml_(it.mag)}: </b><a href="${escapeAttr_(it.href)}" target="_blank">${escapeHtml_(it.title)}</a></div>`
+  ).join('');
+  
+  const revistasHtml = revistasLines
+    ? `<div class="row"><div class="section-title">Revistas</div><div class="info">${revistasLines}</div></div>`
+    : '';
+
+  // ====================================
+  // ÚTILES (MAPA, INSTRUCCIONES, ENLACE FUENTE)
+  // ====================================
+  const utilesBlock = (d.mapa || d.instrucciones || fuenteUrl)
+    ? `<div class="row">
+         <div class="section-title">Útiles</div>
+         <div class="info">
+           ${d.mapa ? `<div class="line">· <a href="${escapeAttr_(d.mapa)}" target="_blank">🗺️ Mapa</a></div>` : ''}
+           ${d.instrucciones ? `<div class="line">· <a href="${escapeAttr_(d.instrucciones)}" target="_blank">📄 Instrucciones</a></div>` : ''}
+           ${fuenteUrl ? `<div class="line">· <a href="${escapeAttr_(fuenteUrl)}" target="_blank">🔗 Enlace fuente</a></div>` : ''}
+         </div>
+       </div>`
+    : '';
+
+  // ====================================
+  // ENSAMBLAR HTML COMPLETO
+  // ====================================
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">${css}</head><body>`
+    + `<div class="h1">${escapeHtml_(titulo)}</div>`
+    + plataformaMeta
+    + cover
+    + infoHtml
+    + sinopsisBlock
+    + tecnicosHtml
+    + shotsHtml
+    + addHtml
+    + videoBlock
+    + revistasHtml
+    + utilesBlock
+    + `</body></html>`;
+}
+
+// ====================================
+// HELPER: FORMATEAR PUNTUACIÓN
+// ====================================
+
+function formatRatingDisplay_(score10, votes) {
+  const hasScore = (typeof score10 === 'number') && !isNaN(score10);
+  const hasVotes = (typeof votes === 'number') && !isNaN(votes);
+
+  if (!hasScore || !hasVotes) {
+    return 'Dato no disponible';
+  }
+
+  if (score10 === 0 && votes === 0) {
+    return 'Dato no disponible';
+  }
+
+  // Formateo con coma decimal
+  const scoreStr = (Math.round(score10 * 10) / 10).toFixed(1).replace('.', ',');
+  const votosStr = `${votes} voto${votes === 1 ? '' : 's'}`;
+  
+  return `${scoreStr} (${votosStr})`;
+}
+
+// ====================================
+// HELPER: CONVERTIR URL DE YOUTUBE A EMBED
+// ====================================
+
+function youtubeEmbedUrl_(u) {
+  try {
+    let url = String(u);
+    
+    // youtu.be/ID
+    const m1 = url.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+    if (m1) return `https://www.youtube.com/embed/${m1[1]}`;
+    
+    // youtube.com/watch?v=ID
+    const v = (url.match(/[?&]v=([A-Za-z0-9_-]{6,})/) || [])[1];
+    if (v) return `https://www.youtube.com/embed/${v}`;
+    
+    // youtube.com/embed/ID (ya está en formato correcto)
+    const m2 = url.match(/\/embed\/([A-Za-z0-9_-]{6,})/);
+    if (m2) return `https://www.youtube.com/embed/${m2[1]}`;
+    
+    return url;
+  } catch (e) {
+    return u;
+  }
+}
+
+/**
+ * ============================================
+ * PARTE 6: ESCRITURA EN SHEET + IDS
+ * ============================================
+ * 
+ * Funciones para:
+ * 1. Escribir datos scrapeados en la hoja (solo celdas vacías)
+ * 2. Rellenar IDs automáticamente
+ * 3. Limpieza de comillas
+ * 
+ * ============================================
+ */
+
+// ====================================
+// ESCRIBIR DATOS EN LA HOJA (SOLO CELDAS VACÍAS)
+// ====================================
+
+function writeBackZXRowFromData_(sh, row, headers, data, opts) {
+  opts = opts || {};
+  const autoScreens = Array.isArray(opts.autoScreenshots) ? opts.autoScreenshots : [];
+  const sinopsis = String(opts.sinopsis || '').trim();
+
+  // ====================================
+  // HELPER: NORMALIZAR NOMBRES DE COLUMNAS
+  // ====================================
+  function normalizeHeaderKey_(s) {
+    let t = String(s || '').toLowerCase().trim();
+    
+    // Quitar tildes
+    t = t
+      .replace(/[áàäâ]/g, 'a')
+      .replace(/[éèëê]/g, 'e')
+      .replace(/[íìïî]/g, 'i')
+      .replace(/[óòöô]/g, 'o')
+      .replace(/[úùüû]/g, 'u')
+      .replace(/ñ/g, 'n');
+    
+    t = t.replace(/\s+/g, ' ');
+    return t;
+  }
+
+  // ====================================
+  // HELPER: ENCONTRAR ÍNDICE DE COLUMNA
+  // ====================================
+  function colIndex_(name) {
+    const target = normalizeHeaderKey_(name);
+    for (let i = 0; i < headers.length; i++) {
+      const hKey = normalizeHeaderKey_(headers[i]);
+      if (hKey === target) return i + 1;
+    }
+    return 0;
+  }
+
+  // ====================================
+  // HELPER: ESCRIBIR SI LA CELDA ESTÁ VACÍA
+  // ====================================
+  function writeIfEmpty_(colName, value) {
+    const col = colIndex_(colName);
+    if (!col || value == null) return;
+
+    const rng = sh.getRange(row, col);
+    const current = String(rng.getValue() || '').trim();
+
+    // Limpiar comillas del valor
+    const v = limpiarComillasExtra_(value);
+
+    if (!current && v) {
+      rng.setValue(v);
+    }
+  }
+
+  // ====================================
+  // APLANAR DATOS A STRINGS
+  // ====================================
+  const anio = data.anio || '';
+  const publisher = (data.publisherAnchors || []).map(a => a.text).join(', ');
+  const dev = (data.desarrolladorAnchors || []).map(a => a.text).join(', ');
+  const genero = (data.generoAnchors || []).map(a => a.text).join(', ');
+  const subgenero = (data.subgeneroAnchors || []).map(a => a.text).join(', ');
+  const autor = (data.autorAnchors || []).map(a => a.text).join(', ');
+  const contrib = (data.contributorsAnchors || []).map(a => a.text).join(', ');
+  const jugadores = (data.jugadoresAnchors || []).map(a => a.text).join(', ');
+  const controles = (data.controlesAnchors || []).map(a => a.text).join(', ');
+  const version = (data.versionAnchors || []).map(a => a.text).join(', ');
+  const distrib = (data.distribuidorasAnchors || []).map(a => a.text).join(', ');
+  
+  const caratula = data.caratula || '';
+  const screenshots = autoScreens.join(', ');
+  const extraImgs = (data.imagenesAdicionales || []).join('\n');
+  const mapa = data.mapa || '';
+  const instrucciones = data.instrucciones || '';
+  const video = data.video || '';
+  const ratingDisp = (data.ratingDisplay && String(data.ratingDisplay).trim()) ? data.ratingDisplay : '';
+
+  // REVISTAS: formato [REVISTA - Título](URL)
+  const revistasStr = (data.revistas || []).map(r => {
+    if (!r || !r.href) return '';
+    const mag = String(r.mag || '').trim();
+    const title = String(r.title || '').trim();
+    const label = mag ? (mag + (title ? ' - ' + title : '')) : title;
+    const finalLabel = label || r.href;
+    return '[' + finalLabel + '](' + r.href + ')';
+  }).filter(line => line !== '').join('\n');
+
+  // ====================================
+  // ESCRIBIR DATOS (SOLO SI CELDAS VACÍAS)
+  // ====================================
+  
+  // Carátula: NO escribir si es el fallback genérico
+  if (caratula && caratula !== FALLBACK_COVER_URL) {
+    writeIfEmpty_('CARÁTULA', caratula);
+  }
+
+  writeIfEmpty_('AÑO', anio);
+  writeIfEmpty_('PUBLISHER', publisher);
+  writeIfEmpty_('DESARROLLADOR', dev);
+  writeIfEmpty_('GÉNERO', genero);
+  writeIfEmpty_('SUBGÉNERO', subgenero);
+  writeIfEmpty_('AUTOR', autor);
+  writeIfEmpty_('CONTRIBUCIONES', contrib);
+  writeIfEmpty_('JUGADORES', jugadores);
+  writeIfEmpty_('CONTROLES', controles);
+  writeIfEmpty_('VERSIÓN', version);
+  writeIfEmpty_('DISTRIBUIDORAS', distrib);
+  writeIfEmpty_('SCREENSHOTS', screenshots);
+  writeIfEmpty_('IMÁGENES', extraImgs);
+  writeIfEmpty_('REVISTAS', revistasStr);
+  writeIfEmpty_('SINOPSIS', sinopsis);
+  writeIfEmpty_('MAPA', mapa);
+  writeIfEmpty_('INSTRUCCIONES', instrucciones);
+  writeIfEmpty_('VIDEO', video);
+  writeIfEmpty_('PUNTUACIÓN', ratingDisp);
+}
+
+// ====================================
+// LIMPIEZA DE COMILLAS
+// ====================================
+
+function limpiarComillasExtra_(t) {
+  if (t == null) return "";
+  t = String(t);
+
+  // Normalizar comillas dobles "raras" a comillas dobles normales
+  t = t.replace(/[""«»„‟]/g, '"');
+
+  // Colapsar grupos de comillas dobles múltiples a una sola
+  t = t.replace(/"{2,}/g, '"');
+
+  // Eliminar cualquier comilla doble que quede
+  t = t.replace(/"/g, "");
+
+  // Espacios múltiples → uno solo
+  t = t.replace(/\s{2,}/g, " ").trim();
+
+  return t;
+}
+
+// ====================================
+// RELLENAR IDs AUTOMÁTICAMENTE
+// ====================================
+
+function rellenarIdsZXLista() {
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName('ZX_SPECTRUM');
+  
+  if (!sh) return;
+
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) return;
+
+  // Leer cabeceras
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+
+  const colIdIndex = headers.indexOf('ID');
+  const colTituloIndex = headers.indexOf('TÍTULO') !== -1
+    ? headers.indexOf('TÍTULO')
+    : headers.indexOf('TITULO');
+
+  if (colIdIndex === -1 || colTituloIndex === -1) return;
+
+  const colId = colIdIndex + 1;
+  const colTitulo = colTituloIndex + 1;
+  const numRows = lastRow - 1;
+
+  const idsRange = sh.getRange(2, colId, numRows, 1);
+  const titulosRange = sh.getRange(2, colTitulo, numRows, 1);
+
+  const ids = idsRange.getValues();
+  const titulos = titulosRange.getValues();
+
+  // Encontrar el ID más alto actual
+  let maxId = 0;
+  for (let i = 0; i < ids.length; i++) {
+    const val = ids[i][0];
+    if (typeof val === 'number' && !isNaN(val)) {
+      if (val > maxId) maxId = val;
+    }
+  }
+
+  // Rellenar solo IDs vacíos que tengan título
+  for (let i = 0; i < ids.length; i++) {
+    const idActual = ids[i][0];
+    const tituloActual = String(titulos[i][0] || '').trim();
+
+    if (!tituloActual) continue; // Fila vacía
+    
+    if (idActual === '' || idActual == null) {
+      maxId++;
+      ids[i][0] = maxId;
+    }
+  }
+
+  // Guardar los IDs actualizados
+  idsRange.setValues(ids);
+}
+
+/**
+ * ============================================
+ * PARTE 7: HELPERS GENERALES (ÚLTIMA PARTE)
+ * ============================================
+ * 
+ * Funciones auxiliares de bajo nivel:
+ * - Manipulación de HTML
+ * - Manipulación de URLs
+ * - Parsing de anchors
+ * - Conversión de archivos .scr
+ * - Normalización de nombres
+ * - Utilidades diversas
+ * 
+ * ============================================
+ */
+
+// ====================================
+// UTILIDADES BÁSICAS
+// ====================================
+
+function uiAlert_(m) {
+  SpreadsheetApp.getUi().alert(m);
+}
+
+function stripTags_(s) {
+  return String(s || '').replace(/<[^>]*>/g, '');
+}
+
+function escapeHtml_(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[c] || c));
+}
+
+function escapeAttr_(s) {
+  return String(s || '').replace(/"/g, '&quot;');
+}
+
+function escapeRegex_(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ====================================
+// MANIPULACIÓN DE URLs
+// ====================================
+
+function absolutize_(base, url) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  
+  const root = base.replace(/(https?:\/\/[^\/]+).*/, '$1');
+  if (url.charAt(0) !== '/') url = '/' + url;
+  
+  return root + url;
+}
+
+function rootOf_(u) {
+  return String(u).replace(/(https?:\/\/[^\/]+).*/, '$1');
+}
+
+function pathOf_(u) {
+  return String(u).replace(/^https?:\/\/[^\/]+\//, '');
+}
+
+// ====================================
+// CONVERSIÓN DE ARCHIVOS .SCR
+// ====================================
+
+function isScr_(u) {
+  return /\.scr(?:\?|#|$)/i.test(String(u));
+}
+
+function scrToImg_(u) {
+  if (!isScr_(u)) return u;
+  
+  const root = rootOf_(u);
+  const path = pathOf_(u);
+  
+  return `${root}/SCRtoFace.php?SCR=${encodeURIComponent(path)}`;
+}
+
+function normalizeKey_(u) {
+  let s = String(u);
+  s = s.replace(/^https?:\/\/[^\/]+\//, '');
+  s = s.replace(/^SCRtoFace\.php\?SCR=/i, '');
+  s = s.replace(/[?#].*$/, '');
+  return s.toLowerCase();
+}
+
+// ====================================
+// EXTRACCIÓN DE PANELES HTML
+// ====================================
+
+function getPanel_(html, headingReStr) {
+  const re = new RegExp(
+    '<div\\s+class="panel-heading[^"]*">\\s*' + headingReStr + 
+    '[\\s\\S]*?<div\\s+class="panel-body">([\\s\\S]*?)<\\/div>',
+    'i'
+  );
+  const m = re.exec(html);
+  return m ? m[1] : '';
+}
+
+function findLabelBlock_(fullHtml, label) {
+  const L = escapeRegex_(label);
+  const re = new RegExp(
+    '(?:' +
+    '<dt[^>]*>\\s*' + L + '\\s*:?\\s*<\\/dt>\\s*<dd[^>]*>([\\s\\S]*?)<\\/dd>|' +
+    '<div\\s+class="col-sm-4">\\s*<b>\\s*' + L + '\\s*:?\\s*<\\/b>\\s*<\\/div>\\s*<div\\s+class="col-sm-8">([\\s\\S]*?)<\\/div>|' +
+    '<t[hd][^>]*>\\s*' + L + '\\s*:?\\s*<\\/t[hd]>\\s*<t[hd][^>]*>([\\s\\S]*?)<\\/t[hd]>' +
+    ')',
+    'i'
+  );
+  const m = re.exec(fullHtml);
+  if (!m) return '';
+  return (m[1] || m[2] || m[3] || '');
+}
+
+// ====================================
+// PARSING DE ANCHORS (ENLACES)
+// ====================================
+
+function parseAnchors_(htmlInner, baseUrl) {
+  const out = [];
+  const s = String(htmlInner || '');
+  
+  // Buscar todos los enlaces <a>
+  for (const m of s.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/ig)) {
+    const href = absolutize_(baseUrl, m[1]);
+    const text = stripTags_(m[2]).replace(/\s+/g, ' ').trim();
+    if (text) out.push({ text, href });
+  }
+  
+  if (out.length) return out;
+
+  // Si no hay enlaces, crear anchors desde texto plano
+  const plain = stripTags_(s).replace(/\s*\n\s*/g, '|').replace(/\s*[,;]\s*/g, '|');
+  const parts = plain.split('|').map(x => x.trim()).filter(Boolean);
+  
+  for (const p of parts) {
+    const href = `${rootOf_(baseUrl)}/list?quick=s&text=${encodeURIComponent(p)}`;
+    out.push({ text: p, href });
+  }
+  
+  return out;
+}
+
+function splitByCommaToAnchors_(txt, baseUrl, labelPrefix) {
+  const s = String(txt || '').trim();
+  if (!s) return [];
+  
+  const parts = s.split(/\s*,\s*/).map(t => t.trim()).filter(Boolean);
+  const root = rootOf_(baseUrl);
+  
+  return parts.map(p => {
+    const q = labelPrefix ? `${labelPrefix} ${p}` : p;
+    return {
+      text: p,
+      href: `${root}/list?quick=s&text=${encodeURIComponent(q)}`
+    };
+  });
+}
+
+// ====================================
+// NORMALIZACIÓN DE NOMBRES
+// ====================================
+
+function normalizePublisherName_(t) {
+  let s = String(t || '').trim();
+  
+  // Quitar sufijos geográficos
+  s = s.replace(/\s*\((?:UK|USA|US|Spain|Italia|France|Germany|ES|GB)\)\s*$/i, '');
+  
+  // Quitar palabras comunes de empresas
+  s = s.replace(/\b(Software|Ltd\.?|Limited|Inc\.?|S\.?A\.?|S\.?L\.?)\b/ig, '');
+  s = s.replace(/\s{2,}/g, ' ').trim();
+  
+  // Normalizar Ocean
+  if (/^ocean\b/i.test(s)) s = 'Ocean';
+  
+  return s;
+}
+
+// ====================================
+// PARSING DE URLs (ANÁLISIS DE NOMBRES)
+// ====================================
+
+function parseUrlName_(u) {
+  const full = String(u);
+  const clean = full.split(/[?#]/)[0];
+  const file = clean.substring(clean.lastIndexOf('/') + 1);
+  const dot = file.lastIndexOf('.');
+  const base = dot > 0 ? file.substring(0, dot) : file;
+  const ext = dot > 0 ? file.substring(dot + 1) : '';
+  
+  return { full, file, base, ext };
+}
