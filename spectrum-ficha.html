@@ -193,6 +193,7 @@
     let additionalImageIndex = 0;
     let additionalImagesKeydownBound = false;
     let modalAbierta = false;
+    let currentGroupLabel = "";
 
 
     // ============================================
@@ -477,6 +478,7 @@ function parseListaCSV(text) {
     const idxDes    = header.indexOf("DESARROLLO");
     const idxContr  = header.indexOf("CONTRIBUCIONES");
     const idxGenero = header.indexOf("GENERO_MOSTRAR");
+    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
@@ -500,7 +502,8 @@ function parseListaCSV(text) {
             autor:  getColumnValue(cols, idxAutor),
             des:    getColumnValue(cols, idxDes),
             contr:  getColumnValue(cols, idxContr),
-            genero: getColumnValue(cols, idxGenero)
+            genero: getColumnValue(cols, idxGenero),
+            subgenero: getColumnValue(cols, idxSubgenero)
         });
     }
 
@@ -1439,6 +1442,26 @@ function updateRevistas(game) {
     // NAVEGACIÓN ENTRE JUEGOS
     // ============================================
 
+    function computeGroupLabel() {
+    const filterField = (getQueryParam("filterField") || "").toLowerCase();
+    const filterValue = (getQueryParam("filterValue") || "").trim();
+    const searchQuery = getQueryParam("search");
+
+    if (filterField === "subgenero" && filterValue) {
+        return `Subgénero ${filterValue}`;
+    }
+
+    if (searchQuery) {
+        const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+        if (singleCharMatch) {
+            return `Letra ${searchQuery.toUpperCase()}`;
+        }
+        return `"${searchQuery}"`;
+    }
+
+    return "Juegos ZX Spectrum";
+}
+
     function updateNavCounter() {
     const counterEl = document.querySelector(".game-nav-counter");
     const titleEl = document.querySelector(".game-nav-title");
@@ -1453,20 +1476,8 @@ function updateRevistas(game) {
     
     // Actualizar título según si hay búsqueda o no
     if (titleEl) {
-        const searchQuery = getQueryParam("search");
-        if (searchQuery) {
-            // Comprobar si es un solo carácter (letra o número)
-            const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
-            if (singleCharMatch) {
-                // Una sola letra/número → "Letra X"
-                titleEl.textContent = `Letra ${searchQuery.toUpperCase()}`;
-            } else {
-                // Búsqueda normal → "búsqueda" (con comillas)
-                titleEl.textContent = `"${searchQuery}"`;
-            }
-        } else {
-            titleEl.textContent = "Juegos ZX Spectrum";
-        }
+        const label = currentGroupLabel || computeGroupLabel();
+        titleEl.textContent = label;
     }
 }
 
@@ -1498,6 +1509,8 @@ function attachVoiceStopToNavigation() {
     
     // Obtener el parámetro search actual para mantenerlo en la navegación
     const searchQuery = getQueryParam("search");
+    const filterField = getQueryParam("filterField");
+    const filterValue = getQueryParam("filterValue");
 
     if (prevArrow) {
         prevArrow.addEventListener("click", () => {
@@ -1515,6 +1528,12 @@ function attachVoiceStopToNavigation() {
                 let url = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
                 }
                 window.location.href = url;
             }
@@ -1539,6 +1558,12 @@ function attachVoiceStopToNavigation() {
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
                 window.location.href = url;
             }
         });
@@ -1561,10 +1586,17 @@ function attachVoiceStopToNavigation() {
 
         // Comprobar si hay filtro de búsqueda
         const searchQuery = getQueryParam("search");
-        
+        const filterField = (getQueryParam("filterField") || "").toLowerCase();
+        const filterValue = (getQueryParam("filterValue") || "").trim();
+
         let filteredGames = games;
-        
-        if (searchQuery) {
+        currentGroupLabel = "";
+
+        if (filterField === "subgenero" && filterValue) {
+            const qNorm = normalizeText(filterValue);
+            filteredGames = games.filter(game => normalizeText(game.subgenero || "").includes(qNorm));
+            currentGroupLabel = `Subgénero ${filterValue}`;
+        } else if (searchQuery) {
             const qNorm = normalizeText(searchQuery);
             
             // Comprobar si es búsqueda por un solo carácter (letra o número)
@@ -1576,6 +1608,7 @@ function attachVoiceStopToNavigation() {
                     const titleNorm = normalizeText(game.sortKey || "");
                     return titleNorm.startsWith(char);
                 });
+                
             } else {
                 // Búsqueda normal en todos los campos
                 filteredGames = games.filter(game => {
@@ -1586,6 +1619,7 @@ function attachVoiceStopToNavigation() {
                     const desNorm = normalizeText(game.des || "");
                     const contrNorm = normalizeText(game.contr || "");
                     const generoNorm = normalizeText(game.genero || "");
+                    const subgeneroNorm = normalizeText(game.subgenero || "");
 
                     return (
                         titleNorm.includes(qNorm) ||
@@ -1594,10 +1628,14 @@ function attachVoiceStopToNavigation() {
                         autorNorm.includes(qNorm) ||
                         desNorm.includes(qNorm) ||
                         contrNorm.includes(qNorm) ||
-                        generoNorm.includes(qNorm)
+                        generoNorm.includes(qNorm) ||
+                        subgeneroNorm.includes(qNorm)
                     );
                 });
+                currentGroupLabel = `"${searchQuery}"`;
             }
+        } else {
+            currentGroupLabel = "Juegos ZX Spectrum";
         }
 
         sortedGamesList = filteredGames;
@@ -1673,20 +1711,7 @@ function attachVoiceStopToNavigation() {
     // Mostrar título correcto desde el inicio (evita parpadeo)
     const titleEl = document.querySelector(".game-nav-title");
     if (titleEl) {
-        const searchQuery = getQueryParam("search");
-        if (searchQuery) {
-            // Comprobar si es un solo carácter (letra o número)
-            const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
-            if (singleCharMatch) {
-                // Una sola letra/número → "Letra X"
-                titleEl.textContent = `Letra ${searchQuery.toUpperCase()}`;
-            } else {
-                // Búsqueda normal → "búsqueda" (con comillas)
-                titleEl.textContent = `"${searchQuery}"`;
-            }
-        } else {
-            titleEl.textContent = "Juegos ZX Spectrum";
-        }
+        titleEl.textContent = computeGroupLabel();
     }
 
     // Recuperar contador guardado mientras carga
@@ -1767,6 +1792,8 @@ function setupSwipeNavigation() {
     
     // Obtener el parámetro search actual
     const searchQuery = getQueryParam("search");
+    const filterField = getQueryParam("filterField");
+    const filterValue = getQueryParam("filterValue");
 
     document.addEventListener("touchstart", function(e) {
         touchStartX = e.changedTouches[0].screenX;
@@ -1805,6 +1832,12 @@ function setupSwipeNavigation() {
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
                 stopSynopsisVoice();
                 window.location.href = url;
             }
@@ -1815,6 +1848,12 @@ function setupSwipeNavigation() {
                 let url = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
                 }
                 stopSynopsisVoice();
                 window.location.href = url;
