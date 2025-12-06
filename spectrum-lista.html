@@ -73,7 +73,9 @@
 
   // Lista global con TODOS los juegos (para el buscador)
   let allGames = [];
-
+  // Contexto del último filtro aplicado
+  let currentFilterField = "";
+  let currentFilterValue = "";
  
   // =========================================
   // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
@@ -332,6 +334,9 @@
     if (query) {
       url += "&search=" + encodeURIComponent(query);
     }
+    if (currentFilterField && currentFilterValue) {
+      url += `&filterField=${encodeURIComponent(currentFilterField)}&filterValue=${encodeURIComponent(currentFilterValue)}`;
+    }
     window.location.href = url;
   }
 });
@@ -392,12 +397,16 @@ if (singleCharMatch) {
     });
 
     renderGames(filteredByChar, trimmed);
+    currentFilterField = "";
+    currentFilterValue = "";
     return; // ⬅️ IMPORTANTE: no seguir con el buscador normal
 }
 
       if (!trimmed) {
         // Sin texto → lista completa
         renderGames(allGames, "");
+        currentFilterField = "";
+        currentFilterValue = "";
         return;
       }
 
@@ -428,6 +437,18 @@ if (singleCharMatch) {
 });
 
 
+      // Guardar contexto del filtro si es un subgénero exacto
+      currentFilterField = "";
+      currentFilterValue = trimmed;
+
+      const isExactSubgenero =
+        filtered.length > 0 &&
+        filtered.every(game => normalizeText(game.subgenero) === qNorm);
+
+      if (isExactSubgenero) {
+        currentFilterField = "subgenero";
+      }
+        
       renderGames(filtered, query);
     });
   }
