@@ -2205,6 +2205,7 @@ function buildIgdbQueryBody_(extra) {
     'first_release_date',
     'genres.name',
     'keywords.name',
+    'themes.name',
     'platforms.name',
     'summary',
     'cover.url',
@@ -2280,11 +2281,19 @@ function buildIgdbGame_(raw) {
     ? raw.platforms.map(p => p && p.name).filter(Boolean)
     : [];
 
+  const keywordNames = Array.isArray(raw.keywords)
+    ? raw.keywords.map(k => k && k.name).filter(Boolean)
+    : [];
+
+  const themeNames = Array.isArray(raw.themes)
+    ? raw.themes.map(t => t && t.name).filter(Boolean)
+    : [];
+
   return {
     title: raw.name || '',
     year: releaseDate ? releaseDate.getFullYear() : '',
     genres: Array.isArray(raw.genres) ? raw.genres.map(g => g && g.name).filter(Boolean) : [],
-    keywords: Array.isArray(raw.keywords) ? raw.keywords.map(k => k && k.name).filter(Boolean) : [],
+    keywords: keywordNames.concat(themeNames),
     publisherNames: publishers,
     developerNames: developers,
     platformNames: platformNames,
