@@ -310,7 +310,7 @@
     });
   }
 
-  function renderGames(gamesToRender, query = "", totalCount = allGames.length) {
+  function renderGames(gamesToRender, query = "") {
     const container = document.getElementById("zx-spectrum-list");
     if (!container) return;
 
@@ -347,7 +347,7 @@
     // Actualizar contador "X REGISTROS" o "N DE X REGISTROS"
     const recordsEl = document.querySelector(".spectrum-records-text");
     if (recordsEl) {
-      const total = totalCount;
+      const total = allGames.length;
       if (!query.trim()) {
         recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
       } else {
@@ -391,13 +391,13 @@ if (singleCharMatch) {
         return titleNorm.startsWith(char);
     });
 
-    renderGames(filteredByChar, trimmed, allGames.length);
+    renderGames(filteredByChar, trimmed);
     return; // ⬅️ IMPORTANTE: no seguir con el buscador normal
 }
 
       if (!trimmed) {
         // Sin texto → lista completa
-        renderGames(allGames, "", allGames.length);
+        renderGames(allGames, "");
         return;
       }
 
@@ -428,7 +428,7 @@ if (singleCharMatch) {
 });
 
 
-      renderGames(filtered, query, allGames.length);
+      renderGames(filtered, query);
     });
   }
 
@@ -457,7 +457,7 @@ if (singleCharMatch) {
       allGames = games;
 
       // Pintamos la lista completa (estado inicial, sin filtro)
-      renderGames(allGames, "", allGames.length);
+      renderGames(allGames, "");
 
       // Configuramos el buscador (una sola vez)
       setupSearch();
