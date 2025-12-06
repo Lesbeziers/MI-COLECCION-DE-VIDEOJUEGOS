@@ -55,11 +55,55 @@ function menuPreviewFichaActual() {
     return i > -1 ? sh.getRange(row, i + 1).getValue() : '';
   };
 
-  const isZX = /spectrum/i.test(sh.getName());
-  const titulo = get('TÍTULO');
-  
-  if (!titulo) return uiAlert_('Falta el campo "TÍTULO" en la fila.');
-  if (!isZX) return uiAlert_('Esta vista previa está pensada para la hoja "ZX Spectrum".');
+const sheetName = sh.getName().trim().toUpperCase();
+const isZX = sheetName.includes('SPECTRUM');
+const isPS3 = sheetName.includes('PS3');  // <-- nuevo
+
+const titulo = get('TÍTULO') || get('TITULO');
+
+if (!titulo) return uiAlert_('Falta el campo "TÍTULO" / "TITULO" en la fila.');
+
+// === FLUJO ZX SPECTRUM (sin cambios) ===
+if (isZX) {
+    // Aquí no tocamos NADA del flujo original.
+} else if (isPS3) {
+  // ====================================
+  // FLUJO PS3 (de momento usando stub)
+  // ====================================
+
+  // 1) Obtener LINK si existe (puede ser opcional en PS3, así que lo tratamos con cuidado)
+  const linkPS3 = get('LINK') || '';
+
+  // 2) Llamar al stub de IGDB (más adelante aquí irá la llamada real)
+  const dataPS3 = fetchPS3_fromIGDB_(titulo);
+
+  // 3) Construir HTML de ficha reutilizando el mismo motor que ZX
+  //    Necesitamos pasar un "tecnicos" mínimo compatible.
+  const tecnicosPS3 = {
+    formato: '',
+    zx2a: '',
+    tspec: '',
+    terminado: ''
+  };
+
+  const html = buildFichaHtml_(
+    dataPS3,
+    'PlayStation 3',   // plataforma
+    linkPS3 || '',     // fuenteUrl (lo usamos para anchors si algún día hace falta)
+    dataPS3.sinopsis || ''
+  );
+
+  const htmlFull = wrapHtmlForSidebar_(html);
+
+  const ui = SpreadsheetApp.getUi();
+  const htmlOutput = HtmlService.createHtmlOutput(htmlFull)
+    .setWidth(480)
+    .setHeight(600);
+
+  ui.showSidebar(htmlOutput);
+  return;
+} else {
+
 
   const link = get('LINK');
   if (!link) return uiAlert_('Falta el campo "LINK".');
@@ -2070,437 +2114,6 @@ function parseUrlName_(u) {
   const dot = file.lastIndexOf('.');
   const base = dot > 0 ? file.substring(0, dot) : file;
   const ext = dot > 0 ? file.substring(dot + 1) : '';
-
+  
   return { full, file, base, ext };
-}
-
-/**
- * ============================================
- * PARTE 8: SOPORTE IGDB / PLATAFORMAS MÚLTIPLES
- * ============================================
- *
- * - Adaptador genérico de IGDB (búsqueda + fetch por URL)
- * - Lectura de configuración de plataformas (CONFIG_PLATAFORMAS)
- * - Actualización de PS3 desde IGDB respetando reglas de ZX
- * - Sincronización de PS3_LISTA con PS3
- *
- * ============================================
- */
-
-// ====================================
-// CONFIG DE PLATAFORMAS
-// ====================================
-
-function getPlatformConfig_(platformKey) {
-  const ss = SpreadsheetApp.getActive();
-  const sh = ss.getSheetByName('CONFIG_PLATAFORMAS');
-  if (!sh) return null;
-
-  const data = sh.getDataRange().getValues();
-  if (!data.length) return null;
-
-  const headers = data[0];
-  const idx = (name) => headers.indexOf(name);
-
-  const keyIdx = idx('PLATFORM_KEY');
-  const dataIdx = idx('DATA_SHEET');
-  const listIdx = idx('LIST_SHEET');
-  const sourceIdx = idx('SOURCE_TYPE');
-  const extraIdx = idx('EXTRA_FIELDS');
-
-  if (keyIdx === -1 || dataIdx === -1 || listIdx === -1 || sourceIdx === -1) return null;
-
-  for (let i = 1; i < data.length; i++) {
-    const row = data[i];
-    if (String(row[keyIdx]).trim().toUpperCase() === String(platformKey || '').trim().toUpperCase()) {
-      return {
-        dataSheetName: row[dataIdx] || '',
-        listSheetName: row[listIdx] || '',
-        sourceType: row[sourceIdx] || '',
-        extraFieldsConfig: parseExtraFieldsConfig_(row[extraIdx])
-      };
-    }
-  }
-
-  return null;
-}
-
-function parseExtraFieldsConfig_(raw) {
-  const txt = String(raw || '').trim();
-  if (!txt) return [];
-
-  return txt.split('|')
-    .map(pair => {
-      const [key, label] = pair.split(':');
-      return {
-        key: String(key || '').trim(),
-        label: String(label || '').trim()
-      };
-    })
-    .filter(it => it.key && it.label);
-}
-
-// ====================================
-// ADAPTADOR IGDB GENÉRICO
-// ====================================
-
-const IGDB_PLATFORM_IDS_ = {
-  PS3: 9
-};
-
-function fetchIGDBGameByUrl_(igdbUrl) {
-  try {
-    const slugMatch = /igdb\.com\/games\/([^/?#]+)/i.exec(String(igdbUrl || ''));
-    if (!slugMatch) return null;
-
-    const slug = slugMatch[1];
-    const body = buildIgdbQueryBody_(
-      `where slug = "${slug}";\nlimit 1;`
-    );
-    const games = igdbRequest_('games', body);
-    if (!Array.isArray(games) || !games.length) return null;
-
-    const game = buildIgdbGame_(games[0]);
-    return game;
-  } catch (err) {
-    Logger.log('[IGDB] fetchIGDBGameByUrl_ error: ' + err);
-    return null;
-  }
-}
-
-function searchIGDBGame_(title, platformFilter) {
-  try {
-    const q = String(title || '').trim();
-    if (!q) return null;
-
-    const platformId = IGDB_PLATFORM_IDS_[platformFilter] || platformFilter;
-    const whereParts = [];
-    if (platformId) {
-      whereParts.push(`platforms = (${platformId})`);
-    }
-
-    const whereClause = whereParts.length ? `where ${whereParts.join(' & ')};` : '';
-    const body = buildIgdbQueryBody_([
-      whereClause,
-      `search "${q}";`,
-      'limit 3;'
-    ].join('\n'));
-
-    const games = igdbRequest_('games', body);
-    if (!Array.isArray(games) || !games.length) return null;
-    if (games.length !== 1) return null; // Ambigüedad u 0 resultados
-
-    const game = buildIgdbGame_(games[0]);
-    return game;
-  } catch (err) {
-    Logger.log('[IGDB] searchIGDBGame_ error: ' + err);
-    return null;
-  }
-}
-
-function buildIgdbQueryBody_(extra) {
-  const fields = [
-    'name',
-    'slug',
-    'first_release_date',
-    'genres.name',
-    'keywords.name',
-    'themes.name',
-    'platforms.name',
-    'summary',
-    'cover.url',
-    'screenshots.url',
-    'videos.video_id',
-    'rating',
-    'involved_companies.company.name',
-    'involved_companies.publisher',
-    'involved_companies.developer',
-    'game_modes.name'
-  ].join(',');
-
-  return `fields ${fields};\n${extra || ''}`;
-}
-
-function igdbRequest_(endpoint, body) {
-  const props = PropertiesService.getScriptProperties();
-  const clientId = props.getProperty('IGDB_CLIENT_ID');
-  const token = props.getProperty('IGDB_ACCESS_TOKEN');
-
-  if (!clientId || !token) return [];
-
-  try {
-    const resp = UrlFetchApp.fetch(`https://api.igdb.com/v4/${endpoint}`, {
-      method: 'post',
-      contentType: 'text/plain',
-      payload: body,
-      muteHttpExceptions: true,
-      headers: {
-        'Client-ID': clientId,
-        'Authorization': 'Bearer ' + token
-      }
-    });
-
-    if (resp.getResponseCode() !== 200) return [];
-
-    try {
-      return JSON.parse(resp.getContentText());
-    } catch (err) {
-      Logger.log('[IGDB] JSON parse error: ' + err);
-      return [];
-    }
-  } catch (err2) {
-    Logger.log('[IGDB] Request error: ' + err2);
-    return [];
-  }
-}
-
-function buildIgdbGame_(raw) {
-  if (!raw) return null;
-
-  const releaseDate = raw.first_release_date ? new Date(raw.first_release_date * 1000) : null;
-  const coverUrl = normalizeIgdbImage_(raw.cover && raw.cover.url, 't_cover_big');
-  const screenshots = Array.isArray(raw.screenshots)
-    ? raw.screenshots.map(s => normalizeIgdbImage_(s.url, 't_screenshot_big')).filter(Boolean)
-    : [];
-  const videoUrls = Array.isArray(raw.videos)
-    ? raw.videos.map(v => v && v.video_id ? `https://www.youtube.com/watch?v=${v.video_id}` : '').filter(Boolean)
-    : [];
-
-  const publishers = [];
-  const developers = [];
-  if (Array.isArray(raw.involved_companies)) {
-    raw.involved_companies.forEach(ic => {
-      const name = ic && ic.company && ic.company.name;
-      if (!name) return;
-      if (ic.publisher) publishers.push(name);
-      if (ic.developer) developers.push(name);
-    });
-  }
-
-  const platformNames = Array.isArray(raw.platforms)
-    ? raw.platforms.map(p => p && p.name).filter(Boolean)
-    : [];
-
-  const keywordNames = Array.isArray(raw.keywords)
-    ? raw.keywords.map(k => k && k.name).filter(Boolean)
-    : [];
-
-  const themeNames = Array.isArray(raw.themes)
-    ? raw.themes.map(t => t && t.name).filter(Boolean)
-    : [];
-
-  return {
-    title: raw.name || '',
-    year: releaseDate ? releaseDate.getFullYear() : '',
-    genres: Array.isArray(raw.genres) ? raw.genres.map(g => g && g.name).filter(Boolean) : [],
-    keywords: keywordNames.concat(themeNames),
-    publisherNames: publishers,
-    developerNames: developers,
-    platformNames: platformNames,
-    summary: raw.summary || '',
-    coverUrl: coverUrl,
-    screenshotUrls: screenshots,
-    videoUrls: videoUrls,
-    rating: raw.rating || '',
-    gameModes: Array.isArray(raw.game_modes) ? raw.game_modes.map(m => m && m.name).filter(Boolean) : [],
-    igdbUrl: raw.slug ? `https://www.igdb.com/games/${raw.slug}` : ''
-  };
-}
-
-function normalizeIgdbImage_(url, preferredSize) {
-  if (!url) return '';
-  let clean = String(url).trim();
-  if (clean.startsWith('//')) clean = 'https:' + clean;
-  if (!/^https?:\/\//i.test(clean)) return '';
-  if (preferredSize) {
-    clean = clean.replace(/\/t_[^/]+\//, '/' + preferredSize + '/');
-  }
-  return clean;
-}
-
-// ====================================
-// ACTUALIZADOR PS3 DESDE IGDB
-// ====================================
-
-function actualizarPS3DesdeIGDB() {
-  const config = getPlatformConfig_('PS3');
-  if (!config || String(config.sourceType).toUpperCase() !== 'IGDB') return;
-
-  const ss = SpreadsheetApp.getActive();
-  const sh = ss.getSheetByName(config.dataSheetName || 'PS3');
-  if (!sh) return;
-
-  const data = sh.getDataRange().getValues();
-  if (!data.length) return;
-
-  const headers = data[0];
-  const body = data.slice(1);
-  const numRows = body.length;
-  const numCols = headers.length;
-  const updated = body.map(r => r.slice());
-
-  const col = (name) => headers.indexOf(name);
-
-  const idIdx = col('ID');
-  const tituloIdx = col('TITULO');
-  const anioIdx = col('AÑO');
-  const generoIdx = col('GENERO');
-  const subgeneroIdx = col('SUBGENERO');
-  const publisherIdx = col('PUBLISHER');
-  const desarrolladorIdx = col('DESARROLLADOR');
-  const jugadoresIdx = col('JUGADORES');
-  const plataformasIdx = col('PLATAFORMAS');
-  const sinopsisIdx = col('SINOPSIS');
-  const caratulaIdx = col('CARATULA');
-  const screenshotsIdx = col('SCREENSHOTS');
-  const videoIdx = col('VIDEO');
-  const extraImagenesIdx = col('EXTRA_IMAGENES');
-  const puntuacionIdx = col('PUNTUACION');
-  const favoritoIdx = col('FAVORITO');
-  const terminadoIdx = col('TERMINADO');
-  const masInfoIdx = col('MAS_INFO');
-  const igdbUrlIdx = col('IGDB_URL');
-  const ignoredIdx = col('IGNORED_IGDB_ID');
-  const ubicacionIdx = col('PS3_UBICACION');
-  const formatoIdx = col('PS3_TIPO_FORMATO');
-
-  const protectedIdx = [favoritoIdx, terminadoIdx, masInfoIdx, ignoredIdx, ubicacionIdx, formatoIdx, extraImagenesIdx].filter(i => i >= 0);
-
-  for (let r = 0; r < numRows; r++) {
-    const row = body[r];
-    const out = updated[r];
-
-    const id = idIdx >= 0 ? row[idIdx] : '';
-    if (!String(id || '').trim()) continue;
-
-    if (ignoredIdx >= 0 && String(row[ignoredIdx] || '').trim()) continue;
-
-    const titulo = tituloIdx >= 0 ? row[tituloIdx] : '';
-    const existingIgdbUrl = igdbUrlIdx >= 0 ? row[igdbUrlIdx] : '';
-
-    let game = null;
-    if (existingIgdbUrl) {
-      game = fetchIGDBGameByUrl_(existingIgdbUrl);
-    } else if (titulo) {
-      game = searchIGDBGame_(titulo, 'PS3');
-      if (game && igdbUrlIdx >= 0 && !out[igdbUrlIdx] && game.igdbUrl) {
-        out[igdbUrlIdx] = game.igdbUrl;
-      }
-    }
-
-    if (!game) continue;
-
-    const setIfEmpty = (idx, val) => {
-      if (idx < 0) return;
-      if (protectedIdx.indexOf(idx) !== -1) return;
-      const current = out[idx];
-      if (String(current || '').trim()) return;
-      if (val === undefined || val === null || String(val).trim() === '') return;
-      out[idx] = val;
-    };
-
-    setIfEmpty(tituloIdx, game.title);
-    setIfEmpty(anioIdx, game.year);
-    setIfEmpty(generoIdx, (game.genres && game.genres.length) ? game.genres[0] : '');
-    setIfEmpty(subgeneroIdx, (game.keywords && game.keywords.length) ? game.keywords[0] : '');
-    setIfEmpty(publisherIdx, (game.publisherNames || []).join(', '));
-    setIfEmpty(desarrolladorIdx, (game.developerNames || []).join(', '));
-    setIfEmpty(jugadoresIdx, (game.gameModes && game.gameModes.length) ? game.gameModes.join(', ') : 'Single player');
-    setIfEmpty(plataformasIdx, (game.platformNames || []).join(', '));
-    setIfEmpty(sinopsisIdx, game.summary);
-    setIfEmpty(caratulaIdx, game.coverUrl || FALLBACK_COVER_URL);
-    setIfEmpty(screenshotsIdx, (game.screenshotUrls || []).join('\n'));
-    setIfEmpty(videoIdx, (game.videoUrls && game.videoUrls.length) ? game.videoUrls[0] : '');
-    setIfEmpty(puntuacionIdx, game.rating);
-  }
-
-  sh.getRange(2, 1, numRows, numCols).setValues(updated);
-  sincronizarPS3Lista_(config, headers, updated);
-}
-
-// ====================================
-// SINCRONIZAR PS3_LISTA DESDE PS3
-// ====================================
-
-function sincronizarPS3Lista_(config, dataHeaders, dataBody) {
-  const ss = SpreadsheetApp.getActive();
-  const listSh = ss.getSheetByName(config.listSheetName || 'PS3_LISTA');
-  if (!listSh) return;
-
-  const listHeaders = listSh.getRange(1, 1, 1, Math.max(1, listSh.getLastColumn())).getValues()[0];
-  const listBody = listSh.getLastRow() > 1
-    ? listSh.getRange(2, 1, listSh.getLastRow() - 1, listHeaders.length).getValues()
-    : [];
-
-  const idxData = (name) => dataHeaders.indexOf(name);
-  const idxList = (name) => listHeaders.indexOf(name);
-
-  const dataById = {};
-  const idIdx = idxData('ID');
-  for (let i = 0; i < dataBody.length; i++) {
-    const row = dataBody[i];
-    const id = idIdx >= 0 ? row[idIdx] : '';
-    if (!String(id || '').trim()) continue;
-    dataById[String(id).trim()] = row;
-  }
-
-  const listIndexById = {};
-  const listIdIdx = idxList('ID');
-  for (let i = 0; i < listBody.length; i++) {
-    const id = listIdIdx >= 0 ? listBody[i][listIdIdx] : '';
-    if (String(id || '').trim()) listIndexById[String(id).trim()] = i;
-  }
-
-  const ensureRowSize = (row, size) => {
-    const out = row.slice();
-    while (out.length < size) out.push('');
-    return out;
-  };
-
-  const resultRows = listBody.slice();
-
-  Object.keys(dataById).forEach(id => {
-    const sourceRow = dataById[id];
-    const targetIdx = listIndexById.hasOwnProperty(id) ? listIndexById[id] : resultRows.length;
-    const existing = listIndexById.hasOwnProperty(id) ? resultRows[targetIdx] : [];
-    const row = ensureRowSize(existing, listHeaders.length);
-
-    const copyField = (fieldName) => {
-      const dIdx = idxData(fieldName);
-      const lIdx = idxList(fieldName);
-      if (dIdx < 0 || lIdx < 0) return;
-      row[lIdx] = sourceRow[dIdx];
-    };
-
-    copyField('ID');
-    copyField('TITULO');
-    copyField('AÑO');
-    copyField('GENERO');
-    copyField('SUBGENERO');
-    copyField('PUBLISHER');
-    copyField('FAVORITO');
-    copyField('TERMINADO');
-    copyField('PUNTUACION');
-
-    const thumbIdx = idxList('THUMB_URL');
-    if (thumbIdx >= 0) {
-      const coverIdx = idxData('CARATULA');
-      const shotsIdx = idxData('SCREENSHOTS');
-      const coverVal = coverIdx >= 0 ? sourceRow[coverIdx] : '';
-      const shotsVal = shotsIdx >= 0 ? sourceRow[shotsIdx] : '';
-      const firstShot = String(shotsVal || '').split(/\s*\n\s*|\s*\|\s*/).filter(Boolean)[0] || '';
-      row[thumbIdx] = coverVal || firstShot || '';
-    }
-
-    if (!listIndexById.hasOwnProperty(id)) {
-      resultRows.push(row);
-      listIndexById[id] = targetIdx;
-    } else {
-      resultRows[targetIdx] = row;
-    }
-  });
-
-  if (resultRows.length) {
-    listSh.getRange(2, 1, resultRows.length, listHeaders.length).setValues(resultRows);
-  }
 }
