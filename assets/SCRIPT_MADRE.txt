@@ -12,6 +12,12 @@
  * 
  * ============================================
  */
+// =====================================
+// IGDB CONFIG — RELLENAR CON TUS DATOS
+// =====================================
+const IGDB_CLIENT_ID = '690ect4klrsg9vr5g2vaub27wjjo5i';
+const IGDB_ACCESS_TOKEN = '2a2pcx8h9e36umavdk8eikzi1pr8ic';
+
 
 // ============================================
 // CONSTANTES GLOBALES
@@ -50,60 +56,136 @@ function menuPreviewFichaActual() {
   }
 
   const headers = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0];
+  
+  // Función auxiliar para normalizar texto (quitar acentos, espacios extra)
+  const normalizeHeader = (s) => {
+    return String(s || '').trim().toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
+      .replace(/\s+/g, '_'); // espacios a guiones bajos
+  };
+  
   const get = (h) => {
-    const i = headers.indexOf(h);
-    return i > -1 ? sh.getRange(row, i + 1).getValue() : '';
+    // Primero buscar coincidencia exacta
+    let i = headers.indexOf(h);
+    if (i > -1) return sh.getRange(row, i + 1).getValue();
+    
+    // Si no, buscar coincidencia normalizada
+    const hNorm = normalizeHeader(h);
+    for (let j = 0; j < headers.length; j++) {
+      if (normalizeHeader(headers[j]) === hNorm) {
+        return sh.getRange(row, j + 1).getValue();
+      }
+    }
+    return '';
   };
 
-const sheetName = sh.getName().trim().toUpperCase();
-const isZX = sheetName.includes('SPECTRUM');
-const isPS3 = sheetName.includes('PS3');  // <-- nuevo
+  // ===============================
+  // DETECTAR PLATAFORMA
+  // ===============================
+  const sheetName = sh.getName().trim().toUpperCase();
+const isPS3 = sheetName.includes('PS3');
 
-const titulo = get('TÍTULO') || get('TITULO');
+// ====================================
+// FLUJO PS3 (IGDB)
+// ====================================
+if (isPS3) {
+  const titulo = get('TÍTULO') || get('TITULO');
+  if (!titulo) return uiAlert_('Falta el campo "TÍTULO" / "TITULO" en la fila.');
 
-if (!titulo) return uiAlert_('Falta el campo "TÍTULO" / "TITULO" en la fila.');
-
-// === FLUJO ZX SPECTRUM (sin cambios) ===
-if (isZX) {
-    // Aquí no tocamos NADA del flujo original.
-} else if (isPS3) {
-  // ====================================
-  // FLUJO PS3 (de momento usando stub)
-  // ====================================
-
-  // 1) Obtener LINK si existe (puede ser opcional en PS3, así que lo tratamos con cuidado)
+  // LINK IGDB (opcional, pero si existe, manda él)
   const linkPS3 = get('LINK') || '';
 
-  // 2) Llamar al stub de IGDB (más adelante aquí irá la llamada real)
-  const dataPS3 = fetchPS3_fromIGDB_(titulo);
+  // Año de la hoja (si la cabecera es "AÑO")
+  const anioHoja = String(get('AÑO') || '').trim();
 
-  // 3) Construir HTML de ficha reutilizando el mismo motor que ZX
-  //    Necesitamos pasar un "tecnicos" mínimo compatible.
-  const tecnicosPS3 = {
-    formato: '',
-    zx2a: '',
-    tspec: '',
-    terminado: ''
+  // ====================================
+  // LEER COLUMNAS MANUALES (NO SE TOCAN AL SCRAPEAR)
+  // ====================================
+  const columnasManualPS3 = {
+    ubicacion: String(get('PS3_UBICACION') || '').trim(),
+    tipoFormato: String(get('PS3_TIPO_FORMATO') || '').trim(),
+    favorito: String(get('FAVORITO') || '').trim(),
+    terminado: String(get('TERMINADO') || '').trim(),
+    masInfo: String(get('MAS_INFO') || '')  // NO hacer trim() para preservar saltos de línea internos
   };
 
-  const html = buildFichaHtml_(
-    dataPS3,
-    'PlayStation 3',   // plataforma
-    linkPS3 || '',     // fuenteUrl (lo usamos para anchors si algún día hace falta)
-    dataPS3.sinopsis || ''
-  );
+  // DEBUG: Log para verificar que se lee MAS_INFO
+  Logger.log('[PS3] MAS_INFO leído (longitud=' + columnasManualPS3.masInfo.length + '): "' + columnasManualPS3.masInfo.substring(0, 100) + '"');
 
-  const htmlFull = wrapHtmlForSidebar_(html);
+  // Leer VIDEO existente en la hoja (por si ya hay uno manual)
+  const videoHojaPS3 = String(get('VIDEO') || '').trim();
+  
+  // Leer ARGUMENTO existente en la hoja (por si ya hay uno manual)
+  const argumentoHojaPS3 = String(get('ARGUMENTO') || '');
+  
+  // Leer SINOPSIS existente en la hoja (por si ya hay una manual)
+  const sinopsisHojaPS3 = String(get('SINOPSIS') || '');
 
-  const ui = SpreadsheetApp.getUi();
-  const htmlOutput = HtmlService.createHtmlOutput(htmlFull)
-    .setWidth(480)
-    .setHeight(600);
+  Logger.log('[PS3] Título: ' + titulo + ' | LINK: ' + linkPS3 + ' | AÑO hoja: ' + anioHoja);
 
-  ui.showSidebar(htmlOutput);
+  // ⚠️ IMPORTANTE: ahora pasamos título + link + año
+  const dataPS3 = fetchPS3_fromIGDB_(titulo, linkPS3, anioHoja);
+
+  // Si ya hay un VIDEO en la hoja, lo respetamos (override manual)
+  if (videoHojaPS3) {
+    dataPS3.video = videoHojaPS3;
+  }
+  
+  // ====================================
+  // SINOPSIS: traducir si viene de IGDB y la hoja está vacía
+  // ====================================
+  if (sinopsisHojaPS3.trim()) {
+    // Si ya hay sinopsis manual, usarla tal cual
+    dataPS3.sinopsis = sinopsisHojaPS3;
+  } else if (dataPS3.sinopsis && dataPS3.sinopsis.trim()) {
+    // Si viene de IGDB, traducir al español (sin marcas)
+    Logger.log('[PS3] Traduciendo sinopsis de IGDB...');
+    dataPS3.sinopsis = translateTextToSpanish_(dataPS3.sinopsis);
+  }
+  
+  // ====================================
+  // ARGUMENTO: traducir si viene de IGDB y la hoja está vacía
+  // ====================================
+  if (argumentoHojaPS3.trim()) {
+    // Si ya hay argumento manual, usarlo tal cual
+    dataPS3.argumento = argumentoHojaPS3;
+  } else if (dataPS3.argumento && dataPS3.argumento.trim()) {
+    // Si viene de IGDB, traducir al español (sin marcas)
+    Logger.log('[PS3] Traduciendo argumento de IGDB...');
+    dataPS3.argumento = translateTextToSpanish_(dataPS3.argumento);
+  }
+
+  // Datos técnicos para PS3 (usando las columnas manuales)
+  const tecnicosPS3 = {
+    // Campos específicos de PS3
+    ubicacion: columnasManualPS3.ubicacion,
+    tipoFormato: columnasManualPS3.tipoFormato,
+    favorito: columnasManualPS3.favorito,
+    terminado: columnasManualPS3.terminado,
+    masInfo: columnasManualPS3.masInfo,
+    // Campos ZX (vacíos para PS3, pero necesarios para la función)
+    formato: '',
+    zx2a: '',
+    tspec: ''
+  };
+
+  writeBackPS3RowFromData_(sh, row, headers, dataPS3);
+
+  const html = buildPreviewHtml_(titulo, 'PlayStation 3', linkPS3, dataPS3, tecnicosPS3, dataPS3.sinopsis);
+  SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha PS3'));
   return;
-} else {
+}
 
+
+  // ===============================
+  // FLUJO ORIGINAL ZX SPECTRUM
+  // (copiado tal cual de tu script estable)
+  // ===============================
+  const isZX = /spectrum/i.test(sh.getName());
+  const titulo = get('TÍTULO');
+  
+  if (!titulo) return uiAlert_('Falta el campo "TÍTULO" en la fila.');
+  if (!isZX) return uiAlert_('Esta vista previa está pensada para la hoja "ZX Spectrum".');
 
   const link = get('LINK');
   if (!link) return uiAlert_('Falta el campo "LINK".');
@@ -209,8 +291,13 @@ if (isZX) {
   // GENERAR Y MOSTRAR FICHA HTML
   // ====================================
   const html = buildPreviewHtml_(titulo, 'ZX Spectrum', link, data, tecnicos, sinopsisText);
-  SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha'));
+  SpreadsheetApp.getUi()
+    .showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha'));
 }
+
+
+  // Cierre de la función principal de menú
+
 
 // ============================================
 // HELPER: APLICAR OVERRIDES MANUALES
@@ -1222,6 +1309,73 @@ function getZXArtSynopsisTranslated_(titulo) {
 }
 
 // ====================================
+// TRADUCCIÓN GENÉRICA DE TEXTO (INGLÉS → ESPAÑOL)
+// ====================================
+// Usada para traducir sinopsis y argumento de IGDB en PS3
+// Sin marcas ni indicadores de traducción
+
+function translateTextToSpanish_(text) {
+  if (!text) return '';
+  
+  const normalizedText = String(text)
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim();
+  
+  if (!normalizedText) return '';
+  
+  // Separar en párrafos
+  const paragraphs = normalizedText
+    .split(/\n\s*\n+/)
+    .map(p => p.replace(/\s+/g, ' ').trim())
+    .filter(p => p.length > 0);
+  
+  // Si no hay párrafos pero sí texto, usar todo como un párrafo
+  if (!paragraphs.length && normalizedText.length) {
+    paragraphs.push(normalizedText);
+  }
+  
+  // Traducir cada párrafo
+  let translatedText = '';
+  if (paragraphs.length) {
+    const translated = [];
+    
+    for (let i = 0; i < paragraphs.length; i++) {
+      const p = paragraphs[i];
+      let t = '';
+      
+      try {
+        t = LanguageApp.translate(p, 'en', 'es');
+      } catch (err) {
+        Logger.log('[WARN] Falló traducción de párrafo ' + i + ': ' + err);
+        t = p; // Usar original si falla
+      }
+      
+      translated.push(String(t || '').trim());
+    }
+    
+    translatedText = translated.join('\n\n');
+  } else {
+    // Traducción global si no hay párrafos
+    try {
+      translatedText = LanguageApp.translate(normalizedText, 'en', 'es');
+    } catch (err2) {
+      Logger.log('[WARN] Falló traducción global: ' + err2);
+      translatedText = normalizedText; // Usar original si falla
+    }
+  }
+  
+  translatedText = String(translatedText || '').trim();
+  
+  // Si la traducción falla completamente, usar el original
+  if (!translatedText) {
+    translatedText = normalizedText;
+  }
+  
+  return translatedText;
+}
+
+// ====================================
 // RESOLVER URL DE ZXART PARA UN TÍTULO
 // ====================================
 
@@ -1540,6 +1694,23 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
   })();
 
   // ====================================
+  // ARGUMENTO (SOLO PS3, desde storyline de IGDB)
+  // ====================================
+  // Se muestra solo si hay contenido en el campo argumento y es ficha PS3
+  const argumentoBlock = (() => {
+    const isPS3 = (plataforma && plataforma.toLowerCase().includes('playstation'));
+    if (!isPS3) return '';
+    
+    const argumentoText = (d && d.argumento) ? String(d.argumento).trim() : '';
+    if (!argumentoText) return '';
+    
+    // Convertir saltos de línea a <br> para respetar el formato
+    const argumentoFormatted = escapeHtml_(argumentoText).replace(/\n/g, '<br>');
+    
+    return `<div class="row"><div class="section-title">Argumento</div><div class="info"><div class="line">${argumentoFormatted}</div></div></div>`;
+  })();
+
+  // ====================================
   // INFORMACIÓN
   // ====================================
   const infoLinesArr = [
@@ -1562,18 +1733,51 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
     : '';
 
   // ====================================
-  // DATOS TÉCNICOS
+  // DATOS TÉCNICOS (ADAPTADO A ZX / PS3)
   // ====================================
-  const tecnicosLines = [
-    renderLineLinks('Formato', makeLocalAnchors(tecnicos && tecnicos.formato)),
-    renderLineLinks('ZX +2A', makeLocalAnchors(tecnicos && tecnicos.zx2a)),
-    renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
-    renderLineText('Terminado', tecnicos && tecnicos.terminado)
-  ].filter(Boolean).join('');
+  const isPS3Ficha = (plataforma && plataforma.toLowerCase().includes('playstation'));
+  
+  let tecnicosLines = '';
+  
+  if (isPS3Ficha) {
+    // Datos técnicos para PS3 (sin masInfo, que va en sección aparte)
+    // Ubicación: solo si NO es "--"
+    // Favorito: solo si es "SI"
+    tecnicosLines = [
+      (tecnicos && tecnicos.ubicacion && tecnicos.ubicacion !== '--') ? renderLineText('Ubicación', tecnicos.ubicacion) : '',
+      tecnicos && tecnicos.tipoFormato ? renderLineText('Formato', tecnicos.tipoFormato) : '',
+      (tecnicos && tecnicos.favorito && tecnicos.favorito.toUpperCase() === 'SI') ? renderLineText('Favorito', tecnicos.favorito) : '',
+      tecnicos && tecnicos.terminado ? renderLineText('Terminado', tecnicos.terminado) : ''
+    ].filter(Boolean).join('');
+  } else {
+    // Datos técnicos para ZX Spectrum
+    tecnicosLines = [
+      renderLineLinks('Formato', makeLocalAnchors(tecnicos && tecnicos.formato)),
+      renderLineLinks('ZX +2A', makeLocalAnchors(tecnicos && tecnicos.zx2a)),
+      renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
+      renderLineText('Terminado', tecnicos && tecnicos.terminado)
+    ].filter(Boolean).join('');
+  }
 
   const tecnicosHtml = tecnicosLines
     ? `<div class="row"><div class="section-title">Datos Técnicos</div><div class="info">${tecnicosLines}</div></div>`
     : '';
+
+  // ====================================
+  // MÁS INFO (SOLO PS3, SECCIÓN SEPARADA)
+  // ====================================
+  // Se muestra solo si hay contenido en MAS_INFO y es ficha PS3
+  // Respeta saltos de línea del texto original
+  const masInfoHtml = (() => {
+    if (!isPS3Ficha) return '';
+    const masInfoText = (tecnicos && tecnicos.masInfo) ? String(tecnicos.masInfo).trim() : '';
+    if (!masInfoText) return '';
+    
+    // Convertir saltos de línea a <br> para respetar el formato del usuario
+    const masInfoFormatted = escapeHtml_(masInfoText).replace(/\n/g, '<br>');
+    
+    return `<div class="row"><div class="section-title">Más Info</div><div class="info"><div class="line">${masInfoFormatted}</div></div></div>`;
+  })();
 
   // ====================================
   // SCREENSHOTS
@@ -1642,7 +1846,9 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
     + cover
     + infoHtml
     + sinopsisBlock
+    + argumentoBlock
     + tecnicosHtml
+    + masInfoHtml
     + shotsHtml
     + addHtml
     + videoBlock
@@ -2116,4 +2322,667 @@ function parseUrlName_(u) {
   const ext = dot > 0 ? file.substring(dot + 1) : '';
   
   return { full, file, base, ext };
+}
+
+/**
+ * ============================================
+ * INTEGRACIÓN IGDB: fetchPS3_fromIGDB_
+ * ============================================
+ * 
+ * Busca datos del juego en IGDB y devuelve un objeto
+ * compatible con buildPreviewHtml_.
+ * 
+ * LÓGICA DE SELECCIÓN (v2.0):
+ * 1) Si hay URL IGDB → usarla directamente (prioridad absoluta)
+ * 2) Si no hay URL → búsqueda por título con filtros inteligentes:
+ *    - Familia de título (normalización)
+ *    - Filtro por año (si está en la hoja)
+ *    - Filtro por plataforma PS3
+ *    - Descarte de "Part II", "Remastered", etc. si no están en el título de hoja
+ *    - Desempate: juego más antiguo
+ * 
+ * @param {string} titulo - Título del juego a buscar
+ * @param {string} link - URL de IGDB (opcional, pero prioritaria)
+ * @param {string} anioHoja - Año de la hoja (opcional, para filtrar/desempatar)
+ * @returns {Object} - Objeto con estructura compatible con el sistema de fichas
+ */
+function fetchPS3_fromIGDB_(titulo, link, anioHoja) {
+  // ============================================
+  // CONSTANTES Y CONFIGURACIÓN
+  // ============================================
+  
+  // ID de plataforma PS3 en IGDB
+  const PS3_PLATFORM_ID = 9;
+  
+  // Términos a eliminar para obtener el "título base"
+  const EDITION_TERMS = [
+    'remastered', 'remaster', 'remake', 'remade',
+    'definitive edition', 'definitive',
+    'game of the year', 'goty', 'goty edition',
+    'ultimate edition', 'ultimate',
+    'complete edition', 'complete',
+    'directors cut', 'director\'s cut',
+    'extended edition', 'extended',
+    'enhanced edition', 'enhanced',
+    'special edition', 'special',
+    'gold edition', 'gold',
+    'platinum', 'platinum edition',
+    'hd', 'hd edition', 'hd collection',
+    'collection', 'anthology',
+    'deluxe', 'deluxe edition',
+    'legendary edition', 'legendary'
+  ];
+  
+  // Términos de "parte/secuela" a detectar
+  const PART_TERMS = [
+    'part ii', 'part 2', 'part two',
+    'part iii', 'part 3', 'part three',
+    'part iv', 'part 4', 'part four',
+    'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
+    '2', '3', '4', '5', '6', '7', '8', '9', '10'
+  ];
+  
+  // ============================================
+  // OBJETO VACÍO (FALLBACK)
+  // ============================================
+  const emptyResult = {
+    plataforma: 'PlayStation 3',
+    titulo: titulo || 'Juego PS3',
+    anio: '????',
+    generoAnchors: [],
+    subgeneroAnchors: [],
+    publisherAnchors: [],
+    desarrolladorAnchors: [],
+    autorAnchors: [],
+    contributorsAnchors: [],
+    jugadoresAnchors: [],
+    controlesAnchors: [],
+    versionAnchors: [],
+    distribuidorasAnchors: [],
+    ratingDisplay: '',
+    caratula: '',
+    screenshots: [],
+    imagenesAdicionales: [],
+    mapa: '',
+    instrucciones: '',
+    video: '',
+    revistas: [],
+    sinopsis: ''
+  };
+
+  // ============================================
+  // VARIABLES DE ENTRADA
+  // ============================================
+  const titleStr = String(titulo || '').trim();
+  const linkStr = String(link || '').trim();
+  const desiredYear = parseInt(String(anioHoja || '').trim(), 10);
+  const hasDesiredYear = !isNaN(desiredYear);
+
+  if (!titleStr && !linkStr) {
+    Logger.log('[IGDB-PS3] Sin título ni link. Abortando.');
+    return emptyResult;
+  }
+
+  // ============================================
+  // HELPERS INTERNOS
+  // ============================================
+  
+  /**
+   * Extrae el año de un juego IGDB
+   */
+  function getYearFromGame_(game) {
+    if (!game || !game.first_release_date) return null;
+    const d = new Date(game.first_release_date * 1000);
+    const y = d.getFullYear();
+    return isNaN(y) ? null : y;
+  }
+
+  /**
+   * Parsea una URL de IGDB para extraer ID y/o slug
+   */
+  function parseIgdbLink_(url) {
+    if (!url) return { id: null, slug: null };
+    try {
+      const m = String(url).match(/igdb\.com\/games\/([^/?#]+)/i);
+      if (!m) return { id: null, slug: null };
+      const part = m[1]; // "1234-the-last-of-us" o "the-last-of-us"
+
+      const idMatch = part.match(/^(\d+)-/);
+      let id = null;
+      let slug = null;
+
+      if (idMatch) {
+        id = parseInt(idMatch[1], 10);
+        slug = part.substring(idMatch[0].length) || null;
+      } else {
+        slug = part || null;
+      }
+
+      if (isNaN(id)) id = null;
+      Logger.log('[IGDB-PS3] parseIgdbLink_ url=' + url + ' → id=' + id + ', slug=' + slug);
+      return { id: id, slug: slug };
+    } catch (e) {
+      Logger.log('[IGDB-PS3] parseIgdbLink_ EXCEPCIÓN: ' + e);
+      return { id: null, slug: null };
+    }
+  }
+
+  /**
+   * Normaliza un título para comparación (título base)
+   * - Minúsculas
+   * - Sin acentos
+   * - Sin puntuación
+   * - Sin términos de edición (remastered, goty, etc.)
+   * - Sin términos de parte (part ii, etc.) → para agrupar familia
+   */
+  function normalizeToBaseTitle_(text) {
+    if (!text) return '';
+    let s = String(text).toLowerCase().trim();
+    
+    // Quitar acentos
+    s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // Quitar puntuación y caracteres especiales (dejar letras, números, espacios)
+    s = s.replace(/[^a-z0-9\s]/g, ' ');
+    
+    // Quitar términos de edición
+    EDITION_TERMS.forEach(function(term) {
+      var re = new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+      s = s.replace(re, ' ');
+    });
+    
+    // Quitar términos de parte/secuela (para agrupar en familia)
+    // Pero solo los que están al final o separados
+    PART_TERMS.forEach(function(term) {
+      // Solo quitar si está al final del título o separado
+      var re = new RegExp('\\s+' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:\\s+|$)', 'gi');
+      s = s.replace(re, ' ');
+    });
+    
+    // Colapsar espacios múltiples
+    s = s.replace(/\s+/g, ' ').trim();
+    
+    return s;
+  }
+
+  /**
+   * Comprueba si un texto contiene alguno de los términos de "parte/secuela"
+   */
+  function containsPartTerms_(text) {
+    if (!text) return false;
+    var lower = String(text).toLowerCase();
+    
+    // Patrones específicos para Part II, Part 2, etc.
+    var partPatterns = [
+      /\bpart\s*(ii|iii|iv|v|vi|vii|viii|ix|x|2|3|4|5|6|7|8|9|10)\b/i,
+      /\b(ii|iii|iv|v|vi|vii|viii|ix|x)\s*$/i,  // Números romanos al final
+      /\s+(2|3|4|5|6|7|8|9|10)\s*$/  // Números arábigos al final (con cuidado)
+    ];
+    
+    for (var i = 0; i < partPatterns.length; i++) {
+      if (partPatterns[i].test(lower)) return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Comprueba si un texto contiene términos de edición especial
+   */
+  function containsEditionTerms_(text) {
+    if (!text) return false;
+    var lower = String(text).toLowerCase();
+    
+    for (var i = 0; i < EDITION_TERMS.length; i++) {
+      var term = EDITION_TERMS[i];
+      var re = new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+      if (re.test(lower)) return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Comprueba si un juego tiene la plataforma PS3
+   */
+  function hasPS3Platform_(game) {
+    if (!game || !Array.isArray(game.platforms)) return false;
+    return game.platforms.some(function(p) {
+      return p === PS3_PLATFORM_ID || (p && p.id === PS3_PLATFORM_ID);
+    });
+  }
+
+  /**
+   * Convierte un objeto game de IGDB al formato de salida
+   */
+  function gameToResult_(game) {
+    var gameYear = getYearFromGame_(game);
+    var anio = '????';
+    if (gameYear) {
+      anio = String(gameYear);
+    }
+
+    var generoAnchors = [];
+    if (Array.isArray(game.genres)) {
+      game.genres.forEach(function(g) {
+        if (g && g.name) generoAnchors.push({ text: g.name, href: '' });
+      });
+    }
+
+    // Themes de IGDB → Subgénero
+    var subgeneroAnchors = [];
+    if (Array.isArray(game.themes)) {
+      game.themes.forEach(function(t) {
+        if (t && t.name) subgeneroAnchors.push({ text: t.name, href: '' });
+      });
+    }
+
+    var publisherAnchors = [];
+    var desarrolladorAnchors = [];
+    if (Array.isArray(game.involved_companies)) {
+      game.involved_companies.forEach(function(ic) {
+        if (ic && ic.company && ic.company.name) {
+          var companyName = ic.company.name;
+          if (ic.publisher) publisherAnchors.push({ text: companyName, href: '' });
+          if (ic.developer) desarrolladorAnchors.push({ text: companyName, href: '' });
+        }
+      });
+    }
+
+    var caratula = '';
+    if (game.cover && game.cover.image_id) {
+      caratula = 'https://images.igdb.com/igdb/image/upload/t_1080p/' + game.cover.image_id + '.jpg';
+    }
+
+    var screenshots = [];
+    if (Array.isArray(game.screenshots)) {
+      game.screenshots.slice(0, 4).forEach(function(s) {
+        if (s && s.image_id) {
+          screenshots.push('https://images.igdb.com/igdb/image/upload/t_1080p/' + s.image_id + '.jpg');
+        }
+      });
+    }
+
+    // ====================================
+    // PROCESAR VÍDEOS DE IGDB
+    // ====================================
+    // IGDB devuelve videos como array con video_id (ID de YouTube)
+    // Convertimos a URLs de YouTube en texto plano
+    var videoUrl = '';
+    if (Array.isArray(game.videos) && game.videos.length > 0) {
+      var videoUrls = [];
+      game.videos.forEach(function(v) {
+        if (v && v.video_id) {
+          // IGDB almacena el ID de YouTube directamente
+          videoUrls.push('https://www.youtube.com/watch?v=' + v.video_id);
+        }
+      });
+      // Guardamos solo el primer vídeo (el más representativo, normalmente el trailer principal)
+      // Si quieres todos, cambia a: videoUrl = videoUrls.join(', ');
+      if (videoUrls.length > 0) {
+        videoUrl = videoUrls[0];
+      }
+    }
+
+    var sinopsis = game.summary || '';
+    
+    // Argumento (storyline de IGDB) - campo separado de la sinopsis
+    var argumento = game.storyline || '';
+
+    var ratingDisplay = '';
+    if (typeof game.aggregated_rating === 'number' && !isNaN(game.aggregated_rating)) {
+      ratingDisplay = Math.round(game.aggregated_rating) + '/100';
+    }
+
+    return {
+      plataforma: 'PlayStation 3',
+      titulo: game.name || titulo,
+      anio: anio,
+      generoAnchors: generoAnchors,
+      subgeneroAnchors: subgeneroAnchors,
+      publisherAnchors: publisherAnchors,
+      desarrolladorAnchors: desarrolladorAnchors,
+      autorAnchors: [],
+      contributorsAnchors: [],
+      jugadoresAnchors: [],
+      controlesAnchors: [],
+      versionAnchors: [],
+      distribuidorasAnchors: [],
+      ratingDisplay: ratingDisplay,
+      caratula: caratula,
+      screenshots: screenshots,
+      imagenesAdicionales: [],
+      mapa: '',
+      instrucciones: '',
+      video: videoUrl,
+      revistas: [],
+      sinopsis: sinopsis,
+      argumento: argumento
+    };
+  }
+
+  /**
+   * Ejecuta una query a IGDB y devuelve los resultados
+   */
+  function executeIgdbQuery_(query) {
+    var endpoint = 'https://api.igdb.com/v4/games';
+    var options = {
+      method: 'post',
+      headers: {
+        'Client-ID': IGDB_CLIENT_ID,
+        'Authorization': 'Bearer ' + IGDB_ACCESS_TOKEN,
+        'Content-Type': 'text/plain'
+      },
+      payload: query,
+      muteHttpExceptions: true
+    };
+
+    var response = UrlFetchApp.fetch(endpoint, options);
+    var code = response.getResponseCode();
+
+    if (code !== 200) {
+      Logger.log('[IGDB-PS3] Error HTTP ' + code + ': ' + response.getContentText());
+      return null;
+    }
+
+    var results = JSON.parse(response.getContentText());
+    return Array.isArray(results) ? results : null;
+  }
+
+  // ============================================
+  // LÓGICA PRINCIPAL
+  // ============================================
+  
+  try {
+    // Campos a solicitar de IGDB (incluimos platforms para filtrar y videos para trailers)
+    var fieldsBlock = 
+      'fields name, slug, first_release_date, aggregated_rating, ' +
+      'genres.name, ' +
+      'themes.name, ' +
+      'involved_companies.company.name, ' +
+      'involved_companies.developer, ' +
+      'involved_companies.publisher, ' +
+      'cover.image_id, ' +
+      'screenshots.image_id, ' +
+      'videos.video_id, ' +
+      'videos.name, ' +
+      'summary, ' +
+      'storyline, ' +
+      'platforms;';
+
+    // ============================================
+    // CASO 1: HAY URL IGDB → PRIORIDAD ABSOLUTA
+    // ============================================
+    if (linkStr) {
+      var parsedLink = parseIgdbLink_(linkStr);
+      var query = null;
+
+      if (parsedLink.id) {
+        query = fieldsBlock + ' where id = ' + parsedLink.id + '; limit 1;';
+        Logger.log('[IGDB-PS3] 🔗 Usando URL por ID: ' + parsedLink.id);
+      } else if (parsedLink.slug) {
+        var safeSlug = parsedLink.slug.replace(/"/g, '\\"');
+        query = fieldsBlock + ' where slug = "' + safeSlug + '"; limit 1;';
+        Logger.log('[IGDB-PS3] 🔗 Usando URL por slug: ' + safeSlug);
+      }
+
+      if (query) {
+        var results = executeIgdbQuery_(query);
+        if (results && results.length > 0) {
+          var game = results[0];
+          Logger.log('[IGDB-PS3] ✅ Juego encontrado por URL: ' + (game.name || 'N/A'));
+          return gameToResult_(game);
+        }
+        Logger.log('[IGDB-PS3] ⚠️ URL válida pero sin resultados. Intentando búsqueda por título...');
+      } else {
+        Logger.log('[IGDB-PS3] ⚠️ URL presente pero no parseable. Intentando búsqueda por título...');
+      }
+      // Si la URL no dio resultados, continuamos con búsqueda por título
+    }
+
+    // ============================================
+    // CASO 2: BÚSQUEDA POR TÍTULO
+    // ============================================
+    if (!titleStr) {
+      Logger.log('[IGDB-PS3] Sin título para buscar. Abortando.');
+      return emptyResult;
+    }
+
+    var safeTitle = titleStr.replace(/"/g, '\\"');
+    
+    // Búsqueda amplia (limit 20 para tener más candidatos)
+    var searchQuery = fieldsBlock + ' search "' + safeTitle + '"; limit 20;';
+    
+    Logger.log('[IGDB-PS3] 🔍 Buscando por título: "' + titleStr + '" (año hoja: ' + (hasDesiredYear ? desiredYear : 'N/A') + ')');
+    
+    var results = executeIgdbQuery_(searchQuery);
+    
+    if (!results || results.length === 0) {
+      Logger.log('[IGDB-PS3] ❌ Sin resultados para: ' + titleStr);
+      return emptyResult;
+    }
+
+    Logger.log('[IGDB-PS3] Encontrados ' + results.length + ' candidatos iniciales');
+
+    // ============================================
+    // FILTRADO INTELIGENTE DE CANDIDATOS
+    // ============================================
+    
+    var candidates = results.slice(); // Copia del array
+    var sheetBaseTitle = normalizeToBaseTitle_(titleStr);
+    var sheetHasPartTerms = containsPartTerms_(titleStr);
+    var sheetHasEditionTerms = containsEditionTerms_(titleStr);
+    
+    Logger.log('[IGDB-PS3] Título hoja base: "' + sheetBaseTitle + '"');
+    Logger.log('[IGDB-PS3] Título hoja tiene Part terms: ' + sheetHasPartTerms);
+    Logger.log('[IGDB-PS3] Título hoja tiene Edition terms: ' + sheetHasEditionTerms);
+
+    // --------------------------------------------
+    // PASO 3.1: Filtrar por "familia de título"
+    // --------------------------------------------
+    var familyFiltered = candidates.filter(function(g) {
+      var gameBaseTitle = normalizeToBaseTitle_(g.name);
+      return gameBaseTitle === sheetBaseTitle;
+    });
+    
+    if (familyFiltered.length > 0) {
+      Logger.log('[IGDB-PS3] Filtro familia: ' + familyFiltered.length + ' juegos coinciden con título base');
+      candidates = familyFiltered;
+    } else {
+      Logger.log('[IGDB-PS3] Filtro familia: ninguno coincide exactamente, manteniendo todos');
+    }
+
+    // --------------------------------------------
+    // PASO 3.2: Filtrar por año (si hay año en hoja)
+    // --------------------------------------------
+    if (hasDesiredYear && candidates.length > 1) {
+      var yearFiltered = candidates.filter(function(g) {
+        var gameYear = getYearFromGame_(g);
+        return gameYear === desiredYear;
+      });
+      
+      if (yearFiltered.length > 0) {
+        Logger.log('[IGDB-PS3] Filtro año ' + desiredYear + ': ' + yearFiltered.length + ' juegos coinciden');
+        candidates = yearFiltered;
+      } else {
+        Logger.log('[IGDB-PS3] Filtro año: ninguno coincide con ' + desiredYear + ', manteniendo anteriores');
+      }
+    }
+
+    // --------------------------------------------
+    // PASO 3.3: Filtrar por plataforma PS3
+    // --------------------------------------------
+    if (candidates.length > 1) {
+      var ps3Filtered = candidates.filter(function(g) {
+        return hasPS3Platform_(g);
+      });
+      
+      if (ps3Filtered.length > 0) {
+        Logger.log('[IGDB-PS3] Filtro PS3: ' + ps3Filtered.length + ' juegos tienen plataforma PS3');
+        candidates = ps3Filtered;
+      } else {
+        Logger.log('[IGDB-PS3] Filtro PS3: ninguno tiene PS3 explícito, manteniendo anteriores');
+      }
+    }
+
+    // --------------------------------------------
+    // PASO 3.4: Descartar Part II / Remastered si el título de hoja no los tiene
+    // --------------------------------------------
+    var beforeVariantFilter = candidates.slice(); // Guardar por si el filtro es muy agresivo
+    
+    if (candidates.length > 1) {
+      // Si el título de la hoja NO tiene "Part II", descartar juegos que sí lo tengan
+      if (!sheetHasPartTerms) {
+        var noPartFiltered = candidates.filter(function(g) {
+          return !containsPartTerms_(g.name);
+        });
+        if (noPartFiltered.length > 0) {
+          Logger.log('[IGDB-PS3] Descartando variantes "Part II": de ' + candidates.length + ' a ' + noPartFiltered.length);
+          candidates = noPartFiltered;
+        }
+      }
+      
+      // Si el título de la hoja NO tiene términos de edición, descartar los que sí
+      if (!sheetHasEditionTerms && candidates.length > 1) {
+        var noEditionFiltered = candidates.filter(function(g) {
+          return !containsEditionTerms_(g.name);
+        });
+        if (noEditionFiltered.length > 0) {
+          Logger.log('[IGDB-PS3] Descartando variantes "Remastered/Edition": de ' + candidates.length + ' a ' + noEditionFiltered.length);
+          candidates = noEditionFiltered;
+        }
+      }
+    }
+    
+    // Si el filtro dejó vacío el array, volver al estado anterior
+    if (candidates.length === 0) {
+      Logger.log('[IGDB-PS3] Filtro de variantes demasiado agresivo, restaurando candidatos anteriores');
+      candidates = beforeVariantFilter;
+    }
+
+    // --------------------------------------------
+    // PASO 3.5: Desempate final (el más antiguo)
+    // --------------------------------------------
+    if (candidates.length > 1) {
+      candidates.sort(function(a, b) {
+        var yearA = getYearFromGame_(a) || 9999;
+        var yearB = getYearFromGame_(b) || 9999;
+        return yearA - yearB; // Más antiguo primero
+      });
+      Logger.log('[IGDB-PS3] Desempate por antigüedad: seleccionando el más antiguo');
+    }
+
+    // Seleccionar el primer candidato (el mejor según todos los filtros)
+    var selectedGame = candidates[0];
+    
+    Logger.log('[IGDB-PS3] ✅ Seleccionado: "' + (selectedGame.name || 'N/A') + '" (' + (getYearFromGame_(selectedGame) || '????') + ')');
+    
+    return gameToResult_(selectedGame);
+
+  } catch (e) {
+    Logger.log('[IGDB-PS3] ❌ Excepción: ' + e);
+    return emptyResult;
+  }
+}
+
+
+
+// ============================================
+// ESCRITURA EN HOJA PS3 (SOLO CELDAS VACÍAS)
+// ============================================
+// ⚠️ IMPORTANTE: Esta función NO toca las columnas manuales:
+//    - PS3_UBICACION
+//    - PS3_TIPO_FORMATO
+//    - FAVORITO
+//    - TERMINADO
+//    - MAS_INFO
+// Esas columnas se leen y muestran en la ficha, pero nunca se sobreescriben.
+// ============================================
+function writeBackPS3RowFromData_(sh, row, headers, data) {
+  if (!data) return;
+
+  // ---------- Helpers internos ----------
+  function normalizeHeaderKey_(s) {
+    let t = String(s || '').toLowerCase().trim();
+    t = t
+      .replace(/[áàäâ]/g, 'a')
+      .replace(/[éèëê]/g, 'e')
+      .replace(/[íìïî]/g, 'i')
+      .replace(/[óòöô]/g, 'o')
+      .replace(/[úùüû]/g, 'u')
+      .replace(/ñ/g, 'n');
+    t = t.replace(/\s+/g, ' ');
+    return t;
+  }
+
+  function colIndex_(name) {
+    const target = normalizeHeaderKey_((name || ''));
+    for (let i = 0; i < headers.length; i++) {
+      const hKey = normalizeHeaderKey_(headers[i]);
+      if (hKey === target) return i + 1;
+    }
+    return 0;
+  }
+
+  function cleanValue_(v) {
+    if (v == null) return '';
+    let t = String(v).trim();
+    if (!t) return '';
+    if (t === '????') return '';                        // no escribimos placeholders
+    if (/^dato no disponible$/i.test(t)) return '';     // tampoco este texto
+    return t;
+  }
+
+ function writeIfEmpty_(colName, value) {
+  const col = colIndex_(colName || '');
+  const v = cleanValue_(value);
+  if (!col || !v) return;
+
+  const rng = sh.getRange(row, col);
+  const current = String(rng.getValue() || '').trim();
+  if (!current) {
+    rng.setValue(v);
+  }
+}
+
+  function anchorsToText_(arr) {
+    return (Array.isArray(arr) ? arr : [])
+      .map(a => (a && a.text) ? String(a.text) : '')
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  // ---------- Aplanar datos ----------
+  const anio = data.anio || '';
+  const genero = anchorsToText_(data.generoAnchors);
+  const subgenero = anchorsToText_(data.subgeneroAnchors);
+  const publisher = anchorsToText_(data.publisherAnchors);
+  const desarrollo = anchorsToText_(data.desarrolladorAnchors);
+  const jugadores = anchorsToText_(data.jugadoresAnchors);
+  const controles = anchorsToText_(data.controlesAnchors);
+  const version = anchorsToText_(data.versionAnchors);
+  const distrib = anchorsToText_(data.distribuidorasAnchors);
+  const rating = data.ratingDisplay || '';
+  const caratula = data.caratula || '';
+  const screenshots = Array.isArray(data.screenshots) ? data.screenshots.join(', ') : '';
+  const sinopsis = data.sinopsis || '';
+  const video = data.video || '';
+  const argumento = data.argumento || '';
+
+  // ---------- Escritura en columnas PS3 ----------
+  writeIfEmpty_('AÑO', anio);
+  writeIfEmpty_('PUNTUACIÓN', rating);
+  writeIfEmpty_('GÉNERO', genero);
+  writeIfEmpty_('SUBGÉNERO', subgenero);
+  writeIfEmpty_('PUBLISHER', publisher);
+  writeIfEmpty_('DESARROLLADOR', desarrollo);
+  writeIfEmpty_('JUGADORES', jugadores);
+  writeIfEmpty_('CONTROLES', controles);
+  writeIfEmpty_('VERSIÓN', version);
+  writeIfEmpty_('DISTRIBUIDORAS', distrib);
+  writeIfEmpty_('CARÁTULA', caratula);
+  writeIfEmpty_('SCREENSHOTS', screenshots);
+  writeIfEmpty_('SINOPSIS', sinopsis);
+  writeIfEmpty_('VIDEO', video);
+  writeIfEmpty_('ARGUMENTO', argumento);
 }
