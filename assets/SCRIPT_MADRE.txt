@@ -2577,6 +2577,13 @@ function fetchPS3_fromIGDB_(titulo, link, anioHoja) {
       });
     }
 
+    var jugadoresAnchors = [];
+    if (Array.isArray(game.game_modes)) {
+      game.game_modes.forEach(function(m) {
+        if (m && m.name) jugadoresAnchors.push({ text: m.name, href: '' });
+      });
+    }
+
     var publisherAnchors = [];
     var desarrolladorAnchors = [];
     if (Array.isArray(game.involved_companies)) {
@@ -2644,7 +2651,7 @@ function fetchPS3_fromIGDB_(titulo, link, anioHoja) {
       desarrolladorAnchors: desarrolladorAnchors,
       autorAnchors: [],
       contributorsAnchors: [],
-      jugadoresAnchors: [],
+      jugadoresAnchors: jugadoresAnchors,
       controlesAnchors: [],
       versionAnchors: [],
       distribuidorasAnchors: [],
@@ -2695,10 +2702,11 @@ function fetchPS3_fromIGDB_(titulo, link, anioHoja) {
   
   try {
     // Campos a solicitar de IGDB (incluimos platforms para filtrar y videos para trailers)
-    var fieldsBlock = 
+    var fieldsBlock =
       'fields name, slug, first_release_date, aggregated_rating, ' +
       'genres.name, ' +
       'themes.name, ' +
+      'game_modes.name, ' +
       'involved_companies.company.name, ' +
       'involved_companies.developer, ' +
       'involved_companies.publisher, ' +
