@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PlayStation 3 – Ficha</title>
+    <link rel="stylesheet" href="assets/css/global.css">
+</head>
+
+<body class="ficha-final loading">
+
+    <!-- CABECERA -->
+    <header class="top-bar top-bar--spectrum">
+        <div class="top-bar-inner top-bar-inner--ficha">
+
+<img src="assets/img/ic_back.svg"
+     class="top-bar-back"
+     alt="Atrás"
+     onclick="window.location.href='ps3-lista.html'">
+
+           <!-- Navegación juego a juego (centrada) -->
+<div class="game-nav-bar game-nav-bar--inline">
+    <div class="game-nav-center">
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--prev"
+             alt="Anterior">
+
+        <span class="game-nav-title"></span>
+
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
+             alt="Siguiente">
+    </div>
+    <div class="game-nav-counter-line">
+        <span class="game-nav-counter">- / -</span>
+    </div>
+</div>
+
+            <!-- Botón HOME (derecha) -->
+            <img src="assets/img/ic_home.svg"
+                 class="top-bar-home"
+                 alt="Home"
+                 onclick="window.location.href='index.html'">
+
+        </div>
+    </header>
+
+    <!-- CONTENIDO -->
+<main class="platforms-content">
+    
+<!-- BLOQUE SUPERIOR: Carátula + Info básica -->
+<div class="ficha-hero">
+    <div class="ficha-cover-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Carátula</span>
+        <img id="ficha-cover"
+             class="ficha-cover"
+             alt="Carátula del juego"
+             style="display:none; opacity:0; transition:opacity 0.2s ease-in-out;">
+    </div>
+    <div class="ficha-hero-info">
+        <h1 id="ficha-title" class="loading-title">Cargando ficha...</h1>
+
+        <!-- Estos empiezan ocultos -->
+        <p class="ficha-platform" style="display:none;">PlayStation 3</p>
+        <p class="ficha-puntuacion" id="ficha-puntuacion" style="display:none;"></p>
+
+        <div class="ficha-rating" style="display:none;">
+            <span class="ficha-rating-stars" id="ficha-rating-stars">★★★★★</span>
+        </div>
+    </div>
+</div>
+
+<!-- SCREENSHOTS -->
+<div class="ficha-screenshots" id="ficha-screenshots" style="display:none;">
+    <div class="screenshot-wrapper" id="screenshot-wrapper-1">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Screenshot 1</span>
+        <img id="screenshot-1" class="screenshot-img" alt="Screenshot 1" style="display:none;">
+    </div>
+    <div class="screenshot-wrapper" id="screenshot-wrapper-2">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Screenshot 2</span>
+        <img id="screenshot-2" class="screenshot-img" alt="Screenshot 2" style="display:none;">
+    </div>
+</div>
+
+<!-- SECCIÓN FICHA -->
+<div class="ficha-section">
+    <h2 class="ficha-section-title">FICHA</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-datos" id="ficha-datos" style="display:none;">
+        <!-- Los datos se rellenan por JS -->
+    </div>
+</div>
+
+<!-- SECCIÓN + INFO -->
+<div class="ficha-section" id="masinfo-section" style="display:none;">
+    <h2 class="ficha-section-title">+ INFO</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-masinfo" id="ficha-masinfo">
+        <!-- El texto se rellena por JS -->
+    </div>
+</div>
+
+<!-- SECCIÓN SINOPSIS -->
+<div class="ficha-section" id="sinopsis-section" style="display:none;">
+    <h2 class="ficha-section-title">SINOPSIS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-sinopsis" id="ficha-sinopsis">
+        <!-- El texto se rellena por JS -->
+    </div>
+</div>
+
+<!-- SECCIÓN ARGUMENTO -->
+<div class="ficha-section" id="argumento-section" style="display:none;">
+    <h2 class="ficha-section-title">ARGUMENTO</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-argumento" id="ficha-argumento">
+        <!-- El texto se rellena por JS -->
+    </div>
+</div>
+
+<!-- SECCIÓN DATOS TÉCNICOS -->
+<div class="ficha-section" id="datos-tecnicos-section" style="display:none;">
+    <h2 class="ficha-section-title">DATOS TÉCNICOS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-datos ficha-datos-tecnicos" id="ficha-datos-tecnicos">
+        <!-- Los datos se rellenan por JS -->
+    </div>
+</div>
+
+   <!-- SECCIÓN GAMEPLAY -->
+<div class="ficha-section ficha-section--flush" id="gameplay-section" style="display:none;">
+    <h2 class="ficha-section-title">GAMEPLAY</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-gameplay" id="ficha-gameplay">
+        <div class="ficha-gameplay-frame" id="ficha-gameplay-frame">
+            <div class="ficha-gameplay-placeholder" id="ficha-gameplay-placeholder">
+                <div class="ficha-gameplay-play"></div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+    <!-- SECCIÓN IMÁGENES ADICIONALES -->
+<div class="ficha-section ficha-section--flush" id="imagenes-section" style="display:none;">
+    <h2 class="ficha-section-title">IMÁGENES</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-imagenes" id="ficha-imagenes">
+        <div class="ficha-imagenes-frame" id="ficha-imagenes-frame">
+            <img id="ficha-imagenes-img" class="ficha-imagenes-img" alt="Imagen adicional" style="display:none;">
+        </div>
+        <div class="ficha-imagenes-nav" id="ficha-imagenes-nav" style="display:none;">
+            <img src="assets/img/ic_back.svg" class="ficha-imagenes-arrow ficha-imagenes-arrow--prev" alt="Anterior">
+            <span class="ficha-imagenes-counter">
+                <span id="imagenes-current">1</span> / <span id="imagenes-total">1</span>
+            </span>
+            <img src="assets/img/ic_back.svg" class="ficha-imagenes-arrow ficha-imagenes-arrow--next" alt="Siguiente">
+        </div>
+    </div>
+</div>
+
+</main>
+
+   <script>
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
+    const PS3_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=511776549&single=true&output=csv";
+
+    const PS3_LISTA_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1642803365&single=true&output=csv";
+
+    // Lista ordenada de juegos para navegación
+    let sortedGamesList = [];
+    let currentGameIndex = -1;
+       
+    // Imágenes adicionales
+    let additionalImages = [];
+    let additionalImageIndex = 0;
+    let additionalImagesKeydownBound = false;
+    let modalAbierta = false;
+    let currentGroupLabel = "";
+
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    
+    function getQueryParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function parseCSVLine(line) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+
+        result.push(current.trim());
+        return result;
+    }
+
+    function findColumnIndex(header, names) {
+        for (const name of names) {
+            const idx = header.indexOf(name);
+            if (idx >= 0) return idx;
+        }
+        return -1;
+    }
+
+    function getColumnValue(cols, idx) {
+        return idx >= 0 && cols[idx] !== undefined ? cols[idx].trim() : "";
+    }
+       
+function normalizeUrlValue(value) {
+        const trimmed = (value || "").trim();
+        return trimmed ? trimmed : "";
+    }
+
+    function formatTitleWithArticle(title) {
+        if (!title) return "";
+        const t = title.trim();
+        const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+        const match = t.match(re);
+        if (!match) return t;
+        return match[2] + ", " + match[1];
+    }
+
+    function normalizeText(str) {
+    return (str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+// ============================================
+// PARSER CSV GENERAL (soporta saltos de línea dentro de comillas)
+// ============================================
+function parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentField = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (ch === '"') {
+            if (inQuotes && text[i + 1] === '"') {
+                currentField += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === "," && !inQuotes) {
+            currentRow.push(currentField.trim());
+            currentField = "";
+        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+            if (ch === "\r" && text[i + 1] === "\n") {
+                i++;
+            }
+            currentRow.push(currentField.trim());
+            if (currentRow.some(v => v !== "")) {
+                rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = "";
+        } else {
+            currentField += ch;
+        }
+    }
+
+    if (currentField.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(v => v !== "")) {
+            rows.push(currentRow);
+        }
+    }
+
+    return rows;
+}
+
+function parseScreenshotsList(text) {
+    return (text || "")
+        .split(",")
+        .map(url => url.trim())
+        .filter(url => url !== "" && url !== "--");
+}
+
+// ============================================
+// PARSER CSV - FICHA PS3 (datos completos)
+// ============================================
+function parsePS3CSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (!lines.length) return [];
+
+    const header = parseCSVLine(lines[0]);
+    console.log("Columnas del CSV PS3:", header);
+    const expectedCols = header.length;
+    const rows = [];
+
+    // Índices de columnas
+    const idxID = header.indexOf("ID");
+    const idxTitulo = findColumnIndex(header, ["TITULO", "TÍTULO"]);
+    const idxAnio = findColumnIndex(header, ["AÑO", "ANO"]);
+    const idxPublisher = header.indexOf("PUBLISHER");
+    const idxDesarrollo = header.indexOf("DESARROLLO");
+    const idxGenero = findColumnIndex(header, ["GENERO", "GÉNERO"]);
+    const idxSubgenero = findColumnIndex(header, ["SUBGENERO", "SUBGÉNERO"]);
+    const idxCaratula = findColumnIndex(header, ["CARATULA", "CARÁTULA"]);
+    const idxScreenshots = header.indexOf("SCREENSHOTS");
+    const idxPuntuacion = findColumnIndex(header, ["PUNTUACION", "PUNTUACIÓN"]);
+    const idxMasInfo = header.indexOf("MAS_INFO");
+    const idxSinopsis = header.indexOf("SINOPSIS");
+    const idxArgumento = header.indexOf("ARGUMENTO");
+    const idxJugadores = header.indexOf("JUGADORES");
+    const idxFormato = header.indexOf("FORMATO");
+    const idxUbicacion = findColumnIndex(header, ["UBICACION", "UBICACIÓN"]);
+    const idxFavorito = header.indexOf("FAVORITO");
+    const idxTerminado = header.indexOf("TERMINADO");
+    const idxVideo = header.indexOf("VIDEO");
+
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+
+        let rawLine = lines[i];
+        let cols = parseCSVLine(rawLine);
+
+        // Si la fila viene "rota" en varias líneas, vamos pegando
+        while (cols.length < expectedCols && i + 1 < lines.length) {
+            rawLine += "\n" + lines[i + 1];
+            i++;
+            cols = parseCSVLine(rawLine);
+        }
+
+        const thisId = getColumnValue(cols, idxID);
+        const screenshotsRaw = getColumnValue(cols, idxScreenshots);
+        const screenshotsList = parseScreenshotsList(screenshotsRaw);
+
+        rows.push({
+            id: thisId,
+            titulo: getColumnValue(cols, idxTitulo),
+            anio: getColumnValue(cols, idxAnio),
+            publisher: getColumnValue(cols, idxPublisher),
+            desarrollo: getColumnValue(cols, idxDesarrollo),
+            genero: getColumnValue(cols, idxGenero),
+            subgenero: getColumnValue(cols, idxSubgenero),
+            caratula: getColumnValue(cols, idxCaratula),
+            screenshotsRaw: screenshotsRaw,
+            screenshotsList: screenshotsList,
+            puntuacion: getColumnValue(cols, idxPuntuacion),
+            masInfo: getColumnValue(cols, idxMasInfo),
+            sinopsis: getColumnValue(cols, idxSinopsis),
+            argumento: getColumnValue(cols, idxArgumento),
+            jugadores: getColumnValue(cols, idxJugadores),
+            formato: getColumnValue(cols, idxFormato),
+            ubicacion: getColumnValue(cols, idxUbicacion),
+            favorito: getColumnValue(cols, idxFavorito),
+            terminado: getColumnValue(cols, idxTerminado),
+            videoUrl: getColumnValue(cols, idxVideo)
+        });
+    }
+
+    return rows;
+}
+
+    // ============================================
+    // PARSER CSV - LISTA (para navegación)
+    // ============================================
+function parseListaCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (!lines.length) return [];
+
+    const header = parseCSVLine(lines[0]);
+    const rows = [];
+
+    const idxID        = header.indexOf("ID");
+    const idxTitulo    = header.indexOf("TITULO_MOSTRAR");
+    const idxPub       = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio      = header.indexOf("AÑO_MOSTRAR");
+    const idxGenero    = header.indexOf("GENERO_MOSTRAR");
+    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
+    const idxJugadores = header.indexOf("JUGADORES_MOSTRAR");
+    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+
+        const cols = parseCSVLine(line);
+        const id     = getColumnValue(cols, idxID);
+        const titulo = getColumnValue(cols, idxTitulo);
+
+        if (!titulo) continue;
+
+        const displayTitulo = formatTitleWithArticle(titulo);
+
+        rows.push({
+            id,
+            titulo,
+            displayTitulo,
+            sortKey: displayTitulo.toLowerCase(),
+            pub:       getColumnValue(cols, idxPub),
+            anio:      getColumnValue(cols, idxAnio),
+            genero:    getColumnValue(cols, idxGenero),
+            subgenero: getColumnValue(cols, idxSubgenero),
+            favorito:  getColumnValue(cols, idxFavorito),
+            jugadores: getColumnValue(cols, idxJugadores),
+            terminado: getColumnValue(cols, idxTerminado),
+            desarrollo: getColumnValue(cols, idxDesarrollo)
+        });
+    }
+
+    return rows;
+}
+
+    // ============================================
+    // EXTRACCIÓN DE CARÁTULA
+    // ============================================
+    
+    function getCoverURL(game) {
+        if (game.caratula) {
+            return game.caratula;
+        }
+        return "";
+    }
+
+    function getYouTubeThumbnail(embedUrl) {
+        if (!embedUrl) return "";
+        const match = embedUrl.match(/embed\/([^?&#\/]+)/);
+        if (match && match[1]) {
+            return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+        }
+        return "";
+    }
+
+
+    // ============================================
+    // ACTUALIZACIÓN DE UI
+    // ============================================
+    
+function updateTitle(game) {
+    const title = game.titulo || "Juego PlayStation 3";
+    document.title = `${title} – PlayStation 3`;
+
+    const h1 = document.getElementById("ficha-title");
+    if (h1) {
+        h1.textContent = title;
+        h1.classList.remove("loading-title");
+    }
+
+    const platformEl = document.querySelector(".ficha-platform");
+    if (platformEl) {
+        platformEl.style.display = "block";
+    }
+
+    // Mostrar sección FICHA
+    const fichaSection = document.querySelector(".ficha-section");
+    if (fichaSection) {
+        fichaSection.style.display = "block";
+    }
+
+    document.body.classList.remove("loading");
+}
+
+function updateCover(game) {
+    const coverImg = document.getElementById("ficha-cover");
+    const wrapper = document.querySelector(".ficha-cover-wrapper");
+    if (!coverImg || !wrapper) return;
+
+    const fallbackCover = "assets/img/CaratulaNoDisponible.png";
+    const coverUrl = (getCoverURL(game) || "").trim();
+    const hasValidCover = coverUrl && coverUrl.toLowerCase() !== "null";
+    const finalCoverUrl = hasValidCover ? coverUrl : fallbackCover;
+
+    coverImg.style.opacity = "0";
+    coverImg.style.display = "block";
+
+    coverImg.onload = function() {
+        const naturalW = coverImg.naturalWidth;
+        const naturalH = coverImg.naturalHeight;
+        const aspectRatio = naturalW / naturalH;
+
+        const wrapperWidth = wrapper.offsetWidth;
+        const wrapperHeight = wrapper.offsetHeight;
+        const targetRatio = wrapperWidth / wrapperHeight;
+
+        const scaledWidth = wrapperHeight * aspectRatio;
+        const squeezeRatio = 0.97;
+        const ratioDiff = Math.abs(aspectRatio - targetRatio) / targetRatio;
+        const isMatchingRatio = ratioDiff < 0.03;
+
+        if (scaledWidth < wrapperWidth || isMatchingRatio) {
+            coverImg.style.width = "100%";
+            coverImg.style.height = "100%";
+            coverImg.style.objectFit = "fill";
+            coverImg.style.left = "auto";
+            coverImg.style.right = "0";
+            coverImg.style.transform = "none";
+        } else if (aspectRatio > targetRatio) {
+            const compressedWidth = scaledWidth * squeezeRatio;
+            coverImg.style.width = compressedWidth + "px";
+            coverImg.style.height = "100%";
+            coverImg.style.objectFit = "fill";
+            coverImg.style.left = "auto";
+            coverImg.style.right = "0";
+            coverImg.style.transform = "none";
+        } else {
+            coverImg.style.width = "auto";
+            coverImg.style.height = "100%";
+            coverImg.style.objectFit = "cover";
+            coverImg.style.left = "auto";
+            coverImg.style.right = "0";
+            coverImg.style.transform = "none";
+        }
+        
+        coverImg.style.opacity = "1";
+        const coverLabel = wrapper.querySelector(".skeleton-label");
+        if (coverLabel) coverLabel.style.display = "none";
+        wrapper.classList.add("loaded");
+    };
+
+    coverImg.onerror = function() {
+        const fallbackAbsolute = new URL(fallbackCover, window.location.href).href;
+        if (coverImg.src !== fallbackAbsolute) {
+            coverImg.onerror = null;
+            coverImg.src = fallbackCover;
+        }
+    };
+
+    coverImg.src = finalCoverUrl;
+    coverImg.alt = `Carátula de ${game.titulo || "juego PlayStation 3"}`;
+    coverImg.style.display = "block";
+}
+
+function updatePuntuacion(game) {
+    const puntuacionEl = document.getElementById("ficha-puntuacion");
+    const ratingEl = document.querySelector(".ficha-rating");
+    const starsEl = document.getElementById("ficha-rating-stars");
+    if (!puntuacionEl || !ratingEl || !starsEl) return;
+
+    const valor = (game.puntuacion || "").trim();
+    console.log("Puntuación del juego:", valor);
+
+    if (valor) {
+        // Texto debajo de PlayStation 3
+        puntuacionEl.innerHTML = `<b>Puntuación:</b> ${valor}`;
+        puntuacionEl.style.display = "block";
+        ratingEl.style.display = "flex";
+
+        // Sacar la nota (valor de 0 a 100)
+        const match = valor.match(/^(\d+)/);
+        let nota = 0;
+        if (match) {
+            nota = parseInt(match[1], 10);
+        }
+
+        // Clamp 0–100
+        if (isNaN(nota)) nota = 0;
+        if (nota < 0) nota = 0;
+        if (nota > 100) nota = 100;
+
+        // El porcentaje es directamente la nota (ya es de 0 a 100)
+        const porcentaje = nota;
+        console.log("Nota numérica:", nota, "→ porcentaje barra:", porcentaje);
+
+        // Elegir color (adaptado para escala 0-100)
+        let color = "#ff4b4b"; // rojo < 50
+        if (nota >= 70) {
+            color = "#00c853"; // verde >= 70
+        } else if (nota >= 50) {
+            color = "#ffd600"; // amarillo 50-69
+        }
+
+        // Aplicar variables CSS con animación
+        starsEl.style.setProperty("--fill", "0%");
+        starsEl.style.setProperty("--rating-color", color);
+        void starsEl.offsetWidth;
+        starsEl.style.setProperty("--fill", porcentaje + "%");
+
+    } else {
+        puntuacionEl.innerHTML = "";
+        puntuacionEl.style.display = "none";
+        ratingEl.style.display = "none";
+        starsEl.style.setProperty("--fill", "0%");
+    }
+}
+
+// ============================================
+// SCREENSHOTS
+// ============================================
+
+function updateScreenshots(game) {
+    const screenshot1 = document.getElementById("screenshot-1");
+    const screenshot2 = document.getElementById("screenshot-2");
+    const wrapper1 = document.getElementById("screenshot-wrapper-1");
+    const wrapper2 = document.getElementById("screenshot-wrapper-2");
+    const container = document.getElementById("ficha-screenshots");
+
+    if (!screenshot1 || !screenshot2 || !container) return;
+
+    const screenshots = game.screenshotsList || [];
+    const screenshot1Url = screenshots[0] || "";
+    const screenshot2Url = screenshots[1] || "";
+
+    // Si no hay ninguna screenshot, ocultar todo el contenedor
+    if (!screenshot1Url && !screenshot2Url) {
+        container.style.display = "none";
+        return;
+    }
+
+    container.style.display = "flex";
+
+    // Screenshot 1
+    if (screenshot1Url) {
+        screenshot1.src = screenshot1Url;
+        screenshot1.style.display = "block";
+        screenshot1.onclick = () => openModal(screenshot1Url);
+        wrapper1.classList.remove("empty");
+        wrapper1.style.display = "block";
+        const label1 = wrapper1.querySelector(".skeleton-label");
+        if (label1) label1.style.display = "none";
+    } else {
+        screenshot1.style.display = "none";
+        wrapper1.style.display = "none";
+    }
+
+    // Screenshot 2
+    if (screenshot2Url) {
+        screenshot2.src = screenshot2Url;
+        screenshot2.style.display = "block";
+        screenshot2.onclick = () => openModal(screenshot2Url);
+        wrapper2.classList.remove("empty");
+        wrapper2.style.display = "block";
+        const label2 = wrapper2.querySelector(".skeleton-label");
+        if (label2) label2.style.display = "none";
+    } else {
+        screenshot2.style.display = "none";
+        wrapper2.style.display = "none";
+    }
+}
+
+function openModal(src) {
+    const modal = document.getElementById("cover-modal");
+    const modalImg = document.getElementById("cover-modal-img");
+    if (modal && modalImg) {
+        modalImg.src = src;
+        modal.classList.add("active");
+        modalAbierta = true;
+    }
+}
+
+// ============================================
+// DATOS DE LA FICHA
+// ============================================
+function updateFichaDatos(game) {
+    const container = document.getElementById("ficha-datos");
+    if (!container) return;
+
+    const campos = [
+        { label: "· AÑO", value: game.anio },
+        { label: "· EDITOR", value: game.publisher },
+        { label: "· DESARROLLO", value: game.desarrollo },
+        { label: "· GÉNERO", value: game.genero },
+        { label: "· SUBGÉNERO", value: game.subgenero }
+    ];
+
+    const camposConValor = campos.filter(c => c.value && c.value.trim() !== "");
+
+    if (camposConValor.length === 0) {
+        container.style.display = "none";
+        return;
+    }
+
+    let html = "";
+    camposConValor.forEach(campo => {
+        html += `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${campo.value}</p>`;
+    });
+
+    container.innerHTML = html;
+    container.style.display = "block";
+}
+
+// ============================================
+// + INFO
+// ============================================
+function updateMasInfo(game) {
+    const section = document.getElementById("masinfo-section");
+    const container = document.getElementById("ficha-masinfo");
+    if (!section || !container) return;
+
+    const masInfo = (game.masInfo || "").trim();
+
+    if (!masInfo) {
+        section.style.display = "none";
+        return;
+    }
+
+    const textParagraph = document.createElement("p");
+    textParagraph.className = "ficha-masinfo-texto";
+    textParagraph.textContent = masInfo;
+    container.appendChild(textParagraph);
+    
+    section.style.display = "block";
+}
+
+// ============================================
+// SINOPSIS Y ARGUMENTO CON VOZ
+// ============================================
+let sinopsisVoiceButton = null;
+let sinopsisVoiceOnIcon = null;
+let sinopsisVoiceOffIcon = null;
+let argumentoVoiceButton = null;
+let argumentoVoiceOnIcon = null;
+let argumentoVoiceOffIcon = null;
+let currentUtterance = null;
+let isReadingSinopsis = false;
+let isReadingArgumento = false;
+const speechSupported =
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    typeof SpeechSynthesisUtterance !== "undefined";
+
+function resetSinopsisVoiceIcons() {
+    if (!sinopsisVoiceButton) return;
+    if (sinopsisVoiceOnIcon && sinopsisVoiceOffIcon) {
+        sinopsisVoiceOnIcon.style.display = isReadingSinopsis ? "none" : "block";
+        sinopsisVoiceOffIcon.style.display = isReadingSinopsis ? "block" : "none";
+    }
+}
+
+function resetArgumentoVoiceIcons() {
+    if (!argumentoVoiceButton) return;
+    if (argumentoVoiceOnIcon && argumentoVoiceOffIcon) {
+        argumentoVoiceOnIcon.style.display = isReadingArgumento ? "none" : "block";
+        argumentoVoiceOffIcon.style.display = isReadingArgumento ? "block" : "none";
+    }
+}
+
+function stopAllVoice() {
+    if (!speechSupported) return;
+    window.speechSynthesis.cancel();
+    currentUtterance = null;
+    isReadingSinopsis = false;
+    isReadingArgumento = false;
+    resetSinopsisVoiceIcons();
+    resetArgumentoVoiceIcons();
+}
+
+function getPreferredSpanishVoice() {
+    if (!speechSupported) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || !voices.length) return null;
+
+    const preferred = voices.find(voice =>
+        voice.lang && voice.lang.toLowerCase().startsWith("es-es")
+    );
+    if (preferred) return preferred;
+
+    const anySpanish = voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith("es"));
+    return anySpanish || voices[0];
+}
+
+function handleSinopsisVoiceEnd() {
+    isReadingSinopsis = false;
+    currentUtterance = null;
+    resetSinopsisVoiceIcons();
+}
+
+function handleArgumentoVoiceEnd() {
+    isReadingArgumento = false;
+    currentUtterance = null;
+    resetArgumentoVoiceIcons();
+}
+
+function startSinopsisVoice() {
+    if (!speechSupported) return;
+    const textEl = document.querySelector(".ficha-sinopsis-texto");
+    const text = textEl ? textEl.textContent.trim() : "";
+    if (!text) return;
+
+    stopAllVoice();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = 1;
+    utterance.volume = 1;
+    const voice = getPreferredSpanishVoice();
+    if (voice) {
+        utterance.voice = voice;
+    }
+    utterance.onend = handleSinopsisVoiceEnd;
+    utterance.onerror = handleSinopsisVoiceEnd;
+
+    currentUtterance = utterance;
+    isReadingSinopsis = true;
+    resetSinopsisVoiceIcons();
+    window.speechSynthesis.speak(utterance);
+}
+
+function startArgumentoVoice() {
+    if (!speechSupported) return;
+    const textEl = document.querySelector(".ficha-argumento-texto");
+    const text = textEl ? textEl.textContent.trim() : "";
+    if (!text) return;
+
+    stopAllVoice();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = 1;
+    utterance.volume = 1;
+    const voice = getPreferredSpanishVoice();
+    if (voice) {
+        utterance.voice = voice;
+    }
+    utterance.onend = handleArgumentoVoiceEnd;
+    utterance.onerror = handleArgumentoVoiceEnd;
+
+    currentUtterance = utterance;
+    isReadingArgumento = true;
+    resetArgumentoVoiceIcons();
+    window.speechSynthesis.speak(utterance);
+}
+
+function toggleSinopsisVoice() {
+    if (!speechSupported) return;
+    if (isReadingSinopsis) {
+        stopAllVoice();
+    } else {
+        startSinopsisVoice();
+    }
+}
+
+function toggleArgumentoVoice() {
+    if (!speechSupported) return;
+    if (isReadingArgumento) {
+        stopAllVoice();
+    } else {
+        startArgumentoVoice();
+    }
+}
+
+function renderSinopsisVoiceButton(container) {
+    sinopsisVoiceButton = document.createElement("button");
+    sinopsisVoiceButton.type = "button";
+    sinopsisVoiceButton.className = "sinopsis-voice-button";
+    sinopsisVoiceButton.setAttribute("aria-label", "Leer sinopsis en voz alta");
+
+    sinopsisVoiceOnIcon = document.createElement("img");
+    sinopsisVoiceOnIcon.src = "assets/img/ic_voz_ON.svg";
+    sinopsisVoiceOnIcon.alt = "Reproducir voz";
+    sinopsisVoiceOnIcon.className = "sinopsis-voice-icon sinopsis-voice-icon--on";
+
+    sinopsisVoiceOffIcon = document.createElement("img");
+    sinopsisVoiceOffIcon.src = "assets/img/ic_voz_OFF.svg";
+    sinopsisVoiceOffIcon.alt = "Detener voz";
+    sinopsisVoiceOffIcon.className = "sinopsis-voice-icon sinopsis-voice-icon--off";
+
+    sinopsisVoiceButton.appendChild(sinopsisVoiceOnIcon);
+    sinopsisVoiceButton.appendChild(sinopsisVoiceOffIcon);
+    container.appendChild(sinopsisVoiceButton);
+    resetSinopsisVoiceIcons();
+
+    if (!speechSupported) {
+        sinopsisVoiceButton.style.display = "none";
+        return;
+    }
+
+    sinopsisVoiceButton.addEventListener("click", toggleSinopsisVoice);
+}
+
+function renderArgumentoVoiceButton(container) {
+    argumentoVoiceButton = document.createElement("button");
+    argumentoVoiceButton.type = "button";
+    argumentoVoiceButton.className = "sinopsis-voice-button";
+    argumentoVoiceButton.setAttribute("aria-label", "Leer argumento en voz alta");
+
+    argumentoVoiceOnIcon = document.createElement("img");
+    argumentoVoiceOnIcon.src = "assets/img/ic_voz_ON.svg";
+    argumentoVoiceOnIcon.alt = "Reproducir voz";
+    argumentoVoiceOnIcon.className = "sinopsis-voice-icon sinopsis-voice-icon--on";
+
+    argumentoVoiceOffIcon = document.createElement("img");
+    argumentoVoiceOffIcon.src = "assets/img/ic_voz_OFF.svg";
+    argumentoVoiceOffIcon.alt = "Detener voz";
+    argumentoVoiceOffIcon.className = "sinopsis-voice-icon sinopsis-voice-icon--off";
+
+    argumentoVoiceButton.appendChild(argumentoVoiceOnIcon);
+    argumentoVoiceButton.appendChild(argumentoVoiceOffIcon);
+    container.appendChild(argumentoVoiceButton);
+    resetArgumentoVoiceIcons();
+
+    if (!speechSupported) {
+        argumentoVoiceButton.style.display = "none";
+        return;
+    }
+
+    argumentoVoiceButton.addEventListener("click", toggleArgumentoVoice);
+}
+
+function updateSinopsis(game) {
+    const section = document.getElementById("sinopsis-section");
+    const container = document.getElementById("ficha-sinopsis");
+    if (!section || !container) return;
+
+    const sinopsis = (game.sinopsis || "").trim();
+
+    if (!sinopsis) {
+        section.style.display = "none";
+        return;
+    }
+
+    const textParagraph = document.createElement("p");
+    textParagraph.className = "ficha-sinopsis-texto";
+    textParagraph.textContent = sinopsis;
+    container.appendChild(textParagraph);
+    renderSinopsisVoiceButton(container);
+    
+    section.style.display = "block";
+}
+
+function updateArgumento(game) {
+    const section = document.getElementById("argumento-section");
+    const container = document.getElementById("ficha-argumento");
+    if (!section || !container) return;
+
+    const argumento = (game.argumento || "").trim();
+
+    if (!argumento) {
+        section.style.display = "none";
+        return;
+    }
+
+    const textParagraph = document.createElement("p");
+    textParagraph.className = "ficha-argumento-texto";
+    textParagraph.textContent = argumento;
+    container.appendChild(textParagraph);
+    renderArgumentoVoiceButton(container);
+    
+    section.style.display = "block";
+}
+
+
+// ============================================
+// DATOS TÉCNICOS
+// ============================================
+function updateDatosTecnicos(game) {
+    const section = document.getElementById("datos-tecnicos-section");
+    const container = document.getElementById("ficha-datos-tecnicos");
+    if (!section || !container) return;
+
+    const getStatusClass = (label, value) => {
+        const normalized = (value || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        const isCompletionField = label.includes("TERMINADO") || label.includes("FAVORITO");
+
+        if (!isCompletionField) return "";
+
+        if (normalized === "no") return "status status--no";
+        if (normalized === "si") return "status status--yes";
+
+        return "";
+    };
+    
+    // Construir campos dinámicamente
+    const campos = [
+        { label: "· MODOS DE JUEGO", value: game.jugadores },
+        { label: "· FORMATO", value: game.formato }
+    ];
+
+    // Ubicación solo si tiene contenido
+    if (game.ubicacion && game.ubicacion.trim()) {
+        campos.push({ label: "· UBICACIÓN", value: game.ubicacion });
+    }
+
+    // Favorito solo si es "SI"
+    if (game.favorito && game.favorito.trim().toUpperCase() === "SI") {
+        campos.push({ label: "· FAVORITO", value: game.favorito });
+    }
+
+    // Terminado siempre
+    campos.push({ label: "· TERMINADO", value: game.terminado });
+
+    const camposConValor = campos.filter(campo => campo.value && campo.value.trim() !== "");
+
+    if (!camposConValor.length) {
+        section.style.display = "none";
+        return;
+    }
+
+    const html = camposConValor
+        .map(campo => {
+            const statusClass = getStatusClass(campo.label, campo.value);
+            const valueHtml = statusClass
+                ? `<span class="${statusClass}">${campo.value}</span>`
+                : campo.value;
+
+            return `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${valueHtml}</p>`;
+        })
+        .join("");
+
+    container.innerHTML = html;
+    section.style.display = "block";
+}
+
+// ============================================
+// GAMEPLAY
+// ============================================
+function updateGameplay(game) {
+    const section = document.getElementById("gameplay-section");
+    const frame = document.getElementById("ficha-gameplay-frame");
+    const placeholder = document.getElementById("ficha-gameplay-placeholder");
+
+    if (!section || !frame || !placeholder) return;
+
+    const videoUrl = (game.videoUrl || "").trim();
+
+    if (!videoUrl) {
+        section.style.display = "none";
+        return;
+    }
+
+    const thumbnail = getYouTubeThumbnail(videoUrl);
+    if (thumbnail) {
+        placeholder.style.backgroundImage = `url('${thumbnail}')`;
+    } else {
+        placeholder.style.backgroundImage = "";
+    }
+
+    if (!placeholder.dataset.bound) {
+        placeholder.dataset.bound = "true";
+        placeholder.addEventListener("click", () => {
+            const iframe = document.createElement("iframe");
+            const separator = videoUrl.includes("?") ? "&" : "?";
+            iframe.src = `${videoUrl}${separator}autoplay=1`;
+            iframe.className = "ficha-gameplay-iframe";
+            iframe.title = "Gameplay";
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+            iframe.allowFullscreen = true;
+            iframe.loading = "lazy";
+
+            frame.innerHTML = "";
+            frame.appendChild(iframe);
+        });
+    }
+
+    section.style.display = "block";
+}
+
+// ============================================
+// IMÁGENES ADICIONALES (a partir de la 3ª screenshot)
+// ============================================
+function renderAdditionalImage() {
+    if (!additionalImages.length) return;
+
+    const imgEl = document.getElementById("ficha-imagenes-img");
+    const counterCurrent = document.getElementById("imagenes-current");
+    const counterTotal = document.getElementById("imagenes-total");
+    const modal = document.getElementById("imagenes-modal");
+    const modalImg = document.getElementById("imagenes-modal-img");
+
+    if (!imgEl || !counterCurrent || !counterTotal) return;
+
+    const url = additionalImages[additionalImageIndex];
+
+    imgEl.src = url;
+    imgEl.style.display = "block";
+    counterCurrent.textContent = (additionalImageIndex + 1).toString();
+    counterTotal.textContent = additionalImages.length.toString();
+
+    if (modal && modal.classList.contains("active") && modalImg) {
+        modalImg.src = url;
+    }
+}
+
+function changeAdditionalImage(step) {
+    if (!additionalImages.length) return;
+
+    additionalImageIndex = (additionalImageIndex + step + additionalImages.length) % additionalImages.length;
+    renderAdditionalImage();
+}
+
+function openAdditionalImagesModal() {
+    const modal = document.getElementById("imagenes-modal");
+    if (!modal || !additionalImages.length) return;
+
+    modal.classList.add("active");
+    renderAdditionalImage();
+    modalAbierta = true;
+}
+
+function closeAdditionalImagesModal() {
+    const modal = document.getElementById("imagenes-modal");
+    if (modal) {
+        modal.classList.remove("active");
+    }
+    modalAbierta = false;
+}
+
+function setupAdditionalImagesModalControls() {
+    const modal = document.getElementById("imagenes-modal");
+    const closeBtn = document.querySelector(".imagenes-modal-close");
+    const prevArrow = document.querySelector(".imagenes-modal-arrow--prev");
+    const nextArrow = document.querySelector(".imagenes-modal-arrow--next");
+
+    if (closeBtn && !closeBtn.dataset.bound) {
+        closeBtn.dataset.bound = "true";
+        closeBtn.addEventListener("click", closeAdditionalImagesModal);
+    }
+
+    if (modal && !modal.dataset.bound) {
+        modal.dataset.bound = "true";
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                closeAdditionalImagesModal();
+            }
+        });
+
+        ["touchstart", "touchmove", "touchend"].forEach(eventName => {
+            modal.addEventListener(eventName, (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+        });
+    }
+
+    if (prevArrow && !prevArrow.dataset.bound) {
+        prevArrow.dataset.bound = "true";
+        prevArrow.addEventListener("click", () => changeAdditionalImage(-1));
+    }
+
+    if (nextArrow && !nextArrow.dataset.bound) {
+        nextArrow.dataset.bound = "true";
+        nextArrow.addEventListener("click", () => changeAdditionalImage(1));
+    }
+
+    if (!additionalImagesKeydownBound) {
+        additionalImagesKeydownBound = true;
+        document.addEventListener("keydown", (e) => {
+            if (!modal || !modal.classList.contains("active")) return;
+
+            if (e.key === "Escape") {
+                closeAdditionalImagesModal();
+            } else if (e.key === "ArrowLeft") {
+                changeAdditionalImage(-1);
+            } else if (e.key === "ArrowRight") {
+                changeAdditionalImage(1);
+            }
+        });
+    }
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const minSwipeDistance = 40;
+
+    if (modal && !modal.dataset.swipeBound) {
+        modal.dataset.swipeBound = "true";
+        modal.addEventListener("touchstart", (e) => {
+            e.stopPropagation();
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        modal.addEventListener("touchend", (e) => {
+            e.stopPropagation();
+            touchEndX = e.changedTouches[0].screenX;
+            const distance = touchEndX - touchStartX;
+
+            if (Math.abs(distance) < minSwipeDistance) return;
+
+            if (distance < 0) {
+                changeAdditionalImage(1);
+            } else {
+                changeAdditionalImage(-1);
+            }
+        }, { passive: true });
+    }
+}
+
+function updateImagenesAdicionales(game) {
+    const section = document.getElementById("imagenes-section");
+    const nav = document.getElementById("ficha-imagenes-nav");
+    const imgEl = document.getElementById("ficha-imagenes-img");
+    if (!section || !nav || !imgEl) return;
+
+    // Coger screenshots a partir de la 3ª (índice 2 en adelante)
+    const allScreenshots = game.screenshotsList || [];
+    additionalImages = allScreenshots.slice(2); // Desde la 3ª en adelante
+    additionalImageIndex = 0;
+
+    // Si hay 2 o menos screenshots, no mostrar la sección
+    if (additionalImages.length === 0) {
+        section.style.display = "none";
+        nav.style.display = "none";
+        imgEl.style.display = "none";
+        return;
+    }
+
+    const prevArrow = nav.querySelector(".ficha-imagenes-arrow--prev");
+    const nextArrow = nav.querySelector(".ficha-imagenes-arrow--next");
+
+    section.style.display = "block";
+    nav.style.display = "flex";
+    imgEl.style.display = "block";
+
+    if (prevArrow && !prevArrow.dataset.bound) {
+        prevArrow.dataset.bound = "true";
+        prevArrow.addEventListener("click", () => changeAdditionalImage(-1));
+    }
+
+    if (nextArrow && !nextArrow.dataset.bound) {
+        nextArrow.dataset.bound = "true";
+        nextArrow.addEventListener("click", () => changeAdditionalImage(1));
+    }
+
+    if (!imgEl.dataset.bound) {
+        imgEl.dataset.bound = "true";
+        imgEl.addEventListener("click", openAdditionalImagesModal);
+    }
+
+    setupAdditionalImagesModalControls();
+    renderAdditionalImage();
+}
+
+    function showError(message) {
+        const h1 = document.getElementById("ficha-title");
+        if (h1) {
+            h1.textContent = message;
+        }
+    }
+
+       
+
+    // ============================================
+    // NAVEGACIÓN ENTRE JUEGOS
+    // ============================================
+
+    function computeGroupLabel() {
+    const filterField = (getQueryParam("filterField") || "").toLowerCase();
+    const filterValue = (getQueryParam("filterValue") || "").trim();
+    const searchQuery = getQueryParam("search");
+
+    if (filterField === "subgenero" && filterValue) {
+        return `Subgénero ${filterValue}`;
+    }
+
+    if (filterField === "favorito" && filterValue) {
+        return `Favoritos`;
+    }
+
+    if (searchQuery) {
+        const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+        if (singleCharMatch) {
+            return `Letra ${searchQuery.toUpperCase()}`;
+        }
+        return `"${searchQuery}"`;
+    }
+
+    return "Juegos PS3";
+}
+
+    function updateNavCounter() {
+    const counterEl = document.querySelector(".game-nav-counter");
+    const titleEl = document.querySelector(".game-nav-title");
+    
+    if (counterEl && currentGameIndex >= 0) {
+        const position = currentGameIndex + 1;
+        const total = sortedGamesList.length;
+        const counterText = `${position.toLocaleString("es-ES")}/${total.toLocaleString("es-ES")}`;
+        counterEl.textContent = counterText;
+        sessionStorage.setItem("navCounter", counterText);
+    }
+    
+    if (titleEl) {
+        const label = currentGroupLabel || computeGroupLabel();
+        titleEl.textContent = label;
+    }
+}
+
+function attachVoiceStopToNavigation() {
+    const navSelectors = [
+        ".top-bar-back",
+        ".top-bar-home",
+        ".game-nav-arrow--prev",
+        ".game-nav-arrow--next"
+    ];
+
+    navSelectors.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.addEventListener("click", () => stopAllVoice(), { capture: true });
+        }
+    });
+
+    window.addEventListener("beforeunload", () => {
+        stopAllVoice();
+    });
+}
+
+       
+    function setupNavigation() {
+    const prevArrow = document.querySelector(".game-nav-arrow--prev");
+    const nextArrow = document.querySelector(".game-nav-arrow--next");
+    const counterEl = document.querySelector(".game-nav-counter");
+    
+    const searchQuery = getQueryParam("search");
+    const filterField = getQueryParam("filterField");
+    const filterValue = getQueryParam("filterValue");
+
+    if (prevArrow) {
+        prevArrow.addEventListener("click", () => {
+            if (currentGameIndex > 0) {
+                stopAllVoice();
+                const newPosition = currentGameIndex;
+                const total = sortedGamesList.length;
+                const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                if (counterEl) {
+                    counterEl.textContent = counterText;
+                }
+                sessionStorage.setItem("navCounter", counterText);
+                
+                const prevGame = sortedGamesList[currentGameIndex - 1];
+                let url = `ps3-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                window.location.href = url;
+            }
+        });
+        prevArrow.style.cursor = "pointer";
+    }
+
+    if (nextArrow) {
+        nextArrow.addEventListener("click", () => {
+            if (currentGameIndex < sortedGamesList.length - 1) {
+                stopAllVoice();
+                const newPosition = currentGameIndex + 2;
+                const total = sortedGamesList.length;
+                const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                if (counterEl) {
+                    counterEl.textContent = counterText;
+                }
+                sessionStorage.setItem("navCounter", counterText);
+                
+                const nextGame = sortedGamesList[currentGameIndex + 1];
+                let url = `ps3-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                window.location.href = url;
+            }
+        });
+        nextArrow.style.cursor = "pointer";
+    }
+}
+
+    async function loadGamesList(gameId) {
+    try {
+        const response = await fetch(PS3_LISTA_CSV_URL);
+        if (!response.ok) {
+            throw new Error("No se pudo cargar la lista");
+        }
+
+        const text = await response.text();
+        const games = parseListaCSV(text);
+
+        games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+        const searchQuery = getQueryParam("search");
+        const filterField = (getQueryParam("filterField") || "").toLowerCase();
+        const filterValue = (getQueryParam("filterValue") || "").trim();
+
+        let filteredGames = games;
+        currentGroupLabel = "";
+
+        if (filterField === "subgenero" && filterValue) {
+            const qNorm = normalizeText(filterValue);
+            filteredGames = games.filter(game => normalizeText(game.subgenero || "").includes(qNorm));
+            currentGroupLabel = `Subgénero ${filterValue}`;
+        } else if (filterField === "favorito") {
+            filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+            currentGroupLabel = `Favoritos`;
+        } else if (searchQuery) {
+            const qNorm = normalizeText(searchQuery);
+            
+            const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
+            
+            if (singleCharMatch) {
+                const char = normalizeText(singleCharMatch[1]);
+                filteredGames = games.filter(game => {
+                    const titleNorm = normalizeText(game.sortKey || "");
+                    return titleNorm.startsWith(char);
+                });
+                
+            } else if (qNorm === "fav") {
+                // Tratamiento especial para "fav"
+                filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+                currentGroupLabel = `Favoritos`;
+            } else {
+                filteredGames = games.filter(game => {
+                    const titleNorm = normalizeText(game.sortKey || "");
+                    const pubNorm = normalizeText(game.pub || "");
+                    const yearNorm = normalizeText(game.anio || "");
+                    const generoNorm = normalizeText(game.genero || "");
+                    const subgeneroNorm = normalizeText(game.subgenero || "");
+                    const jugadoresNorm = normalizeText(game.jugadores || "");
+                    const terminadoNorm = normalizeText(game.terminado || "");
+                    const desarrolloNorm = normalizeText(game.desarrollo || "");
+
+                    return (
+                        titleNorm.includes(qNorm) ||
+                        pubNorm.includes(qNorm) ||
+                        yearNorm.includes(qNorm) ||
+                        generoNorm.includes(qNorm) ||
+                        subgeneroNorm.includes(qNorm) ||
+                        jugadoresNorm.includes(qNorm) ||
+                        terminadoNorm.includes(qNorm) ||
+                        desarrolloNorm.includes(qNorm)
+                    );
+                });
+                currentGroupLabel = `"${searchQuery}"`;
+            }
+        } else {
+            currentGroupLabel = "Juegos PS3";
+        }
+
+        sortedGamesList = filteredGames;
+        currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
+        updateNavCounter();
+        setupNavigation();
+
+    } catch (err) {
+        console.error("Error cargando lista para navegación:", err);
+    }
+}
+
+    // ============================================
+    // CARGA PRINCIPAL
+    // ============================================
+    
+    async function loadPS3Ficha() {
+        const gameId = (getQueryParam("id") || "").trim();
+        
+        if (!gameId) {
+            console.warn("No hay ID en la URL.");
+            showError("ID no especificado");
+            return;
+        }
+
+        try {
+            const response = await fetch(PS3_CSV_URL);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar el CSV");
+            }
+
+            const text = await response.text();
+            const games = parsePS3CSV(text);
+            const game = games.find(row => row.id === gameId);
+
+                if (game) {
+                updateTitle(game);
+                updateCover(game);
+                updatePuntuacion(game);
+                updateScreenshots(game);
+                updateFichaDatos(game);
+                updateMasInfo(game);
+                updateSinopsis(game);
+                updateArgumento(game);
+                updateDatosTecnicos(game);
+                updateGameplay(game);
+                updateImagenesAdicionales(game);
+                } else {
+                showError("Juego no encontrado");
+                }
+
+            await loadGamesList(gameId);
+
+        } catch (err) {
+            console.error("Error cargando PS3:", err);
+            showError("Error cargando datos");
+        }
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    const titleEl = document.querySelector(".game-nav-title");
+    if (titleEl) {
+        titleEl.textContent = computeGroupLabel();
+    }
+
+    const savedCounter = sessionStorage.getItem("navCounter");
+    if (savedCounter) {
+        const counterEl = document.querySelector(".game-nav-counter");
+        if (counterEl) {
+            counterEl.textContent = savedCounter;
+        }
+    }
+    
+    loadPS3Ficha();
+    setupCoverModal();
+    setupSwipeNavigation();
+    attachVoiceStopToNavigation();
+});
+
+// ============================================
+// MODAL CARÁTULA
+// ============================================
+
+function setupCoverModal() {
+    const coverImg = document.getElementById("ficha-cover");
+    const modal = document.getElementById("cover-modal");
+    const modalImg = document.getElementById("cover-modal-img");
+    const closeBtn = document.querySelector(".cover-modal-close");
+
+    if (!coverImg || !modal || !modalImg || !closeBtn) return;
+
+    coverImg.addEventListener("click", function() {
+        modalImg.src = coverImg.src;
+        modal.classList.add("active");
+        modalAbierta = true;
+    });
+
+    closeBtn.addEventListener("click", function() {
+        modal.classList.remove("active");
+        modalAbierta = false;
+    });
+
+    modal.addEventListener("click", function(e) {
+        if (e.target === modal) {
+            modal.classList.remove("active");
+            modalAbierta = false;
+        }
+    });
+     ["touchstart", "touchmove", "touchend"].forEach(eventName => {
+        modal.addEventListener(eventName, (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && modal.classList.contains("active")) {
+            modal.classList.remove("active");
+            modalAbierta = false;
+        }
+    });
+}
+
+// ============================================
+// SWIPE PARA NAVEGACIÓN EN MÓVIL
+// ============================================
+
+function setupSwipeNavigation() {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let touchStartTime = 0;
+    
+    const minSwipeDistance = 100;
+    const maxSwipeTime = 500;
+    const maxVerticalRatio = 0.5;
+    
+    const searchQuery = getQueryParam("search");
+    const filterField = getQueryParam("filterField");
+    const filterValue = getQueryParam("filterValue");
+
+    document.addEventListener("touchstart", function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+        touchStartTime = Date.now();
+    }, { passive: true });
+
+    document.addEventListener("touchend", function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        if (modalAbierta) return;
+        
+        const distanceX = touchEndX - touchStartX;
+        const distanceY = touchEndY - touchStartY;
+        const elapsedTime = Date.now() - touchStartTime;
+        
+        if (Math.abs(distanceX) < minSwipeDistance) return;
+        if (elapsedTime > maxSwipeTime) return;
+        if (Math.abs(distanceY) > Math.abs(distanceX) * maxVerticalRatio) return;
+
+        if (distanceX < 0) {
+            if (currentGameIndex < sortedGamesList.length - 1) {
+                const nextGame = sortedGamesList[currentGameIndex + 1];
+                let url = `ps3-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                stopAllVoice();
+                window.location.href = url;
+            }
+        } else {
+            if (currentGameIndex > 0) {
+                const prevGame = sortedGamesList[currentGameIndex - 1];
+                let url = `ps3-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                if (filterField) {
+                    url += `&filterField=${encodeURIComponent(filterField)}`;
+                }
+                if (filterValue) {
+                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                stopAllVoice();
+                window.location.href = url;
+            }
+        }
+    }
+}
+</script>
+
+    <script src="assets/js/app.js"></script>
+
+    <!-- MODAL CARÁTULA -->
+<div id="cover-modal" class="cover-modal">
+    <span class="cover-modal-close">&times;</span>
+    <img class="cover-modal-img" id="cover-modal-img" alt="Carátula ampliada">
+</div>
+    
+<!-- MODAL IMÁGENES ADICIONALES -->
+<div id="imagenes-modal" class="imagenes-modal">
+    <span class="imagenes-modal-close">&times;</span>
+    <img class="imagenes-modal-img" id="imagenes-modal-img" alt="Imagen adicional ampliada">
+    <img src="assets/img/ic_back.svg" class="imagenes-modal-arrow imagenes-modal-arrow--prev" alt="Anterior">
+    <img src="assets/img/ic_back.svg" class="imagenes-modal-arrow imagenes-modal-arrow--next" alt="Siguiente">
+</div>
+</body>
+</html>
