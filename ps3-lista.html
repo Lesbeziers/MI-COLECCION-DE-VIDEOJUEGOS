@@ -66,10 +66,9 @@
     </main>
 
     <script>
-  // =========================================
-  // URL DEL FEED CSV ZX_LISTA
-  // =========================================
-  const ZX_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
+  // URL DEL FEED CSV PS3 (hoja "PS3")
+  // =========================================␊
+  const PS3_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/gviz/tq?tqx=out:csv&sheet=PS3";
 
   // Lista global con TODOS los juegos (para el buscador)
   let allGames = [];
@@ -125,6 +124,9 @@
     const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
     const idxAnio   = header.indexOf("AÑO_MOSTRAR");
     const idxThumb  = header.indexOf("THUMB_URL");
+    const idxCaratula = header.indexOf("CARATULA_URL");
+
+    const idxDesarrollador = header.indexOf("DESARROLLADOR");
 
     const idxAutor   = header.indexOf("AUTOR_MOSTRAR");
     const idxDes     = header.indexOf("DESARROLLO");
@@ -143,6 +145,11 @@
       const pub   = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
       const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
       const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
+      const caratula = (idxCaratula >= 0 && cols[idxCaratula] !== undefined) ? cols[idxCaratula].trim() : "";
+
+      const desarrollador = (idxDesarrollador >= 0 && cols[idxDesarrollador] !== undefined)
+        ? cols[idxDesarrollador].trim()
+        : "";
 
       const autor  = (idxAutor   >= 0 && cols[idxAutor]   !== undefined) ? cols[idxAutor].trim()   : "";
       const des    = (idxDes     >= 0 && cols[idxDes]     !== undefined) ? cols[idxDes].trim()     : "";
@@ -169,6 +176,8 @@
       contr,
       genero,
       subgenero,
+      desarrollador,
+      caratula,
       sortKey: displayTitulo.toLowerCase()
       });
 
@@ -223,7 +232,7 @@
 
      // Normalizamos el thumb siguiendo la convención de los slots separados por coma
     // y el placeholder "--" en el primer slot para indicar que debe usarse el segundo.
-    const rawThumb = (game.thumb || "").trim();
+    const rawThumb = (game.caratula || game.thumb || "").trim();
     const thumbParts = rawThumb ? rawThumb.split(",").map(p => p.trim()) : [];
 
     let thumbUrl = "";
@@ -420,6 +429,7 @@ if (singleCharMatch) {
      // 🔹 Nuevos campos
      const autorNorm  = normalizeText(game.autor);
      const desNorm    = normalizeText(game.des);
+     const devNorm    = normalizeText(game.desarrollador);
      const contrNorm  = normalizeText(game.contr);
      const generoNorm = normalizeText(game.genero);
      const subgeneroNorm = normalizeText(game.subgenero);
@@ -430,6 +440,7 @@ if (singleCharMatch) {
     yearNorm.includes(qNorm)   ||
     autorNorm.includes(qNorm)  ||
     desNorm.includes(qNorm)    ||
+    devNorm.includes(qNorm)    ||
     contrNorm.includes(qNorm)  ||
     generoNorm.includes(qNorm) ||
     subgeneroNorm.includes(qNorm)
@@ -456,14 +467,14 @@ if (singleCharMatch) {
   // =========================================
   // CARGA INICIAL DE LA LISTA
   // =========================================
-  async function loadZXList() {
+  async function loadPS3List() {
     const container = document.getElementById("zx-spectrum-list");
     if (!container) return;
 
     try {
       container.innerHTML = '<p class="zx-list-loading">Cargando listado de juegos...</p>';
 
-      const response = await fetch(ZX_LISTA_CSV_URL);
+      const response = await fetch(PS3_LISTA_CSV_URL);
       if (!response.ok) {
         throw new Error("No se pudo cargar el CSV");
       }
@@ -484,16 +495,17 @@ if (singleCharMatch) {
       setupSearch();
 
     } catch (err) {
-      console.error("Error al cargar la lista ZX:", err);
+      console.error("Error al cargar la lista PS3:", err);
       container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
     }
   }
 
-  document.addEventListener("DOMContentLoaded", loadZXList);
+  document.addEventListener("DOMContentLoaded", loadPS3List);
 </script>
 
 
 </body>
 </html>
+
 
 
