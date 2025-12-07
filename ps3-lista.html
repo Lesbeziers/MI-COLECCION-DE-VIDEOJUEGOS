@@ -67,8 +67,8 @@
 
     <script>
   // URL DEL FEED CSV PS3 (hoja "PS3")
-  // =========================================␊
-  const PS3_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=511776549&single=true&output=csv";
+  // =========================================
+  const PS3_LISTA_CSV_URL = "URL_DEL_CSV_AQUI";
 
   // Lista global con TODOS los juegos (para el buscador)
   let allGames = [];
@@ -119,20 +119,17 @@
     const header = parseCSVLine(lines[0]);
     const rows = [];
 
-    const idxID     = header.indexOf("ID");
-    const idxTitulo = header.indexOf("TITULO_MOSTRAR");
-    const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
-    const idxAnio   = header.indexOf("AÑO_MOSTRAR");
-    const idxThumb  = header.indexOf("THUMB_URL");
-    const idxCaratula = header.indexOf("CARATULA_URL");
-
-    const idxDesarrollador = header.indexOf("DESARROLLADOR");
-
-    const idxAutor   = header.indexOf("AUTOR_MOSTRAR");
-    const idxDes     = header.indexOf("DESARROLLO");
-    const idxContr   = header.indexOf("CONTRIBUCIONES");
-    const idxGenero  = header.indexOf("GENERO_MOSTRAR");
+    // Índices de las columnas de PS3_LISTA
+    const idxID        = header.indexOf("ID");
+    const idxTitulo    = header.indexOf("TITULO_MOSTRAR");
+    const idxAnio      = header.indexOf("AÑO_MOSTRAR");
+    const idxPub       = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxGenero    = header.indexOf("GENERO_MOSTRAR");
     const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
+    const idxCaratula  = header.indexOf("CARATULA_URL");
+    const idxJugadores = header.indexOf("JUGADORES_MOSTRAR");
+    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
@@ -140,23 +137,16 @@
 
       const cols = parseCSVLine(line);
 
-      const id    = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
-      const titulo= (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
-      const pub   = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
-      const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
-      const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
-      const caratula = (idxCaratula >= 0 && cols[idxCaratula] !== undefined) ? cols[idxCaratula].trim() : "";
-
-      const desarrollador = (idxDesarrollador >= 0 && cols[idxDesarrollador] !== undefined)
-        ? cols[idxDesarrollador].trim()
-        : "";
-
-      const autor  = (idxAutor   >= 0 && cols[idxAutor]   !== undefined) ? cols[idxAutor].trim()   : "";
-      const des    = (idxDes     >= 0 && cols[idxDes]     !== undefined) ? cols[idxDes].trim()     : "";
-      const contr  = (idxContr   >= 0 && cols[idxContr]   !== undefined) ? cols[idxContr].trim()   : "";
-      const genero = (idxGenero  >= 0 && cols[idxGenero]  !== undefined) ? cols[idxGenero].trim()  : "";
+      const id        = (idxID        >= 0 && cols[idxID]        !== undefined) ? cols[idxID].trim()        : "";
+      const titulo    = (idxTitulo    >= 0 && cols[idxTitulo]    !== undefined) ? cols[idxTitulo].trim()    : "";
+      const anio      = (idxAnio      >= 0 && cols[idxAnio]      !== undefined) ? cols[idxAnio].trim()      : "";
+      const pub       = (idxPub       >= 0 && cols[idxPub]       !== undefined) ? cols[idxPub].trim()       : "";
+      const genero    = (idxGenero    >= 0 && cols[idxGenero]    !== undefined) ? cols[idxGenero].trim()    : "";
       const subgenero = (idxSubgenero >= 0 && cols[idxSubgenero] !== undefined) ? cols[idxSubgenero].trim() : "";
-
+      const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
+      const caratula  = (idxCaratula  >= 0 && cols[idxCaratula]  !== undefined) ? cols[idxCaratula].trim()  : "";
+      const jugadores = (idxJugadores >= 0 && cols[idxJugadores] !== undefined) ? cols[idxJugadores].trim() : "";
+      const terminado = (idxTerminado >= 0 && cols[idxTerminado] !== undefined) ? cols[idxTerminado].trim() : "";
 
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
@@ -165,20 +155,18 @@
       const displayTitulo = formatTitleWithArticle(titulo);
 
       rows.push({
-      id,
-      titulo,
-      displayTitulo,
-      pub,
-      anio,
-      thumb,
-      autor,
-      des,
-      contr,
-      genero,
-      subgenero,
-      desarrollador,
-      caratula,
-      sortKey: displayTitulo.toLowerCase()
+        id,
+        titulo,
+        displayTitulo,
+        anio,
+        pub,
+        genero,
+        subgenero,
+        favorito,
+        caratula,
+        jugadores,
+        terminado,
+        sortKey: displayTitulo.toLowerCase()
       });
 
     }
@@ -203,7 +191,7 @@
       return t;  // Sin artículo al principio → se deja igual
     }
 
-    const article = match[1]; // “The”, “La”, etc.
+    const article = match[1]; // "The", "La", etc.
     const rest    = match[2]; // El resto
     return rest + ", " + article;
   }
@@ -230,26 +218,8 @@
     const thumbWrapper = document.createElement("div");
     thumbWrapper.className = "zx-thumb-wrapper";
 
-     // Normalizamos el thumb siguiendo la convención de los slots separados por coma
-    // y el placeholder "--" en el primer slot para indicar que debe usarse el segundo.
-    const rawThumb = (game.caratula || game.thumb || "").trim();
-    const thumbParts = rawThumb ? rawThumb.split(",").map(p => p.trim()) : [];
-
-    let thumbUrl = "";
-
-    if (thumbParts.length > 0) {
-      const first = thumbParts[0];
-
-      if (first && first !== "--") {
-        thumbUrl = first;
-      } else {
-        const second = thumbParts[1];
-        if (second && second !== "--") {
-          thumbUrl = second;
-        }
-      }
-
-    }
+    // Usamos CARATULA_URL para el thumbnail
+    const thumbUrl = (game.caratula || "").trim();
 
     if (thumbUrl) {
       const img = document.createElement("img");
@@ -260,7 +230,7 @@
     } else {
       const placeholder = document.createElement("div");
       placeholder.className = "zx-thumb-placeholder";
-      placeholder.textContent = "SIN SCREENSHOT";
+      placeholder.textContent = "SIN IMAGEN";
       thumbWrapper.appendChild(placeholder);
     }
 
@@ -277,7 +247,7 @@
     if (game.pub) {
       const pubEl = document.createElement("p");
       pubEl.className = "zx-subtitle";
-      pubEl.textContent = game.pub.replace(/[\"“”«»„‟]+/g, "");
+      pubEl.textContent = game.pub.replace(/[\"""«»„‟]+/g, "");
       meta.appendChild(pubEl);
     }
 
@@ -285,7 +255,7 @@
     if (game.anio) {
       const yearEl = document.createElement("p");
       yearEl.className = "zx-subtitle";
-      yearEl.textContent = game.anio.replace(/[\"“”«»„‟]+/g, "");
+      yearEl.textContent = game.anio.replace(/[\"""«»„‟]+/g, "");
       meta.appendChild(yearEl);
     }
 
@@ -339,7 +309,7 @@
   if (game.id) {
     const searchInput = document.querySelector(".spectrum-search-input");
     const query = searchInput ? searchInput.value.trim() : "";
-    let url = "spectrum-ficha.html?id=" + encodeURIComponent(game.id);
+    let url = "ps3-ficha.html?id=" + encodeURIComponent(game.id);
     if (query) {
       url += "&search=" + encodeURIComponent(query);
     }
@@ -422,30 +392,24 @@ if (singleCharMatch) {
       const qNorm = normalizeText(trimmed);
 
      const filtered = allGames.filter(game => {
-     const titleNorm  = normalizeText(game.displayTitulo || game.titulo);
-     const pubNorm    = normalizeText(game.pub);
-     const yearNorm   = normalizeText(game.anio);
+       const titleNorm     = normalizeText(game.displayTitulo || game.titulo);
+       const pubNorm       = normalizeText(game.pub);
+       const yearNorm      = normalizeText(game.anio);
+       const generoNorm    = normalizeText(game.genero);
+       const subgeneroNorm = normalizeText(game.subgenero);
+       const jugadoresNorm = normalizeText(game.jugadores);
+       const terminadoNorm = normalizeText(game.terminado);
 
-     // 🔹 Nuevos campos
-     const autorNorm  = normalizeText(game.autor);
-     const desNorm    = normalizeText(game.des);
-     const devNorm    = normalizeText(game.desarrollador);
-     const contrNorm  = normalizeText(game.contr);
-     const generoNorm = normalizeText(game.genero);
-     const subgeneroNorm = normalizeText(game.subgenero);
-
-     return (
-    titleNorm.includes(qNorm)  ||
-    pubNorm.includes(qNorm)    ||
-    yearNorm.includes(qNorm)   ||
-    autorNorm.includes(qNorm)  ||
-    desNorm.includes(qNorm)    ||
-    devNorm.includes(qNorm)    ||
-    contrNorm.includes(qNorm)  ||
-    generoNorm.includes(qNorm) ||
-    subgeneroNorm.includes(qNorm)
-  );
-});
+       return (
+         titleNorm.includes(qNorm)     ||
+         pubNorm.includes(qNorm)       ||
+         yearNorm.includes(qNorm)      ||
+         generoNorm.includes(qNorm)    ||
+         subgeneroNorm.includes(qNorm) ||
+         jugadoresNorm.includes(qNorm) ||
+         terminadoNorm.includes(qNorm)
+       );
+     });
 
 
       // Guardar contexto del filtro si es un subgénero exacto
@@ -506,8 +470,3 @@ if (singleCharMatch) {
 
 </body>
 </html>
-
-
-
-
-
