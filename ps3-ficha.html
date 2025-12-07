@@ -92,10 +92,11 @@
 </div>
 
 <!-- SECCIÓN + INFO -->
+<!-- SECCIÓN + INFO -->
 <div class="ficha-section" id="masinfo-section" style="display:none;">
     <h2 class="ficha-section-title">+ INFO</h2>
     <div class="ficha-section-line"></div>
-    <div class="ficha-masinfo" id="ficha-masinfo">
+    <div class="ficha-datos" id="ficha-masinfo">
         <!-- El texto se rellena por JS -->
     </div>
 </div>
@@ -113,7 +114,7 @@
 <div class="ficha-section" id="argumento-section" style="display:none;">
     <h2 class="ficha-section-title">ARGUMENTO</h2>
     <div class="ficha-section-line"></div>
-    <div class="ficha-argumento" id="ficha-argumento">
+    <div class="ficha-sinopsis" id="ficha-argumento">
         <!-- El texto se rellena por JS -->
     </div>
 </div>
@@ -331,8 +332,8 @@ function parsePS3CSV(text) {
     const idxSinopsis = header.indexOf("SINOPSIS");
     const idxArgumento = header.indexOf("ARGUMENTO");
     const idxJugadores = header.indexOf("JUGADORES");
-    const idxFormato = header.indexOf("FORMATO");
-    const idxUbicacion = findColumnIndex(header, ["UBICACION", "UBICACIÓN"]);
+    const idxFormato = header.indexOf("PS3_TIPO_FORMATO");
+    const idxUbicacion = header.indexOf("PS3_UBICACION");
     const idxFavorito = header.indexOf("FAVORITO");
     const idxTerminado = header.indexOf("TERMINADO");
     const idxVideo = header.indexOf("VIDEO");
@@ -444,11 +445,53 @@ function parseListaCSV(text) {
         return "";
     }
 
-    function getYouTubeThumbnail(embedUrl) {
-        if (!embedUrl) return "";
-        const match = embedUrl.match(/embed\/([^?&#\/]+)/);
-        if (match && match[1]) {
-            return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+    // Convierte cualquier URL de YouTube a formato embed
+    function convertToYouTubeEmbed(url) {
+        if (!url) return "";
+        
+        // Si ya es formato embed, devolverla tal cual
+        if (url.includes("/embed/")) {
+            return url;
+        }
+        
+        // Extraer el ID del video de formato watch?v=
+        const watchMatch = url.match(/[?&]v=([^?&#]+)/);
+        if (watchMatch && watchMatch[1]) {
+            return `https://www.youtube.com/embed/${watchMatch[1]}`;
+        }
+        
+        // Extraer el ID de formato youtu.be/
+        const shortMatch = url.match(/youtu\.be\/([^?&#]+)/);
+        if (shortMatch && shortMatch[1]) {
+            return `https://www.youtube.com/embed/${shortMatch[1]}`;
+        }
+        
+        return url;
+    }
+
+    // Extrae el ID del video de cualquier formato de URL de YouTube
+    function getYouTubeVideoId(url) {
+        if (!url) return "";
+        
+        // Formato embed
+        const embedMatch = url.match(/embed\/([^?&#\/]+)/);
+        if (embedMatch && embedMatch[1]) return embedMatch[1];
+        
+        // Formato watch?v=
+        const watchMatch = url.match(/[?&]v=([^?&#]+)/);
+        if (watchMatch && watchMatch[1]) return watchMatch[1];
+        
+        // Formato youtu.be/
+        const shortMatch = url.match(/youtu\.be\/([^?&#]+)/);
+        if (shortMatch && shortMatch[1]) return shortMatch[1];
+        
+        return "";
+    }
+
+    function getYouTubeThumbnail(url) {
+        const videoId = getYouTubeVideoId(url);
+        if (videoId) {
+            return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
         }
         return "";
     }
@@ -715,10 +758,27 @@ function updateMasInfo(game) {
         return;
     }
 
-    const textParagraph = document.createElement("p");
-    textParagraph.className = "ficha-masinfo-texto";
-    textParagraph.textContent = masInfo;
-    container.appendChild(textParagraph);
+    // Formatear: cada "- " (excepto el primero) genera un salto de línea
+    // Primero quitamos el "- " inicial si existe, luego dividimos por "- "
+    let formattedText = masInfo;
+    if (formattedText.startsWith("- ")) {
+        formattedText = formattedText.substring(2);
+    }
+    
+    // Dividir por "- " y crear elementos
+    const items = formattedText.split("- ").map(item => item.trim()).filter(item => item);
+    
+    const textDiv = document.createElement("div");
+    textDiv.className = "ficha-dato"; // Usar misma clase que FICHA para consistencia de espaciado
+    
+    items.forEach((item, index) => {
+        if (index > 0) {
+            textDiv.appendChild(document.createElement("br"));
+        }
+        textDiv.appendChild(document.createTextNode("- " + item));
+    });
+    
+    container.appendChild(textDiv);
     
     section.style.display = "block";
 }
@@ -1036,14 +1096,17 @@ function updateGameplay(game) {
 
     if (!section || !frame || !placeholder) return;
 
-    const videoUrl = (game.videoUrl || "").trim();
+    const rawVideoUrl = (game.videoUrl || "").trim();
 
-    if (!videoUrl) {
+    if (!rawVideoUrl) {
         section.style.display = "none";
         return;
     }
 
-    const thumbnail = getYouTubeThumbnail(videoUrl);
+    // Convertir a formato embed
+    const videoUrl = convertToYouTubeEmbed(rawVideoUrl);
+
+    const thumbnail = getYouTubeThumbnail(rawVideoUrl);
     if (thumbnail) {
         placeholder.style.backgroundImage = `url('${thumbnail}')`;
     } else {
