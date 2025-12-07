@@ -369,6 +369,7 @@ p {
     transition: transform 0.25s ease;
 }
 
+.platform-card[onclick],
 .platform-card--zxspectrum {
     cursor: pointer;
 }
