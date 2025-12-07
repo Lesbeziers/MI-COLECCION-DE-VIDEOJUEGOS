@@ -68,7 +68,7 @@
     <script>
   // URL DEL FEED CSV PS3 (hoja "PS3")
   // =========================================
-  const PS3_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1642803365&single=true&output=csv";
+  const PS3_LISTA_CSV_URL = "URL_DEL_CSV_AQUI";
 
   // Lista global con TODOS los juegos (para el buscador)
   let allGames = [];
@@ -128,8 +128,9 @@
     const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
     const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
     const idxCaratula  = header.indexOf("CARATULA_URL");
-    const idxJugadores = header.indexOf("JUGADORES_MOSTRAR");
-    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+    const idxJugadores  = header.indexOf("JUGADORES_MOSTRAR");
+    const idxTerminado  = header.indexOf("TERMINADO_MOSTRAR");
+    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
@@ -145,8 +146,9 @@
       const subgenero = (idxSubgenero >= 0 && cols[idxSubgenero] !== undefined) ? cols[idxSubgenero].trim() : "";
       const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
       const caratula  = (idxCaratula  >= 0 && cols[idxCaratula]  !== undefined) ? cols[idxCaratula].trim()  : "";
-      const jugadores = (idxJugadores >= 0 && cols[idxJugadores] !== undefined) ? cols[idxJugadores].trim() : "";
-      const terminado = (idxTerminado >= 0 && cols[idxTerminado] !== undefined) ? cols[idxTerminado].trim() : "";
+      const jugadores  = (idxJugadores  >= 0 && cols[idxJugadores]  !== undefined) ? cols[idxJugadores].trim()  : "";
+      const terminado  = (idxTerminado  >= 0 && cols[idxTerminado]  !== undefined) ? cols[idxTerminado].trim()  : "";
+      const desarrollo = (idxDesarrollo >= 0 && cols[idxDesarrollo] !== undefined) ? cols[idxDesarrollo].trim() : "";
 
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
@@ -166,6 +168,7 @@
         caratula,
         jugadores,
         terminado,
+        desarrollo,
         sortKey: displayTitulo.toLowerCase()
       });
 
@@ -391,23 +394,38 @@ if (singleCharMatch) {
 
       const qNorm = normalizeText(trimmed);
 
+      // =============================================
+      // TRATAMIENTO ESPECIAL: "fav" → FAVORITO_MOSTRAR = "SI"
+      // =============================================
+      if (qNorm === "fav") {
+        const filteredFav = allGames.filter(game => {
+          return normalizeText(game.favorito) === "si";
+        });
+        renderGames(filteredFav, trimmed);
+        currentFilterField = "favorito";
+        currentFilterValue = trimmed;
+        return;
+      }
+
      const filtered = allGames.filter(game => {
-       const titleNorm     = normalizeText(game.displayTitulo || game.titulo);
-       const pubNorm       = normalizeText(game.pub);
-       const yearNorm      = normalizeText(game.anio);
-       const generoNorm    = normalizeText(game.genero);
-       const subgeneroNorm = normalizeText(game.subgenero);
-       const jugadoresNorm = normalizeText(game.jugadores);
-       const terminadoNorm = normalizeText(game.terminado);
+       const titleNorm      = normalizeText(game.displayTitulo || game.titulo);
+       const pubNorm        = normalizeText(game.pub);
+       const yearNorm       = normalizeText(game.anio);
+       const generoNorm     = normalizeText(game.genero);
+       const subgeneroNorm  = normalizeText(game.subgenero);
+       const jugadoresNorm  = normalizeText(game.jugadores);
+       const terminadoNorm  = normalizeText(game.terminado);
+       const desarrolloNorm = normalizeText(game.desarrollo);
 
        return (
-         titleNorm.includes(qNorm)     ||
-         pubNorm.includes(qNorm)       ||
-         yearNorm.includes(qNorm)      ||
-         generoNorm.includes(qNorm)    ||
-         subgeneroNorm.includes(qNorm) ||
-         jugadoresNorm.includes(qNorm) ||
-         terminadoNorm.includes(qNorm)
+         titleNorm.includes(qNorm)      ||
+         pubNorm.includes(qNorm)        ||
+         yearNorm.includes(qNorm)       ||
+         generoNorm.includes(qNorm)     ||
+         subgeneroNorm.includes(qNorm)  ||
+         jugadoresNorm.includes(qNorm)  ||
+         terminadoNorm.includes(qNorm)  ||
+         desarrolloNorm.includes(qNorm)
        );
      });
 
