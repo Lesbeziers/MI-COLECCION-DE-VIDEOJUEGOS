@@ -2070,8 +2070,15 @@ function limpiarComillasExtra_(t) {
 
 function rellenarIdsZXLista() {
   const ss = SpreadsheetApp.getActive();
+  const shActiva = ss.getActiveSheet();
+  const nombreHojaActiva = shActiva ? shActiva.getName().trim().toUpperCase() : '';
+
+  if (nombreHojaActiva.includes('PS3')) {
+    return rellenarIdPS3FilaActual_(shActiva);
+  }
+
   const sh = ss.getSheetByName('ZX_SPECTRUM');
-  
+
   if (!sh) return;
 
   const lastRow = sh.getLastRow();
@@ -2121,6 +2128,53 @@ function rellenarIdsZXLista() {
 
   // Guardar los IDs actualizados
   idsRange.setValues(ids);
+}
+
+function rellenarIdPS3FilaActual_(sh) {
+  const ui = SpreadsheetApp.getUi();
+  const activeCell = sh.getActiveCell();
+  const row = activeCell ? activeCell.getRow() : 0;
+
+  if (!row || row === 1) {
+    return uiAlert_('Selecciona una fila con datos (no la cabecera).');
+  }
+
+  const headers = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0];
+  const colIdIndex = headers.indexOf('ID');
+
+  if (colIdIndex === -1) {
+    return uiAlert_('No se ha encontrado la columna "ID" en la hoja PS3.');
+  }
+
+  const colId = colIdIndex + 1;
+  const numRows = Math.max(0, sh.getLastRow() - 1);
+  let ids = [];
+
+  if (numRows > 0) {
+    ids = sh.getRange(2, colId, numRows, 1).getValues();
+  }
+
+  let ultimoId = '';
+
+  for (let i = ids.length - 1; i >= 0; i--) {
+    const val = String(ids[i][0] || '').trim();
+    if (val) {
+      ultimoId = val;
+      break;
+    }
+  }
+
+  let siguienteNumero = 1;
+
+  if (ultimoId) {
+    const match = ultimoId.match(/(\d+)$/);
+    if (match) {
+      siguienteNumero = parseInt(match[1], 10) + 1;
+    }
+  }
+
+  const nuevoId = `PS3_${String(siguienteNumero).padStart(4, '0')}`;
+  sh.getRange(row, colId).setValue(nuevoId);
 }
 
 /**
