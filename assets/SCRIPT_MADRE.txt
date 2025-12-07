@@ -1721,7 +1721,6 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
     renderLineLinks('Contribuciones', d.contributorsAnchors),
     renderLineLinks('Género', d.generoAnchors),
     renderLineLinks('Subgénero', d.subgeneroAnchors),
-    renderLineLinks('Jugadores', d.jugadoresAnchors),
     renderLineLinks('Controles', d.controlesAnchors),
     renderLineLinks('Versión', d.versionAnchors),
     renderLineLinks('Distribuidoras', d.distribuidorasAnchors),
@@ -1744,10 +1743,20 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
     // Ubicación: solo si NO es "--"
     // Favorito: solo si es "SI"
     tecnicosLines = [
+      renderLineLinks('Modos de juego', d.jugadoresAnchors),
       (tecnicos && tecnicos.ubicacion && tecnicos.ubicacion !== '--') ? renderLineText('Ubicación', tecnicos.ubicacion) : '',
       tecnicos && tecnicos.tipoFormato ? renderLineText('Formato', tecnicos.tipoFormato) : '',
       (tecnicos && tecnicos.favorito && tecnicos.favorito.toUpperCase() === 'SI') ? renderLineText('Favorito', tecnicos.favorito) : '',
       tecnicos && tecnicos.terminado ? renderLineText('Terminado', tecnicos.terminado) : ''
+    ].filter(Boolean).join('');
+  } else {
+    // Datos técnicos para ZX Spectrum
+    tecnicosLines = [
+      renderLineLinks('Modos de juego', d.jugadoresAnchors),
+      renderLineLinks('Formato', makeLocalAnchors(tecnicos && tecnicos.formato)),
+      renderLineLinks('ZX +2A', makeLocalAnchors(tecnicos && tecnicos.zx2a)),
+      renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
+      renderLineText('Terminado', tecnicos && tecnicos.terminado)
     ].filter(Boolean).join('');
   } else {
     // Datos técnicos para ZX Spectrum
