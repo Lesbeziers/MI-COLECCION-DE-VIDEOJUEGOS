@@ -1737,11 +1737,12 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
   const isPS3Ficha = (plataforma && plataforma.toLowerCase().includes('playstation'));
   
   let tecnicosLines = '';
-  
-    if (isPS3Ficha) {
-      // Datos técnicos para PS3 (sin masInfo, que va en sección aparte)
-      // Ubicación: solo si NO es "--"
-      // Favorito: solo si 
+
+  if (isPS3Ficha) {
+    // Datos técnicos para PS3 (sin masInfo, que va en sección aparte)
+    // Ubicación: solo si NO es "--"
+    // Favorito: solo si
+    tecnicosLines = [
       renderLineLinks('Modos de juego', d.jugadoresAnchors),
       (tecnicos && tecnicos.ubicacion && tecnicos.ubicacion !== '--') ? renderLineText('Ubicación', tecnicos.ubicacion) : '',
       tecnicos && tecnicos.tipoFormato ? renderLineText('Formato', tecnicos.tipoFormato) : '',
@@ -1757,7 +1758,7 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
         renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
         renderLineText('Terminado', tecnicos && tecnicos.terminado)
       ].filter(Boolean).join('');
-    }
+  }
 
   const tecnicosHtml = tecnicosLines
     ? `<div class="row"><div class="section-title">Datos Técnicos</div><div class="info">${tecnicosLines}</div></div>`
