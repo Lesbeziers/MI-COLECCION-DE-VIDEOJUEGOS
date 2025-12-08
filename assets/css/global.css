@@ -1618,3 +1618,32 @@ body.ficha-final.loading .ficha-cover-wrapper {
 .ficha-imagenes-arrow--next {
     transform: scaleX(-1);
 }
+
+/* ============================================
+   FICHA - CARÁTULA ESTÁNDAR (PS3, PS4, etc.)
+   Aspect ratio 3:4 (810x1080 original)
+============================================ */
+.ficha-cover-standard .ficha-cover-wrapper {
+    width: 220px;
+    max-width: 220px;
+    aspect-ratio: 3 / 4;
+}
+
+.ficha-cover-standard .ficha-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: static;
+    transform: none;
+    left: auto;
+    right: auto;
+}
+
+/* Móvil: misma proporción pero ancho adaptable */
+@media (max-width: 600px) {
+    .ficha-cover-standard .ficha-cover-wrapper {
+        width: calc((100% - 12px) / 2);
+        max-width: none;
+        aspect-ratio: 3 / 4;
+    }
+}
