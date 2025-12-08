@@ -556,6 +556,20 @@ function updateCover(game) {
     coverImg.src = finalCoverUrl;
     coverImg.alt = `Carátula de ${game.titulo || "juego PlayStation 3"}`;
     coverImg.style.display = "block";
+
+    // Añadir estrella si es favorito
+    const isFavorito = (game.favorito || "").trim().toUpperCase() === "SI";
+    const existingStar = wrapper.querySelector(".ficha-favorito-star");
+    
+    if (isFavorito && !existingStar) {
+        const star = document.createElement("img");
+        star.src = "assets/img/ic_favorito.svg";
+        star.alt = "Favorito";
+        star.className = "ficha-favorito-star";
+        wrapper.appendChild(star);
+    } else if (!isFavorito && existingStar) {
+        existingStar.remove();
+    }
 }
 
 function updatePuntuacion(game) {
