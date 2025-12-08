@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="assets/css/global.css">
 </head>
 
-<body class="ficha-final loading">
+<body class="ficha-final ficha-cover-standard loading">
 
     <!-- CABECERA -->
     <header class="top-bar top-bar--spectrum">
@@ -539,43 +539,6 @@ function updateCover(game) {
     coverImg.style.display = "block";
 
     coverImg.onload = function() {
-        const naturalW = coverImg.naturalWidth;
-        const naturalH = coverImg.naturalHeight;
-        const aspectRatio = naturalW / naturalH;
-
-        const wrapperWidth = wrapper.offsetWidth;
-        const wrapperHeight = wrapper.offsetHeight;
-        const targetRatio = wrapperWidth / wrapperHeight;
-
-        const scaledWidth = wrapperHeight * aspectRatio;
-        const squeezeRatio = 0.97;
-        const ratioDiff = Math.abs(aspectRatio - targetRatio) / targetRatio;
-        const isMatchingRatio = ratioDiff < 0.03;
-
-        if (scaledWidth < wrapperWidth || isMatchingRatio) {
-            coverImg.style.width = "100%";
-            coverImg.style.height = "100%";
-            coverImg.style.objectFit = "fill";
-            coverImg.style.left = "auto";
-            coverImg.style.right = "0";
-            coverImg.style.transform = "none";
-        } else if (aspectRatio > targetRatio) {
-            const compressedWidth = scaledWidth * squeezeRatio;
-            coverImg.style.width = compressedWidth + "px";
-            coverImg.style.height = "100%";
-            coverImg.style.objectFit = "fill";
-            coverImg.style.left = "auto";
-            coverImg.style.right = "0";
-            coverImg.style.transform = "none";
-        } else {
-            coverImg.style.width = "auto";
-            coverImg.style.height = "100%";
-            coverImg.style.objectFit = "cover";
-            coverImg.style.left = "auto";
-            coverImg.style.right = "0";
-            coverImg.style.transform = "none";
-        }
-        
         coverImg.style.opacity = "1";
         const coverLabel = wrapper.querySelector(".skeleton-label");
         if (coverLabel) coverLabel.style.display = "none";
