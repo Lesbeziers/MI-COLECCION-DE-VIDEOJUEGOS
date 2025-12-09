@@ -157,6 +157,16 @@
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
 
+      // DEBUG: Ver qué lee en terminado y formato para Assassin's Creed III
+      if (titulo.includes("Assassin's Creed III")) {
+        console.log("DEBUG - Assassin's Creed III:");
+        console.log("  terminado:", terminado);
+        console.log("  formato:", formato);
+        console.log("  idxTerminado:", idxTerminado);
+        console.log("  idxFormato:", idxFormato);
+        console.log("  cols:", cols);
+      }
+
       // Título SOLO para mostrar (con artículo al final)
       const displayTitulo = formatTitleWithArticle(titulo);
 
