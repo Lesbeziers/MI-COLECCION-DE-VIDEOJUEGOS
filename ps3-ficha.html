@@ -1028,8 +1028,10 @@ function updateDatosTecnicos(game) {
         { label: "· FORMATO", value: game.formato }
     ];
 
-    // Ubicación solo si tiene contenido (y no es "--")
-    if (game.ubicacion && game.ubicacion.trim() && game.ubicacion.trim() !== "--") {
+    // Ubicación solo si tiene contenido real (no vacío ni solo guiones)
+    const ubicacionVal = (game.ubicacion || "").trim();
+    const esVacioOGuiones = !ubicacionVal || /^[-–—]+$/.test(ubicacionVal);
+    if (!esVacioOGuiones) {
         campos.push({ label: "· UBICACIÓN", value: game.ubicacion });
     }
 
