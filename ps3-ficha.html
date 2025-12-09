@@ -1028,8 +1028,8 @@ function updateDatosTecnicos(game) {
         { label: "· FORMATO", value: game.formato }
     ];
 
-    // Ubicación solo si tiene contenido
-    if (game.ubicacion && game.ubicacion.trim()) {
+    // Ubicación solo si tiene contenido (y no es "--")
+    if (game.ubicacion && game.ubicacion.trim() && game.ubicacion.trim() !== "--") {
         campos.push({ label: "· UBICACIÓN", value: game.ubicacion });
     }
 
