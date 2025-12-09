@@ -410,6 +410,19 @@ if (singleCharMatch) {
         return;
       }
 
+      // =============================================
+      // TRATAMIENTO ESPECIAL: "terminado" → TERMINADO_MOSTRAR = "SI"
+      // =============================================
+      if (qNorm === "terminado") {
+        const filteredTerminado = allGames.filter(game => {
+          return normalizeText(game.terminado) === "si";
+        });
+        renderGames(filteredTerminado, trimmed);
+        currentFilterField = "terminado";
+        currentFilterValue = trimmed;
+        return;
+      }
+
      const filtered = allGames.filter(game => {
        const titleNorm      = normalizeText(game.displayTitulo || game.titulo);
        const pubNorm        = normalizeText(game.pub);
