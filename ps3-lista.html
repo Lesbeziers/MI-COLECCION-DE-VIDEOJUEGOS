@@ -131,6 +131,7 @@
     const idxJugadores  = header.indexOf("JUGADORES_MOSTRAR");
     const idxTerminado  = header.indexOf("TERMINADO_MOSTRAR");
     const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
+    const idxInfo       = header.indexOf("INFO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
@@ -149,6 +150,7 @@
       const jugadores  = (idxJugadores  >= 0 && cols[idxJugadores]  !== undefined) ? cols[idxJugadores].trim()  : "";
       const terminado  = (idxTerminado  >= 0 && cols[idxTerminado]  !== undefined) ? cols[idxTerminado].trim()  : "";
       const desarrollo = (idxDesarrollo >= 0 && cols[idxDesarrollo] !== undefined) ? cols[idxDesarrollo].trim() : "";
+      const info       = (idxInfo       >= 0 && cols[idxInfo]       !== undefined) ? cols[idxInfo].trim()       : "";
 
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
@@ -169,6 +171,7 @@
         jugadores,
         terminado,
         desarrollo,
+        info,
         sortKey: displayTitulo.toLowerCase()
       });
 
@@ -416,6 +419,7 @@ if (singleCharMatch) {
        const jugadoresNorm  = normalizeText(game.jugadores);
        const terminadoNorm  = normalizeText(game.terminado);
        const desarrolloNorm = normalizeText(game.desarrollo);
+       const infoNorm       = normalizeText(game.info);
 
        return (
          titleNorm.includes(qNorm)      ||
@@ -425,7 +429,8 @@ if (singleCharMatch) {
          subgeneroNorm.includes(qNorm)  ||
          jugadoresNorm.includes(qNorm)  ||
          terminadoNorm.includes(qNorm)  ||
-         desarrolloNorm.includes(qNorm)
+         desarrolloNorm.includes(qNorm) ||
+         infoNorm.includes(qNorm)
        );
      });
 
