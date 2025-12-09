@@ -426,6 +426,19 @@ if (singleCharMatch) {
         return;
       }
 
+      // =============================================
+      // TRATAMIENTO ESPECIAL: "fisico" → FORMATO_MOSTRAR contiene "Físico"
+      // =============================================
+      if (qNorm === "fisico") {
+        const filteredFisico = allGames.filter(game => {
+          return normalizeText(game.formato).includes("fisico");
+        });
+        renderGames(filteredFisico, trimmed);
+        currentFilterField = "formato";
+        currentFilterValue = trimmed;
+        return;
+      }
+
      const filtered = allGames.filter(game => {
        const titleNorm      = normalizeText(game.displayTitulo || game.titulo);
        const pubNorm        = normalizeText(game.pub);
