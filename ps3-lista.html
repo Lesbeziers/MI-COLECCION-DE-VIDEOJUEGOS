@@ -158,8 +158,8 @@
       if (!titulo) continue;
 
       // DEBUG: Ver qué lee en terminado y formato para Assassin's Creed III
-      if (titulo.includes("Assassin's Creed III")) {
-        console.log("DEBUG - Assassin's Creed III:");
+      if (titulo.toLowerCase().includes("assassin") && titulo.includes("III")) {
+        console.log("DEBUG - " + titulo + ":");
         console.log("  terminado:", terminado);
         console.log("  formato:", formato);
         console.log("  idxTerminado:", idxTerminado);
