@@ -245,7 +245,8 @@
     if (thumbUrl) {
       const img = document.createElement("img");
       img.className = "zx-thumb-img";
-      img.src = thumbUrl;
+      img.loading = "lazy";
+      img.dataset.src = thumbUrl;
       img.alt = game.titulo || "Screenshot";
       thumbWrapper.appendChild(img);
     } else {
@@ -284,6 +285,22 @@
     card.appendChild(meta);
 
     return card;
+  }
+
+  // =========================================
+  // CARGAR THUMBS DE LOS ELEMENTOS VISIBLES
+  // Asigna el src real a las imágenes del listado actual
+  // =========================================
+  function loadVisibleThumbs() {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    const images = container.querySelectorAll("img.zx-thumb-img[data-src]");
+    images.forEach(img => {
+      if (!img.src || img.src === window.location.href) {
+        img.src = img.dataset.src;
+      }
+    });
   }
 
   // =========================================
@@ -369,6 +386,9 @@
     // llevamos el contenedor que hace scroll al inicio para que se vean
     // los primeros resultados del listado.
     resetListScroll();
+
+    // Cargar los thumbs de los juegos filtrados
+    loadVisibleThumbs();
 
   }
     
