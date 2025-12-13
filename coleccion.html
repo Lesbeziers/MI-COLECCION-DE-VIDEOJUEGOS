@@ -30,7 +30,9 @@
         
         /* MICROORDENADORES: ZX Spectrum, Commodore 64, Amiga, Amstrad, MSX */
         .platform-badge.SPECTRUM,
+        .platform-badge.ZXSPECTRUM,
         .platform-badge.C64,
+        .platform-badge.COMMODORE64,
         .platform-badge.AMIGA,
         .platform-badge.AMSTRAD,
         .platform-badge.MSX { background: #7e00ff; }
@@ -39,6 +41,7 @@
         .platform-badge.NES,
         .platform-badge.SNES,
         .platform-badge.N64,
+        .platform-badge.NINTENDO64,
         .platform-badge.GAMECUBE,
         .platform-badge.WII,
         .platform-badge.WIIU,
@@ -47,11 +50,15 @@
         .platform-badge.GAMEBOY,
         .platform-badge.GBCOLOR,
         .platform-badge.GBA,
+        .platform-badge.GBAADVANCE,
         .platform-badge.DS,
-        .platform-badge.3DS { background: #e64545; }
+        .platform-badge.NDS,
+        .platform-badge.\33DS,
+        .platform-badge.N3DS { background: #e64545; }
         
         /* SONY: PSX, PS2, PS3, PS4, PS5, PSP, PS Vita */
         .platform-badge.PSX,
+        .platform-badge.PS1,
         .platform-badge.PS2,
         .platform-badge.PS3,
         .platform-badge.PS4,
@@ -62,15 +69,20 @@
         /* SEGA: Master System, Megadrive, Saturn, Dreamcast, Game Gear */
         .platform-badge.MASTERSYSTEM,
         .platform-badge.MEGADRIVE,
+        .platform-badge.GENESIS,
         .platform-badge.SATURN,
         .platform-badge.DREAMCAST,
         .platform-badge.GAMEGEAR { background: #003087; }
         
         /* ATARI: 2600, 5200, 7800, Jaguar */
         .platform-badge.ATARI2600,
+        .platform-badge.\32600,
         .platform-badge.ATARI5200,
+        .platform-badge.\35200,
         .platform-badge.ATARI7800,
-        .platform-badge.JAGUAR { background: #41bc61; }
+        .platform-badge.\37800,
+        .platform-badge.JAGUAR,
+        .platform-badge.ATARIJAGUAR { background: #41bc61; }
         
         /* OTROS: PC, Arcade */
         .platform-badge.PC,
@@ -160,6 +172,15 @@
     let currentLoadedCount = 0;
     let filteredGames = [];
     let isLoading = false;
+
+    // =========================================
+    // NORMALIZAR PLATAFORMA PARA CLASE CSS
+    // =========================================
+    function getPlatformClass(platform) {
+        if (!platform) return "";
+        // Quitar espacios, convertir a mayúsculas
+        return platform.toUpperCase().replace(/\s+/g, "");
+    }
 
     // =========================================
     // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
@@ -386,7 +407,8 @@
 
         // Badge de plataforma (entre título y año)
         const platformBadge = document.createElement("span");
-        platformBadge.className = `platform-badge ${game.plataforma}`;
+        const platformClass = getPlatformClass(game.plataforma);
+        platformBadge.className = `platform-badge ${platformClass}`;
         platformBadge.textContent = game.plataforma;
         meta.appendChild(platformBadge);
 
