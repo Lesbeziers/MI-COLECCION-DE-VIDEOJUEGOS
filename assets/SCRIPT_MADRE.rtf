@@ -673,8 +673,10 @@ function menuActualizarFilaActual() \{\
     // ====================================\
     // GENERAR FICHA LATERAL (SIDEBAR)\
     // ====================================\
-    const html = buildPreviewHtml_(titulo, nombrePlataforma, igdbUrl, data, columnasManual, data.sinopsis);\
-    SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha ' + cfg.platformKey));\
+const html = buildPreviewHtml_(titulo, nombrePlataforma, igdbUrl, data, columnasManual, data.sinopsis);\
+Logger.log('[DEBUG] HTML length: ' + (html ? html.length : 'NULL'));\
+Logger.log('[DEBUG] HTML preview: ' + (html ? html.substring(0, 500) : 'NULL'));\
+SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha ' + cfg.platformKey));\
     \
     return;\
   \}\
