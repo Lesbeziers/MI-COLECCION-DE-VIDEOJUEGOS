@@ -16,7 +16,7 @@
 <img src="assets/img/ic_back.svg"
      class="top-bar-back"
      alt="Atrás"
-     onclick="window.location.href='spectrum-lista.html'">
+     onclick="goBackToList()">
 
            <!-- Navegación juego a juego (centrada) -->
 <div class="game-nav-bar game-nav-bar--inline">
@@ -195,6 +195,20 @@
     let modalAbierta = false;
     let currentGroupLabel = "";
 
+    // Función para volver a la lista
+    function goBackToList() {
+      const params = new URLSearchParams(window.location.search);
+      const fromColeccion = params.get("from") === "coleccion";
+      
+      // Si viene de colección, volver a coleccion.html
+      if (fromColeccion) {
+        window.location.href = "coleccion.html";
+        return;
+      }
+      
+      // Si no, volver a la lista de Spectrum
+      window.location.href = "spectrum-lista.html";
+    }
 
     // ============================================
     // UTILIDADES
@@ -1446,6 +1460,12 @@ function updateRevistas(game) {
     const filterField = (getQueryParam("filterField") || "").toLowerCase();
     const filterValue = (getQueryParam("filterValue") || "").trim();
     const searchQuery = getQueryParam("search");
+    const fromColeccion = getQueryParam("from") === "coleccion";
+
+    // Si viene de colección, mostrar etiqueta especial
+    if (fromColeccion) {
+        return "Mi Colección";
+    }
 
     if (filterField === "subgenero" && filterValue) {
         return `Subgénero ${filterValue}`;
@@ -1511,6 +1531,7 @@ function attachVoiceStopToNavigation() {
     const searchQuery = getQueryParam("search");
     const filterField = getQueryParam("filterField");
     const filterValue = getQueryParam("filterValue");
+    const fromColeccion = getQueryParam("from");
 
     if (prevArrow) {
         prevArrow.addEventListener("click", () => {
@@ -1534,6 +1555,9 @@ function attachVoiceStopToNavigation() {
                 }
                 if (filterValue) {
                     url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                if (fromColeccion) {
+                    url += `&from=${encodeURIComponent(fromColeccion)}`;
                 }
                 window.location.href = url;
             }
@@ -1563,6 +1587,9 @@ function attachVoiceStopToNavigation() {
                 }
                 if (filterValue) {
                     url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                if (fromColeccion) {
+                    url += `&from=${encodeURIComponent(fromColeccion)}`;
                 }
                 window.location.href = url;
             }
@@ -1794,6 +1821,7 @@ function setupSwipeNavigation() {
     const searchQuery = getQueryParam("search");
     const filterField = getQueryParam("filterField");
     const filterValue = getQueryParam("filterValue");
+    const fromColeccion = getQueryParam("from");
 
     document.addEventListener("touchstart", function(e) {
         touchStartX = e.changedTouches[0].screenX;
@@ -1838,6 +1866,9 @@ function setupSwipeNavigation() {
                 if (filterValue) {
                     url += `&filterValue=${encodeURIComponent(filterValue)}`;
                 }
+                if (fromColeccion) {
+                    url += `&from=${encodeURIComponent(fromColeccion)}`;
+                }
                 stopSynopsisVoice();
                 window.location.href = url;
             }
@@ -1854,6 +1885,9 @@ function setupSwipeNavigation() {
                 }
                 if (filterValue) {
                     url += `&filterValue=${encodeURIComponent(filterValue)}`;
+                }
+                if (fromColeccion) {
+                    url += `&from=${encodeURIComponent(fromColeccion)}`;
                 }
                 stopSynopsisVoice();
                 window.location.href = url;
