@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="page-title">Cargando...</title>
+    <link rel="stylesheet" href="assets/css/global.css">
+</head>
+
+<body class="spectrum-lista">
+
+    <!-- BANDA SUPERIOR -->
+    <header class="top-bar top-bar--spectrum">
+
+    <!-- FILA 1: ATRÁS + TÍTULO + HOME -->
+    <div class="top-bar-inner">
+        <img src="assets/img/ic_back.svg"
+             class="top-bar-back"
+             alt="Atrás"
+             onclick="window.location.href='plataformas.html'">
+
+        <h1 class="top-bar-title" id="header-title">Cargando...</h1>
+
+        <img src="assets/img/ic_home.svg"
+             class="top-bar-home"
+             alt="Home"
+             onclick="window.location.href='index.html'">
+    </div>
+
+    <!-- FILA 2: BUSCADOR -->
+    <div class="spectrum-header-box">
+        <div class="spectrum-search-wrapper">
+            <div class="spectrum-search-box">
+                <input type="text"
+                       class="spectrum-search-input"
+                       placeholder="Buscar">
+
+                <img src="assets/img/ic_search.svg"
+                     class="spectrum-search-icon"
+                     alt="Buscar">
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 3: CONTADOR -->
+    <div class="spectrum-records-block">
+        <p class="spectrum-records-text">Cargando registros...</p>
+    </div>
+
+</header>
+
+
+    <!-- CONTENIDO DE LA PÁGINA -->
+    <main class="platforms-content">
+
+        <!-- LISTA DE JUEGOS -->
+        <section class="zx-list-wrapper">
+            <!-- Contenedor donde se inyectarán las tarjetas vía JS -->
+            <div id="zx-spectrum-list" class="zx-list-grid">
+                <p class="zx-list-loading">Cargando listado de juegos...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+  // =========================================
+  // CONFIGURACIÓN DE PLATAFORMAS IGDB
+  // =========================================
+  const PLATFORM_CONFIG = {
+    PS3: {
+      name: "PLAYSTATION 3",
+      shortName: "PS3",
+      csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1642803365&single=true&output=csv",
+      fichaPage: "igdb-ficha.html",
+      // Columnas específicas de formato/ubicación
+      formatoCol: "FORMATO_MOSTRAR",
+      ubicacionCol: "PS3_UBICACION"
+    },
+    SWITCH: {
+      name: "NINTENDO SWITCH",
+      shortName: "SWITCH",
+csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1129407639&single=true&output=csv",
+      fichaPage: "igdb-ficha.html",
+      formatoCol: "FORMATO_MOSTRAR",
+      ubicacionCol: "SWITCH_UBICACION"
+    }
+    // Añadir más plataformas aquí en el futuro
+  };
+
+  // Obtener plataforma de la URL
+  function getPlatformFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("platform") || "PS3"; // Default: PS3
+  }
+
+  const CURRENT_PLATFORM = getPlatformFromUrl();
+  const CONFIG = PLATFORM_CONFIG[CURRENT_PLATFORM] || PLATFORM_CONFIG.PS3;
+
+  // Lista global con TODOS los juegos (para el buscador)
+  let allGames = [];
+  // Contexto del último filtro aplicado
+  let currentFilterField = "";
+  let currentFilterValue = "";
+ 
+  // =========================================
+  // INICIALIZAR TÍTULOS DE LA PÁGINA
+  // =========================================
+  function initPageTitles() {
+    document.getElementById("page-title").textContent = CONFIG.name;
+    document.getElementById("header-title").textContent = CONFIG.name;
+  }
+
+  // =========================================
+  // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
+  // =========================================
+  function parseCSVLine(line) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === "," && !inQuotes) {
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+
+    result.push(current.trim());
+    return result;
+  }
+
+  // =========================================
+  // UTILIDAD PARA PARSEAR EL CSV COMPLETO
+  // =========================================
+  function parseCSV(text) {
+    const lines = [];
+    let current = "";
+    let inQuotes = false;
+    
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      
+      if (ch === '"') {
+        if (inQuotes && text[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        current += ch;
+      } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+        if (ch === '\r' && text[i + 1] === '\n') {
+          i++;
+        }
+        if (current.trim()) {
+          lines.push(current);
+        }
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    if (current.trim()) {
+      lines.push(current);
+    }
+    
+    if (lines.length === 0) return [];
+
+    const header = parseCSVLine(lines[0]);
+    const rows = [];
+
+    // Índices de las columnas genéricas
+    const idxID        = header.indexOf("ID");
+    const idxTitulo    = header.indexOf("TITULO_MOSTRAR");
+    const idxAnio      = header.indexOf("AÑO_MOSTRAR");
+    const idxPub       = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxGenero    = header.indexOf("GENERO_MOSTRAR");
+    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
+    const idxCaratula  = header.indexOf("CARATULA_URL");
+    const idxJugadores = header.indexOf("JUGADORES_MOSTRAR");
+    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
+    const idxInfo       = header.indexOf("INFO_MOSTRAR");
+    const idxFormato    = header.indexOf(CONFIG.formatoCol) >= 0 ? header.indexOf(CONFIG.formatoCol) : header.indexOf("FORMATO_MOSTRAR");
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+
+      const cols = parseCSVLine(line);
+
+      const id        = (idxID        >= 0 && cols[idxID]        !== undefined) ? cols[idxID].trim()        : "";
+      const titulo    = (idxTitulo    >= 0 && cols[idxTitulo]    !== undefined) ? cols[idxTitulo].trim()    : "";
+      const anio      = (idxAnio      >= 0 && cols[idxAnio]      !== undefined) ? cols[idxAnio].trim()      : "";
+      const pub       = (idxPub       >= 0 && cols[idxPub]       !== undefined) ? cols[idxPub].trim()       : "";
+      const genero    = (idxGenero    >= 0 && cols[idxGenero]    !== undefined) ? cols[idxGenero].trim()    : "";
+      const subgenero = (idxSubgenero >= 0 && cols[idxSubgenero] !== undefined) ? cols[idxSubgenero].trim() : "";
+      const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
+      const caratula  = (idxCaratula  >= 0 && cols[idxCaratula]  !== undefined) ? cols[idxCaratula].trim()  : "";
+      const jugadores  = (idxJugadores  >= 0 && cols[idxJugadores]  !== undefined) ? cols[idxJugadores].trim()  : "";
+      const terminado  = (idxTerminado  >= 0 && cols[idxTerminado]  !== undefined) ? cols[idxTerminado].trim()  : "";
+      const desarrollo = (idxDesarrollo >= 0 && cols[idxDesarrollo] !== undefined) ? cols[idxDesarrollo].trim() : "";
+      const info       = (idxInfo       >= 0 && cols[idxInfo]       !== undefined) ? cols[idxInfo].trim()       : "";
+      const formato    = (idxFormato    >= 0 && cols[idxFormato]    !== undefined) ? cols[idxFormato].trim()    : "";
+
+      if (!titulo) continue;
+
+      const displayTitulo = formatTitleWithArticle(titulo);
+
+      rows.push({
+        id,
+        titulo,
+        displayTitulo,
+        anio,
+        pub,
+        genero,
+        subgenero,
+        favorito,
+        caratula,
+        jugadores,
+        terminado,
+        desarrollo,
+        info,
+        formato,
+        sortKey: displayTitulo.toLowerCase()
+      });
+
+    }
+
+    return rows;
+  }
+
+  // =========================================
+  // FORMATEO DE TÍTULOS CON ARTÍCULO AL FINAL
+  // =========================================
+  function formatTitleWithArticle(title) {
+    if (!title) return "";
+    const t = title.trim();
+    const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+    const match = t.match(re);
+    if (!match) return t;
+    return match[2] + ", " + match[1];
+  }
+
+  // =========================================
+  // NORMALIZAR TEXTO PARA BÚSQUEDAS
+  // =========================================
+  function normalizeText(str) {
+    return (str || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  // =========================================
+  // CREAR TARJETA DE JUEGO
+  // =========================================
+  function createGameCard(game) {
+    const card = document.createElement("div");
+    card.className = "zx-card";
+
+    // Cover
+    const coverDiv = document.createElement("div");
+    coverDiv.className = "zx-card-cover";
+
+    if (game.caratula) {
+      const img = document.createElement("img");
+      img.alt = game.displayTitulo || game.titulo;
+      img.loading = "lazy";
+      img.src = game.caratula;
+      coverDiv.appendChild(img);
+    }
+
+    // Info
+    const infoDiv = document.createElement("div");
+    infoDiv.className = "zx-card-info";
+
+    const titleP = document.createElement("p");
+    titleP.className = "zx-card-title";
+    titleP.textContent = game.displayTitulo || game.titulo;
+
+    const metaP = document.createElement("p");
+    metaP.className = "zx-card-meta";
+    const metaParts = [game.anio, game.pub].filter(Boolean);
+    metaP.textContent = metaParts.join(" · ");
+
+    infoDiv.appendChild(titleP);
+    infoDiv.appendChild(metaP);
+
+    card.appendChild(coverDiv);
+    card.appendChild(infoDiv);
+
+    return card;
+  }
+
+  // =========================================
+  // SCROLL AL INICIO
+  // =========================================
+  function resetListScroll() {
+    requestAnimationFrame(() => {
+      const listContainer = document.getElementById("zx-spectrum-list");
+      if (listContainer) {
+        listContainer.scrollTop = 0;
+      }
+
+      const scrollingElement = document.scrollingElement || document.documentElement;
+      if (scrollingElement) {
+        scrollingElement.scrollTop = 0;
+      }
+
+      if (typeof window !== "undefined" && window.scrollTo) {
+        window.scrollTo(0, 0);
+      }
+    });
+  }
+
+  // =========================================
+  // RENDERIZAR JUEGOS
+  // =========================================
+  function renderGames(gamesToRender, query = "") {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!gamesToRender.length) {
+      container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos que coincidan con la búsqueda.</p>';
+    } else {
+      gamesToRender.forEach(game => {
+        const card = createGameCard(game);
+
+        // Hacer que toda la tarjeta sea clicable
+        card.addEventListener("click", () => {
+          if (game.id) {
+            const searchInput = document.querySelector(".spectrum-search-input");
+            const query = searchInput ? searchInput.value.trim() : "";
+            let url = `${CONFIG.fichaPage}?platform=${CURRENT_PLATFORM}&id=${encodeURIComponent(game.id)}`;
+            if (query) {
+              url += "&search=" + encodeURIComponent(query);
+            }
+            if (currentFilterField && currentFilterValue) {
+              url += `&filterField=${encodeURIComponent(currentFilterField)}&filterValue=${encodeURIComponent(currentFilterValue)}`;
+            }
+            window.location.href = url;
+          }
+        });
+
+        card.style.cursor = "pointer";
+        container.appendChild(card);
+      });
+    }
+
+    // Actualizar contador
+    const recordsEl = document.querySelector(".spectrum-records-text");
+    if (recordsEl) {
+      const total = allGames.length;
+      if (!query.trim()) {
+        recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
+      } else {
+        const current = gamesToRender.length;
+        recordsEl.textContent =
+          current.toLocaleString("es-ES") +
+          " DE " +
+          total.toLocaleString("es-ES") +
+        " REGISTROS";
+      }
+    }
+
+    resetListScroll();
+  }
+    
+  // =========================================
+  // CONFIGURAR BUSCADOR
+  // =========================================
+  function setupSearch() {
+    const searchInput = document.querySelector(".spectrum-search-input");
+    if (!searchInput) return;
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value || "";
+      const trimmed = query.trim();
+
+      // Un solo carácter → filtrar por inicial
+      const singleCharMatch = trimmed.match(/^([a-zñáéíóúü0-9])$/i);
+      if (singleCharMatch) {
+        const char = normalizeText(singleCharMatch[1]);
+        const filteredByChar = allGames.filter(game => {
+          const titleNorm = normalizeText(game.displayTitulo || game.titulo);
+          return titleNorm.startsWith(char);
+        });
+        renderGames(filteredByChar, trimmed);
+        currentFilterField = "";
+        currentFilterValue = "";
+        return;
+      }
+
+      if (!trimmed) {
+        renderGames(allGames, "");
+        currentFilterField = "";
+        currentFilterValue = "";
+        return;
+      }
+
+      const qNorm = normalizeText(trimmed);
+
+      // Filtro especial: "fav"
+      if (qNorm === "fav") {
+        const filteredFav = allGames.filter(game => normalizeText(game.favorito) === "si");
+        renderGames(filteredFav, trimmed);
+        currentFilterField = "favorito";
+        currentFilterValue = trimmed;
+        return;
+      }
+
+      // Filtro especial: "terminado"
+      if (qNorm === "terminado") {
+        const filteredTerminado = allGames.filter(game => normalizeText(game.terminado) === "si");
+        renderGames(filteredTerminado, trimmed);
+        currentFilterField = "terminado";
+        currentFilterValue = trimmed;
+        return;
+      }
+
+      // Filtro especial: "fisico"
+      if (qNorm === "fisico") {
+        const filteredFisico = allGames.filter(game => normalizeText(game.formato).includes("fisico"));
+        renderGames(filteredFisico, trimmed);
+        currentFilterField = "formato";
+        currentFilterValue = trimmed;
+        return;
+      }
+
+      // Búsqueda general
+      const filtered = allGames.filter(game => {
+        const titleNorm      = normalizeText(game.displayTitulo || game.titulo);
+        const pubNorm        = normalizeText(game.pub);
+        const yearNorm       = normalizeText(game.anio);
+        const generoNorm     = normalizeText(game.genero);
+        const subgeneroNorm  = normalizeText(game.subgenero);
+        const jugadoresNorm  = normalizeText(game.jugadores);
+        const terminadoNorm  = normalizeText(game.terminado);
+        const desarrolloNorm = normalizeText(game.desarrollo);
+        const infoNorm       = normalizeText(game.info);
+        const formatoNorm    = normalizeText(game.formato);
+
+        return (
+          titleNorm.includes(qNorm)      ||
+          pubNorm.includes(qNorm)        ||
+          yearNorm.includes(qNorm)       ||
+          generoNorm.includes(qNorm)     ||
+          subgeneroNorm.includes(qNorm)  ||
+          jugadoresNorm.includes(qNorm)  ||
+          terminadoNorm.includes(qNorm)  ||
+          desarrolloNorm.includes(qNorm) ||
+          infoNorm.includes(qNorm)       ||
+          formatoNorm.includes(qNorm)
+        );
+      });
+
+      currentFilterField = "";
+      currentFilterValue = trimmed;
+
+      const isExactSubgenero =
+        filtered.length > 0 &&
+        filtered.every(game => normalizeText(game.subgenero) === qNorm);
+
+      if (isExactSubgenero) {
+        currentFilterField = "subgenero";
+      }
+        
+      renderGames(filtered, query);
+    });
+  }
+
+  // =========================================
+  // CARGA INICIAL DE LA LISTA
+  // =========================================
+  async function loadGamesList() {
+    const container = document.getElementById("zx-spectrum-list");
+    if (!container) return;
+
+    try {
+      container.innerHTML = '<p class="zx-list-loading">Cargando listado de juegos...</p>';
+
+      const response = await fetch(CONFIG.csvUrl);
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el CSV");
+      }
+
+      const text = await response.text();
+      const games = parseCSV(text);
+
+      // Ordenar alfabéticamente
+      games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+      allGames = games;
+      renderGames(allGames, "");
+      setupSearch();
+
+    } catch (err) {
+      console.error("Error al cargar la lista:", err);
+      container.innerHTML = '<p class="zx-list-loading">Error al cargar la lista de juegos.</p>';
+    }
+  }
+
+  // =========================================
+  // INICIALIZACIÓN
+  // =========================================
+  document.addEventListener("DOMContentLoaded", () => {
+    initPageTitles();
+    loadGamesList();
+  });
+</script>
+
+</body>
+</html>
