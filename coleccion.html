@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi Colección</title>
+    <link rel="stylesheet" href="assets/css/global.css">
+    <style>
+        /* Estilos específicos para la vista de colección */
+        .zx-card .platform-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            z-index: 2;
+        }
+
+        .zx-thumb-wrapper {
+            position: relative;
+        }
+
+        /* Badge de plataforma con colores específicos */
+        .platform-badge.PS3 { background: #003087; }
+        .platform-badge.PS4 { background: #003087; }
+        .platform-badge.SWITCH { background: #e60012; }
+        .platform-badge.SPECTRUM { background: #cc0000; }
+
+        /* Año en las cards */
+        .zx-year {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+
+<body class="spectrum-lista">
+
+    <!-- BANDA SUPERIOR -->
+    <header class="top-bar top-bar--spectrum">
+
+        <!-- FILA 1: ATRÁS + TÍTULO + HOME -->
+        <div class="top-bar-inner">
+            <img src="assets/img/ic_back.svg"
+                 class="top-bar-back"
+                 alt="Atrás"
+                 onclick="window.location.href='index.html'">
+
+            <h1 class="top-bar-title">MI COLECCIÓN</h1>
+
+            <img src="assets/img/ic_home.svg"
+                 class="top-bar-home"
+                 alt="Home"
+                 onclick="window.location.href='index.html'">
+        </div>
+
+        <!-- FILA 2: BUSCADOR -->
+        <div class="spectrum-header-box">
+            <div class="spectrum-search-wrapper">
+                <div class="spectrum-search-box">
+                    <input type="text"
+                           class="spectrum-search-input"
+                           placeholder="Buscar en toda la colección...">
+
+                    <img src="assets/img/ic_search.svg"
+                         class="spectrum-search-icon"
+                         alt="Buscar">
+                </div>
+            </div>
+        </div>
+
+        <!-- FILA 3: CONTADOR -->
+        <div class="spectrum-records-block">
+            <p class="spectrum-records-text">Cargando registros...</p>
+        </div>
+
+    </header>
+
+    <!-- CONTENIDO DE LA PÁGINA -->
+    <main class="platforms-content">
+
+        <!-- LISTA DE JUEGOS -->
+        <section class="zx-list-wrapper">
+            <div id="zx-spectrum-list" class="zx-list-grid">
+                <p class="zx-list-loading">Cargando colección...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+    // =========================================
+    // CONFIGURACIÓN
+    // =========================================
+    const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
+
+    // Mapeo de plataformas a sus páginas de ficha
+    const PLATFORM_FICHA_CONFIG = {
+        "PS3": { page: "igdb-ficha.html", platform: "PS3" },
+        "PS4": { page: "igdb-ficha.html", platform: "PS4" },
+        "SWITCH": { page: "igdb-ficha.html", platform: "SWITCH" },
+        "SPECTRUM": { page: "zx-spectrum-ficha.html", platform: null }
+        // Añadir más plataformas aquí
+    };
+
+    // Lista global con TODOS los juegos
+    let allGames = [];
+    // Contexto del último filtro aplicado
+    let currentFilterField = "";
+    let currentFilterValue = "";
+
+    // =========================================
+    // LAZY LOADING CONFIGURATION
+    // =========================================
+    const LAZY_LOAD_BATCH = 50;  // Cargar de 50 en 50
+    let currentLoadedCount = 0;
+    let filteredGames = [];
+    let isLoading = false;
+
+    // =========================================
+    // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
+    // =========================================
+    function parseCSVLine(line) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+
+        result.push(current.trim());
+        return result;
+    }
+
+    // =========================================
+    // UTILIDAD PARA PARSEAR EL CSV COMPLETO
+    // =========================================
+    function parseCSV(text) {
+        const lines = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+
+            if (ch === '"') {
+                if (inQuotes && text[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+                current += ch;
+            } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+                if (ch === '\r' && text[i + 1] === '\n') {
+                    i++;
+                }
+                if (current.trim()) {
+                    lines.push(current);
+                }
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+        if (current.trim()) {
+            lines.push(current);
+        }
+
+        if (lines.length === 0) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        // Índices de las columnas
+        const idxID        = header.indexOf("ID");
+        const idxTitulo    = header.indexOf("TITULO_MOSTRAR");
+        const idxPlataforma = header.indexOf("PLATAFORMA");
+        const idxAnio      = header.indexOf("AÑO_MOSTRAR");
+        const idxCaratula  = header.indexOf("CARATULA_URL");
+        const idxFavorito  = header.indexOf("FAVORITO");
+        const idxTerminado = header.indexOf("TERMINADO");
+        const idxFisico    = header.indexOf("FISICO");
+        const idxFichaPage = header.indexOf("FICHA_PAGE");
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (!line.trim()) continue;
+
+            const cols = parseCSVLine(line);
+
+            const id         = (idxID >= 0 && cols[idxID]) ? cols[idxID].trim() : "";
+            const titulo     = (idxTitulo >= 0 && cols[idxTitulo]) ? cols[idxTitulo].trim() : "";
+            const plataforma = (idxPlataforma >= 0 && cols[idxPlataforma]) ? cols[idxPlataforma].trim().toUpperCase() : "";
+            const anio       = (idxAnio >= 0 && cols[idxAnio]) ? cols[idxAnio].trim() : "";
+            const caratula   = (idxCaratula >= 0 && cols[idxCaratula]) ? cols[idxCaratula].trim() : "";
+            const favorito   = (idxFavorito >= 0 && cols[idxFavorito]) ? cols[idxFavorito].trim() : "";
+            const terminado  = (idxTerminado >= 0 && cols[idxTerminado]) ? cols[idxTerminado].trim() : "";
+            const fisico     = (idxFisico >= 0 && cols[idxFisico]) ? cols[idxFisico].trim() : "";
+            const fichaPage  = (idxFichaPage >= 0 && cols[idxFichaPage]) ? cols[idxFichaPage].trim() : "";
+
+            if (!titulo) continue;
+
+            const displayTitulo = formatTitleWithArticle(titulo);
+
+            rows.push({
+                id,
+                titulo,
+                displayTitulo,
+                plataforma,
+                anio,
+                caratula,
+                favorito,
+                terminado,
+                fisico,
+                fichaPage,
+                sortKey: displayTitulo.toLowerCase()
+            });
+        }
+
+        return rows;
+    }
+
+    // =========================================
+    // FORMATEO DE TÍTULOS CON ARTÍCULO AL FINAL
+    // =========================================
+    function formatTitleWithArticle(title) {
+        if (!title) return "";
+        const t = title.trim();
+        const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+        const match = t.match(re);
+        if (!match) return t;
+        return match[2] + ", " + match[1];
+    }
+
+    // =========================================
+    // NORMALIZAR TEXTO PARA BÚSQUEDAS
+    // =========================================
+    function normalizeText(str) {
+        return (str || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // =========================================
+    // CREACIÓN DE UNA TARJETA DE JUEGO
+    // =========================================
+    function createGameCard(game, useLazyLoad = true) {
+        const card = document.createElement("article");
+        card.className = "zx-card";
+
+        // --- Thumb ---
+        const thumbWrapper = document.createElement("div");
+        thumbWrapper.className = "zx-thumb-wrapper";
+
+        // Badge de plataforma
+        const platformBadge = document.createElement("span");
+        platformBadge.className = `platform-badge ${game.plataforma}`;
+        platformBadge.textContent = game.plataforma;
+        thumbWrapper.appendChild(platformBadge);
+
+        const thumbUrl = (game.caratula || "").trim();
+
+        if (thumbUrl) {
+            const img = document.createElement("img");
+            img.className = "zx-thumb-img";
+            img.alt = game.titulo || "Carátula";
+            
+            if (useLazyLoad) {
+                img.dataset.src = thumbUrl;
+                img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%23333' width='1' height='1'/%3E%3C/svg%3E";
+            } else {
+                img.src = thumbUrl;
+            }
+            
+            thumbWrapper.appendChild(img);
+        } else {
+            const placeholder = document.createElement("div");
+            placeholder.className = "zx-thumb-placeholder";
+            placeholder.textContent = "SIN IMAGEN";
+            thumbWrapper.appendChild(placeholder);
+        }
+
+        // --- Meta (textos) ---
+        const meta = document.createElement("div");
+        meta.className = "zx-meta";
+
+        const titleEl = document.createElement("h3");
+        titleEl.className = "zx-title";
+        titleEl.textContent = game.displayTitulo || game.titulo;
+        meta.appendChild(titleEl);
+
+        if (game.anio) {
+            const yearEl = document.createElement("p");
+            yearEl.className = "zx-year";
+            yearEl.textContent = game.anio;
+            meta.appendChild(yearEl);
+        }
+
+        card.appendChild(thumbWrapper);
+        card.appendChild(meta);
+
+        return card;
+    }
+
+    // =========================================
+    // OBTENER URL DE FICHA PARA UN JUEGO
+    // =========================================
+    function getFichaUrl(game) {
+        const config = PLATFORM_FICHA_CONFIG[game.plataforma];
+        
+        if (!config) {
+            // Fallback: usar igdb-ficha.html con la plataforma
+            return `igdb-ficha.html?platform=${encodeURIComponent(game.plataforma)}&id=${encodeURIComponent(game.id)}`;
+        }
+
+        // Si la ficha tiene page específica en el CSV, usarla
+        const page = game.fichaPage || config.page;
+
+        if (config.platform) {
+            // Plataformas IGDB (PS3, PS4, SWITCH)
+            return `${page}?platform=${config.platform}&id=${encodeURIComponent(game.id)}`;
+        } else {
+            // Spectrum u otras sin parámetro platform
+            return `${page}?id=${encodeURIComponent(game.id)}`;
+        }
+    }
+
+    // =========================================
+    // SCROLL AL INICIO
+    // =========================================
+    function resetListScroll() {
+        requestAnimationFrame(() => {
+            const listContainer = document.getElementById("zx-spectrum-list");
+            if (listContainer) {
+                listContainer.scrollTop = 0;
+            }
+
+            const scrollingElement = document.scrollingElement || document.documentElement;
+            if (scrollingElement) {
+                scrollingElement.scrollTop = 0;
+            }
+
+            if (typeof window !== "undefined" && window.scrollTo) {
+                window.scrollTo(0, 0);
+            }
+        });
+    }
+
+    // =========================================
+    // INTERSECTION OBSERVER PARA LAZY LOAD
+    // =========================================
+    let imageObserver = null;
+
+    function setupImageObserver() {
+        if (imageObserver) {
+            imageObserver.disconnect();
+        }
+
+        imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        delete img.dataset.src;
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        }, {
+            rootMargin: "200px 0px"
+        });
+    }
+
+    function observeImages() {
+        const images = document.querySelectorAll(".zx-thumb-img[data-src]");
+        images.forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+
+    // =========================================
+    // RENDERIZAR BATCH DE JUEGOS (LAZY)
+    // =========================================
+    function renderGamesBatch(games, startIndex, count) {
+        const container = document.getElementById("zx-spectrum-list");
+        if (!container) return;
+
+        const endIndex = Math.min(startIndex + count, games.length);
+
+        for (let i = startIndex; i < endIndex; i++) {
+            const game = games[i];
+            const card = createGameCard(game, true);
+
+            // Click handler
+            card.addEventListener("click", () => {
+                if (game.id) {
+                    const searchInput = document.querySelector(".spectrum-search-input");
+                    const query = searchInput ? searchInput.value.trim() : "";
+                    let url = getFichaUrl(game);
+
+                    // Añadir parámetros de búsqueda para volver
+                    if (query) {
+                        url += "&search=" + encodeURIComponent(query);
+                    }
+                    if (currentFilterField && currentFilterValue) {
+                        url += `&filterField=${encodeURIComponent(currentFilterField)}&filterValue=${encodeURIComponent(currentFilterValue)}`;
+                    }
+                    // Añadir marca de que viene de colección
+                    url += "&from=coleccion";
+
+                    window.location.href = url;
+                }
+            });
+
+            card.style.cursor = "pointer";
+            container.appendChild(card);
+        }
+
+        currentLoadedCount = endIndex;
+        observeImages();
+    }
+
+    // =========================================
+    // RENDERIZAR JUEGOS (INICIAL)
+    // =========================================
+    function renderGames(gamesToRender, query = "") {
+        const container = document.getElementById("zx-spectrum-list");
+        if (!container) return;
+
+        container.innerHTML = "";
+        currentLoadedCount = 0;
+        filteredGames = gamesToRender;
+
+        if (!gamesToRender.length) {
+            container.innerHTML = '<p class="zx-list-loading">No se han encontrado juegos que coincidan con la búsqueda.</p>';
+        } else {
+            // Cargar primer batch
+            renderGamesBatch(gamesToRender, 0, LAZY_LOAD_BATCH);
+        }
+
+        // Actualizar contador
+        updateCounter(gamesToRender.length, query);
+        resetListScroll();
+    }
+
+    // =========================================
+    // ACTUALIZAR CONTADOR
+    // =========================================
+    function updateCounter(currentCount, query) {
+        const recordsEl = document.querySelector(".spectrum-records-text");
+        if (recordsEl) {
+            const total = allGames.length;
+            if (!query || !query.trim()) {
+                recordsEl.textContent = total.toLocaleString("es-ES") + " JUEGOS EN COLECCIÓN";
+            } else {
+                recordsEl.textContent =
+                    currentCount.toLocaleString("es-ES") +
+                    " DE " +
+                    total.toLocaleString("es-ES") +
+                    " JUEGOS";
+            }
+        }
+    }
+
+    // =========================================
+    // INFINITE SCROLL
+    // =========================================
+    function setupInfiniteScroll() {
+        window.addEventListener("scroll", () => {
+            if (isLoading) return;
+            if (currentLoadedCount >= filteredGames.length) return;
+
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            // Cargar más cuando estemos a 500px del final
+            if (scrollTop + windowHeight >= documentHeight - 500) {
+                isLoading = true;
+                renderGamesBatch(filteredGames, currentLoadedCount, LAZY_LOAD_BATCH);
+                isLoading = false;
+            }
+        });
+    }
+
+    // =========================================
+    // CONFIGURAR BUSCADOR
+    // =========================================
+    function setupSearch() {
+        const searchInput = document.querySelector(".spectrum-search-input");
+        if (!searchInput) return;
+
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value || "";
+            const trimmed = query.trim();
+
+            // Un solo carácter → filtrar por inicial
+            const singleCharMatch = trimmed.match(/^([a-zñáéíóúü0-9])$/i);
+            if (singleCharMatch) {
+                const char = normalizeText(singleCharMatch[1]);
+                const filteredByChar = allGames.filter(game => {
+                    const titleNorm = normalizeText(game.displayTitulo || game.titulo);
+                    return titleNorm.startsWith(char);
+                });
+                renderGames(filteredByChar, trimmed);
+                currentFilterField = "";
+                currentFilterValue = "";
+                return;
+            }
+
+            if (!trimmed) {
+                renderGames(allGames, "");
+                currentFilterField = "";
+                currentFilterValue = "";
+                return;
+            }
+
+            const qNorm = normalizeText(trimmed);
+
+            // Filtro especial: "fav"
+            if (qNorm === "fav") {
+                const filteredFav = allGames.filter(game => normalizeText(game.favorito) === "si");
+                renderGames(filteredFav, trimmed);
+                currentFilterField = "favorito";
+                currentFilterValue = trimmed;
+                return;
+            }
+
+            // Filtro especial: "terminado"
+            if (qNorm === "terminado") {
+                const filteredTerminado = allGames.filter(game => normalizeText(game.terminado) === "si");
+                renderGames(filteredTerminado, trimmed);
+                currentFilterField = "terminado";
+                currentFilterValue = trimmed;
+                return;
+            }
+
+            // Filtro especial: "fisico"
+            if (qNorm === "fisico") {
+                const filteredFisico = allGames.filter(game => normalizeText(game.fisico) === "si");
+                renderGames(filteredFisico, trimmed);
+                currentFilterField = "fisico";
+                currentFilterValue = trimmed;
+                return;
+            }
+
+            // Filtro por plataforma: "ps3", "switch", "spectrum", etc.
+            const platformKeys = Object.keys(PLATFORM_FICHA_CONFIG).map(k => k.toLowerCase());
+            if (platformKeys.includes(qNorm)) {
+                const filteredPlatform = allGames.filter(game => 
+                    normalizeText(game.plataforma) === qNorm
+                );
+                renderGames(filteredPlatform, trimmed);
+                currentFilterField = "plataforma";
+                currentFilterValue = trimmed;
+                return;
+            }
+
+            // Búsqueda general
+            const filtered = allGames.filter(game => {
+                const titleNorm      = normalizeText(game.displayTitulo || game.titulo);
+                const plataformaNorm = normalizeText(game.plataforma);
+                const yearNorm       = normalizeText(game.anio);
+                const favoritoNorm   = normalizeText(game.favorito);
+                const terminadoNorm  = normalizeText(game.terminado);
+                const fisicoNorm     = normalizeText(game.fisico);
+
+                return (
+                    titleNorm.includes(qNorm)      ||
+                    plataformaNorm.includes(qNorm) ||
+                    yearNorm.includes(qNorm)       ||
+                    favoritoNorm.includes(qNorm)   ||
+                    terminadoNorm.includes(qNorm)  ||
+                    fisicoNorm.includes(qNorm)
+                );
+            });
+
+            currentFilterField = "";
+            currentFilterValue = trimmed;
+
+            renderGames(filtered, query);
+        });
+    }
+
+    // =========================================
+    // CARGA INICIAL DE LA LISTA
+    // =========================================
+    async function loadGamesList() {
+        const container = document.getElementById("zx-spectrum-list");
+        if (!container) return;
+
+        try {
+            container.innerHTML = '<p class="zx-list-loading">Cargando colección...</p>';
+
+            const response = await fetch(COLECCION_CSV_URL);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar el CSV");
+            }
+
+            const text = await response.text();
+            const games = parseCSV(text);
+
+            // Ordenar alfabéticamente
+            games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+            allGames = games;
+            
+            setupImageObserver();
+            renderGames(allGames, "");
+            setupSearch();
+            setupInfiniteScroll();
+
+        } catch (err) {
+            console.error("Error al cargar la colección:", err);
+            container.innerHTML = '<p class="zx-list-loading">Error al cargar la colección.</p>';
+        }
+    }
+
+    // =========================================
+    // INICIALIZACIÓN
+    // =========================================
+    document.addEventListener("DOMContentLoaded", () => {
+        loadGamesList();
+    });
+    </script>
+
+</body>
+</html>
