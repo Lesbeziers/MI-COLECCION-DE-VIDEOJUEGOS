@@ -131,6 +131,10 @@
     const idxContr   = header.indexOf("CONTRIBUCIONES");
     const idxGenero  = header.indexOf("GENERO_MOSTRAR");
     const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    
+    // Nuevas columnas
+    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
@@ -150,6 +154,9 @@
       const genero = (idxGenero  >= 0 && cols[idxGenero]  !== undefined) ? cols[idxGenero].trim()  : "";
       const subgenero = (idxSubgenero >= 0 && cols[idxSubgenero] !== undefined) ? cols[idxSubgenero].trim() : "";
 
+      // Nuevos campos
+      const terminado = (idxTerminado >= 0 && cols[idxTerminado] !== undefined) ? cols[idxTerminado].trim() : "";
+      const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
 
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
@@ -158,18 +165,20 @@
       const displayTitulo = formatTitleWithArticle(titulo);
 
       rows.push({
-      id,
-      titulo,
-      displayTitulo,
-      pub,
-      anio,
-      thumb,
-      autor,
-      des,
-      contr,
-      genero,
-      subgenero,
-      sortKey: displayTitulo.toLowerCase()
+        id,
+        titulo,
+        displayTitulo,
+        pub,
+        anio,
+        thumb,
+        autor,
+        des,
+        contr,
+        genero,
+        subgenero,
+        terminado,
+        favorito,
+        sortKey: displayTitulo.toLowerCase()
       });
 
     }
@@ -194,7 +203,7 @@
       return t;  // Sin artículo al principio → se deja igual
     }
 
-    const article = match[1]; // “The”, “La”, etc.
+    const article = match[1]; // "The", "La", etc.
     const rest    = match[2]; // El resto
     return rest + ", " + article;
   }
@@ -272,7 +281,7 @@
     if (game.pub) {
       const pubEl = document.createElement("p");
       pubEl.className = "zx-subtitle";
-      pubEl.textContent = game.pub.replace(/[\"“”«»„‟]+/g, "");
+      pubEl.textContent = game.pub.replace(/[\"""«»„‟]+/g, "");
       meta.appendChild(pubEl);
     }
 
@@ -280,7 +289,7 @@
     if (game.anio) {
       const yearEl = document.createElement("p");
       yearEl.className = "zx-subtitle";
-      yearEl.textContent = game.anio.replace(/[\"“”«»„‟]+/g, "");
+      yearEl.textContent = game.anio.replace(/[\"""«»„‟]+/g, "");
       meta.appendChild(yearEl);
     }
 
@@ -405,25 +414,26 @@
     searchInput.addEventListener("input", () => {
       const query = searchInput.value || "";
       const trimmed = query.trim();
-// =============================================
-// UN SOLO CARÁCTER (letra o número) → mostrar solo 
-// juegos que empiezan por ese carácter
-// =============================================
-const singleCharMatch = trimmed.match(/^([a-zñáéíóúü0-9])$/i);
 
-if (singleCharMatch) {
-    const char = normalizeText(singleCharMatch[1]);
+      // =============================================
+      // UN SOLO CARÁCTER (letra o número) → mostrar solo 
+      // juegos que empiezan por ese carácter
+      // =============================================
+      const singleCharMatch = trimmed.match(/^([a-zñáéíóúü0-9])$/i);
 
-    const filteredByChar = allGames.filter(game => {
-        const titleNorm = normalizeText(game.displayTitulo || game.titulo);
-        return titleNorm.startsWith(char);
-    });
+      if (singleCharMatch) {
+          const char = normalizeText(singleCharMatch[1]);
 
-    renderGames(filteredByChar, trimmed);
-    currentFilterField = "";
-    currentFilterValue = "";
-    return; // ⬅️ IMPORTANTE: no seguir con el buscador normal
-}
+          const filteredByChar = allGames.filter(game => {
+              const titleNorm = normalizeText(game.displayTitulo || game.titulo);
+              return titleNorm.startsWith(char);
+          });
+
+          renderGames(filteredByChar, trimmed);
+          currentFilterField = "";
+          currentFilterValue = "";
+          return; // ⬅️ IMPORTANTE: no seguir con el buscador normal
+      }
 
       if (!trimmed) {
         // Sin texto → lista completa
@@ -435,29 +445,52 @@ if (singleCharMatch) {
 
       const qNorm = normalizeText(trimmed);
 
-     const filtered = allGames.filter(game => {
-     const titleNorm  = normalizeText(game.displayTitulo || game.titulo);
-     const pubNorm    = normalizeText(game.pub);
-     const yearNorm   = normalizeText(game.anio);
+      // =============================================
+      // FILTRO ESPECIAL: "fav" → juegos favoritos
+      // =============================================
+      if (qNorm === "fav") {
+        const filteredFav = allGames.filter(game => normalizeText(game.favorito) === "si");
+        renderGames(filteredFav, trimmed);
+        currentFilterField = "favorito";
+        currentFilterValue = trimmed;
+        return;
+      }
 
-     // 🔹 Nuevos campos
-     const autorNorm  = normalizeText(game.autor);
-     const desNorm    = normalizeText(game.des);
-     const contrNorm  = normalizeText(game.contr);
-     const generoNorm = normalizeText(game.genero);
-     const subgeneroNorm = normalizeText(game.subgenero);
+      // =============================================
+      // FILTRO ESPECIAL: "terminado" → juegos terminados
+      // =============================================
+      if (qNorm === "terminado") {
+        const filteredTerminado = allGames.filter(game => normalizeText(game.terminado) === "si");
+        renderGames(filteredTerminado, trimmed);
+        currentFilterField = "terminado";
+        currentFilterValue = trimmed;
+        return;
+      }
 
-     return (
-    titleNorm.includes(qNorm)  ||
-    pubNorm.includes(qNorm)    ||
-    yearNorm.includes(qNorm)   ||
-    autorNorm.includes(qNorm)  ||
-    desNorm.includes(qNorm)    ||
-    contrNorm.includes(qNorm)  ||
-    generoNorm.includes(qNorm) ||
-    subgeneroNorm.includes(qNorm)
-  );
-});
+      // =============================================
+      // BÚSQUEDA GENERAL
+      // =============================================
+      const filtered = allGames.filter(game => {
+        const titleNorm  = normalizeText(game.displayTitulo || game.titulo);
+        const pubNorm    = normalizeText(game.pub);
+        const yearNorm   = normalizeText(game.anio);
+        const autorNorm  = normalizeText(game.autor);
+        const desNorm    = normalizeText(game.des);
+        const contrNorm  = normalizeText(game.contr);
+        const generoNorm = normalizeText(game.genero);
+        const subgeneroNorm = normalizeText(game.subgenero);
+
+        return (
+          titleNorm.includes(qNorm)  ||
+          pubNorm.includes(qNorm)    ||
+          yearNorm.includes(qNorm)   ||
+          autorNorm.includes(qNorm)  ||
+          desNorm.includes(qNorm)    ||
+          contrNorm.includes(qNorm)  ||
+          generoNorm.includes(qNorm) ||
+          subgeneroNorm.includes(qNorm)
+        );
+      });
 
 
       // Guardar contexto del filtro si es un subgénero exacto
