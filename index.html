@@ -18,16 +18,17 @@
   <div class="stats">
 
     <a href="plataformas.html" class="stat-block" style="text-decoration:none; color:inherit;">
-    <div class="stat-circle"></div>
-    <div class="stat-label">PLATAFORMAS</div>
-    <div class="stat-value"><span id="platform-count">X</span></div>
-</a>
+      <div class="stat-circle"></div>
+      <div class="stat-label">PLATAFORMAS</div>
+      <div class="stat-value"><span id="platform-count">X</span></div>
+    </a>
 
-<div class="stat-block">
-    <div class="stat-circle"></div>
-    <div class="stat-label"><strong>COLECCIÓN</strong></div>
-    <div class="stat-value"><span id="collection-count">...</span></div>
-</div>
+    <!-- COLECCIÓN ahora es clicable -->
+    <a href="coleccion.html" class="stat-block" style="text-decoration:none; color:inherit;">
+      <div class="stat-circle"></div>
+      <div class="stat-label"><strong>COLECCIÓN</strong></div>
+      <div class="stat-value"><span id="collection-count">...</span></div>
+    </a>
 
   </div>
 
@@ -81,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Pintar el número real
         countEl.textContent = total;
 
-} catch (err) {
+    } catch (err) {
         console.error("Error contando plataformas:", err);
     }
 
