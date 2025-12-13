@@ -44,7 +44,7 @@ h4 {
 }
 
 h1 {
-    color: #ff8800;
+    color: #f6bc41;
     font-size: 25px;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -139,7 +139,7 @@ p {
 
 .search-box input:focus {
     outline: none;
-    border-color: #ff8800;
+    border-color: #f6bc41;
 }
 
 /* ============================================
@@ -202,7 +202,7 @@ p {
 }
 
 .stat-block:hover .stat-circle {
-    border-color: #ff8800;
+    border-color: #f6bc41;
     transition: all 0.25s;
 }
 
@@ -215,7 +215,7 @@ p {
 }
 
 .stat-block:hover .stat-label {
-    color: #ff8800;
+    color: #f6bc41;
 }
 
 /* ============================================
@@ -263,7 +263,7 @@ p {
 }
 
 .top-bar-title {
-    color: #ff8800;
+    color: #f6bc41;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -292,7 +292,7 @@ p {
 ============================================ */
 .platform-section-title {
     text-align: center;
-    color: #ff8800;
+    color: #f6bc41;
     font-weight: 700;
     font-size: 20px;
     margin: 12px 0 8px;
@@ -354,13 +354,13 @@ p {
 }
 
 .platform-card:hover .platform-icon-circle {
-    border-color: #ff8800;
+    border-color: #f6bc41;
     opacity: 1;
     transition: all 0.25s ease;
 }
 
 .platform-card:hover .stat-label {
-    color: #ff8800;
+    color: #f6bc41;
     transition: color 0.25s ease;
 }
 
@@ -771,7 +771,7 @@ body.ficha-final .game-nav-center {
 }
 
 body.ficha-final .game-nav-title {
-    color: #ff8800;
+    color: #f6bc41;
     font-size: 20px;
     font-weight: 600;
     white-space: nowrap;
@@ -1192,7 +1192,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 }
 
 .ficha-section-title {
-    color: #ff8800;
+    color: #f6bc41;
     font-size: 24px;
     font-weight: 700;
     text-align: center;
@@ -1332,7 +1332,7 @@ body.ficha-final.loading .ficha-cover-wrapper {
 }
 
 .utiles-button--active:hover .utiles-label {
-    color: #ff8800;
+    color: #f6bc41;
 }
 
 .utiles-button:focus,
