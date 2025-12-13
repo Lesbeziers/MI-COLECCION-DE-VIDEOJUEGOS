@@ -99,7 +99,7 @@
         "PS3": { page: "igdb-ficha.html", platform: "PS3" },
         "PS4": { page: "igdb-ficha.html", platform: "PS4" },
         "SWITCH": { page: "igdb-ficha.html", platform: "SWITCH" },
-        "SPECTRUM": { page: "spectrum-ficha.html", platform: null }  // Ajusta el nombre si es diferente
+        "SPECTRUM": { page: "spectrum-ficha.html", platform: null }
         // Añadir más plataformas aquí
     };
 
@@ -195,12 +195,9 @@
         const idxCaratula  = header.indexOf("CARATULA_URL");
         const idxFavorito  = header.indexOf("FAVORITO");
         const idxTerminado = header.indexOf("TERMINADO");
-        const idxFisico    = header.indexOf("FISICO");
+        const idxFormato   = header.indexOf("FORMATO_MOSTRAR");
         const idxFichaPage = header.indexOf("FICHA_PAGE");
         
-        // Columnas alternativas (por si la estructura cambia o usa nombres diferentes)
-        const idxFormato   = header.indexOf("FORMATO_MOSTRAR");
-
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             if (!line.trim()) continue;
@@ -216,15 +213,10 @@
             const favorito   = (idxFavorito >= 0 && cols[idxFavorito]) ? cols[idxFavorito].trim() : "";
             const terminado  = (idxTerminado >= 0 && cols[idxTerminado]) ? cols[idxTerminado].trim() : "";
             
-            // FISICO: puede venir de columna FISICO o derivarse de FORMATO_MOSTRAR
-            let fisico = "";
-            if (idxFisico >= 0 && cols[idxFisico]) {
-                fisico = cols[idxFisico].trim();
-            }
-            // Si FISICO está vacío pero hay FORMATO_MOSTRAR, derivar el valor
-            if (!fisico && idxFormato >= 0 && cols[idxFormato]) {
-                const formato = cols[idxFormato].toLowerCase();
-                fisico = formato.includes("físico") || formato.includes("fisico") ? "SI" : "NO";
+            // FORMATO_MOSTRAR: guardar el valor original del campo
+            let formato = "";
+            if (idxFormato >= 0 && cols[idxFormato]) {
+                formato = cols[idxFormato].trim();
             }
             
             const fichaPage  = (idxFichaPage >= 0 && cols[idxFichaPage]) ? cols[idxFichaPage].trim() : "";
@@ -242,7 +234,7 @@
                 caratula,
                 favorito,
                 terminado,
-                fisico,
+                formato,
                 fichaPage,
                 sortKey: displayTitulo.toLowerCase()
             });
@@ -601,11 +593,11 @@
                 return;
             }
 
-            // Filtro especial: "fisico"
+            // Filtro especial: "fisico" (busca juegos con formato físico)
             if (qNorm === "fisico") {
-                const filteredFisico = allGames.filter(game => normalizeText(game.fisico) === "si");
+                const filteredFisico = allGames.filter(game => normalizeText(game.formato).includes("fisico"));
                 renderGames(filteredFisico, trimmed);
-                currentFilterField = "fisico";
+                currentFilterField = "formato";
                 currentFilterValue = trimmed;
                 return;
             }
@@ -629,7 +621,7 @@
                 const yearNorm       = normalizeText(game.anio);
                 const favoritoNorm   = normalizeText(game.favorito);
                 const terminadoNorm  = normalizeText(game.terminado);
-                const fisicoNorm     = normalizeText(game.fisico);
+                const formatoNorm    = normalizeText(game.formato);
 
                 return (
                     titleNorm.includes(qNorm)      ||
@@ -637,7 +629,7 @@
                     yearNorm.includes(qNorm)       ||
                     favoritoNorm.includes(qNorm)   ||
                     terminadoNorm.includes(qNorm)  ||
-                    fisicoNorm.includes(qNorm)
+                    formatoNorm.includes(qNorm)
                 );
             });
 
