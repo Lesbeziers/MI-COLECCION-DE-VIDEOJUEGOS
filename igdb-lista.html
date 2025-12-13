@@ -266,42 +266,56 @@ csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYN
   }
 
 // =========================================
-  // CREAR TARJETA DE JUEGO
+  // CREACIÓN DE UNA TARJETA DE JUEGO
   // =========================================
   function createGameCard(game) {
-    const card = document.createElement("div");
+    const card = document.createElement("article");
     card.className = "zx-card";
 
-    // Cover
-    const coverDiv = document.createElement("div");
-    coverDiv.className = "zx-card-cover";
+    // --- Thumb ---
+    const thumbWrapper = document.createElement("div");
+    thumbWrapper.className = "zx-thumb-wrapper";
 
-    if (game.caratula) {
+    const thumbUrl = (game.caratula || "").trim();
+
+    if (thumbUrl) {
       const img = document.createElement("img");
-      img.alt = game.displayTitulo || game.titulo;
-      img.loading = "lazy";
-      img.src = game.caratula;
-      coverDiv.appendChild(img);
+      img.className = "zx-thumb-img";
+      img.src = thumbUrl;
+      img.alt = game.titulo || "Screenshot";
+      thumbWrapper.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "zx-thumb-placeholder";
+      placeholder.textContent = "SIN IMAGEN";
+      thumbWrapper.appendChild(placeholder);
     }
 
-    // Info
-    const infoDiv = document.createElement("div");
-    infoDiv.className = "zx-card-info";
+    // --- Meta (textos) ---
+    const meta = document.createElement("div");
+    meta.className = "zx-meta";
 
-    const titleP = document.createElement("p");
-    titleP.className = "zx-card-title";
-    titleP.textContent = game.displayTitulo || game.titulo;
+    const titleEl = document.createElement("h3");
+    titleEl.className = "zx-title";
+    titleEl.textContent = game.displayTitulo || game.titulo;
+    meta.appendChild(titleEl);
 
-    const metaP = document.createElement("p");
-    metaP.className = "zx-card-meta";
-    const metaParts = [game.anio, game.pub].filter(Boolean);
-    metaP.textContent = metaParts.join(" · ");
+    if (game.pub) {
+      const pubEl = document.createElement("p");
+      pubEl.className = "zx-subtitle";
+      pubEl.textContent = game.pub.replace(/[\"""«»„‟]+/g, "");
+      meta.appendChild(pubEl);
+    }
 
-    infoDiv.appendChild(titleP);
-    infoDiv.appendChild(metaP);
+    if (game.anio) {
+      const yearEl = document.createElement("p");
+      yearEl.className = "zx-subtitle";
+      yearEl.textContent = game.anio.replace(/[\"""«»„‟]+/g, "");
+      meta.appendChild(yearEl);
+    }
 
-    card.appendChild(coverDiv);
-    card.appendChild(infoDiv);
+    card.appendChild(thumbWrapper);
+    card.appendChild(meta);
 
     return card;
   }
