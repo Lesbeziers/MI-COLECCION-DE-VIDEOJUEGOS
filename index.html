@@ -23,11 +23,11 @@
     <div class="stat-value"><span id="platform-count">X</span></div>
 </a>
 
-    <div class="stat-block">
-        <div class="stat-circle"></div>
-        <div class="stat-label"><strong>COLECCIÓN</strong></div>
-        <div class="stat-value">3.767</div>
-    </div>
+<div class="stat-block">
+    <div class="stat-circle"></div>
+    <div class="stat-label"><strong>COLECCIÓN</strong></div>
+    <div class="stat-value"><span id="collection-count">...</span></div>
+</div>
 
   </div>
 
@@ -81,9 +81,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Pintar el número real
         countEl.textContent = total;
 
-    } catch (err) {
+} catch (err) {
         console.error("Error contando plataformas:", err);
-        // Si falla, dejamos la X o no mostramos nada
+    }
+
+    // Cargar suma de colección desde Google Sheets
+    try {
+        const collectionEl = document.getElementById("collection-count");
+        if (collectionEl) {
+            const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1807643027&single=true&output=csv";
+            const resp = await fetch(csvUrl);
+            const text = await resp.text();
+            const lines = text.trim().split("\n");
+            
+            for (const line of lines) {
+                if (line.startsWith("SUMA_COLECCION")) {
+                    const parts = line.split(",");
+                    if (parts[1]) {
+                        const num = parseInt(parts[1].trim(), 10);
+                        collectionEl.textContent = num.toLocaleString("es-ES");
+                    }
+                    break;
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Error cargando suma colección:", err);
     }
 });
 </script>
