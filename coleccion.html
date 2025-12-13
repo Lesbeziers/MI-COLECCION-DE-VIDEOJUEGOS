@@ -105,7 +105,7 @@
         "PS3": { page: "igdb-ficha.html", platform: "PS3" },
         "PS4": { page: "igdb-ficha.html", platform: "PS4" },
         "SWITCH": { page: "igdb-ficha.html", platform: "SWITCH" },
-        "SPECTRUM": { page: "zx-spectrum-ficha.html", platform: null }
+        "SPECTRUM": { page: "spectrum-ficha.html", platform: null }  // Ajusta el nombre si es diferente
         // Añadir más plataformas aquí
     };
 
@@ -203,6 +203,9 @@
         const idxTerminado = header.indexOf("TERMINADO");
         const idxFisico    = header.indexOf("FISICO");
         const idxFichaPage = header.indexOf("FICHA_PAGE");
+        
+        // Columnas alternativas (por si la estructura cambia o usa nombres diferentes)
+        const idxFormato   = header.indexOf("FORMATO_MOSTRAR");
 
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
@@ -214,10 +217,22 @@
             const titulo     = (idxTitulo >= 0 && cols[idxTitulo]) ? cols[idxTitulo].trim() : "";
             const plataforma = (idxPlataforma >= 0 && cols[idxPlataforma]) ? cols[idxPlataforma].trim().toUpperCase() : "";
             const anio       = (idxAnio >= 0 && cols[idxAnio]) ? cols[idxAnio].trim() : "";
-            const caratula   = (idxCaratula >= 0 && cols[idxCaratula]) ? cols[idxCaratula].trim() : "";
+            const caratulaRaw = (idxCaratula >= 0 && cols[idxCaratula]) ? cols[idxCaratula].trim() : "";
+            const caratula   = getValidThumbUrl(caratulaRaw);  // Procesar URLs múltiples
             const favorito   = (idxFavorito >= 0 && cols[idxFavorito]) ? cols[idxFavorito].trim() : "";
             const terminado  = (idxTerminado >= 0 && cols[idxTerminado]) ? cols[idxTerminado].trim() : "";
-            const fisico     = (idxFisico >= 0 && cols[idxFisico]) ? cols[idxFisico].trim() : "";
+            
+            // FISICO: puede venir de columna FISICO o derivarse de FORMATO_MOSTRAR
+            let fisico = "";
+            if (idxFisico >= 0 && cols[idxFisico]) {
+                fisico = cols[idxFisico].trim();
+            }
+            // Si FISICO está vacío pero hay FORMATO_MOSTRAR, derivar el valor
+            if (!fisico && idxFormato >= 0 && cols[idxFormato]) {
+                const formato = cols[idxFormato].toLowerCase();
+                fisico = formato.includes("físico") || formato.includes("fisico") ? "SI" : "NO";
+            }
+            
             const fichaPage  = (idxFichaPage >= 0 && cols[idxFichaPage]) ? cols[idxFichaPage].trim() : "";
 
             if (!titulo) continue;
@@ -262,6 +277,39 @@
             .toLowerCase()
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // =========================================
+    // PROCESAR URL DE THUMBNAIL (SPECTRUM)
+    // =========================================
+    // Maneja casos como:
+    // - Una sola URL: "https://..."
+    // - Dos URLs: "https://..., https://..."
+    // - Primera es placeholder: "--, https://..."
+    function getValidThumbUrl(rawUrl) {
+        if (!rawUrl || rawUrl.trim() === "" || rawUrl.trim() === "--") {
+            return "";
+        }
+
+        // Si contiene coma, puede haber múltiples URLs
+        if (rawUrl.includes(",")) {
+            const parts = rawUrl.split(",").map(u => u.trim());
+            
+            // Buscar la primera URL válida (que no sea "--")
+            for (const part of parts) {
+                if (part && part !== "--" && part.startsWith("http")) {
+                    return part;
+                }
+            }
+        }
+
+        // Si no tiene coma, verificar que no sea "--"
+        const trimmed = rawUrl.trim();
+        if (trimmed !== "--" && trimmed.startsWith("http")) {
+            return trimmed;
+        }
+
+        return "";
     }
 
     // =========================================
