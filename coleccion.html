@@ -7,18 +7,18 @@
     <link rel="stylesheet" href="assets/css/global.css">
     <style>
         /* Estilos específicos para la vista de colección */
-        .zx-card .platform-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
+        
+        /* Badge de plataforma (ahora en la zona de texto) */
+        .platform-badge {
+            display: inline-block;
             background: rgba(0, 0, 0, 0.75);
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
-            padding: 3px 6px;
+            padding: 4px 8px;
             border-radius: 4px;
             letter-spacing: 0.5px;
-            z-index: 2;
+            margin: 6px 0;
         }
 
         .zx-thumb-wrapper {
@@ -30,13 +30,6 @@
         .platform-badge.PS4 { background: #003087; }
         .platform-badge.SWITCH { background: #e60012; }
         .platform-badge.SPECTRUM { background: #cc0000; }
-
-        /* Año en las cards */
-        .zx-year {
-            font-size: 12px;
-            color: #888;
-            margin-top: 2px;
-        }
     </style>
 </head>
 
@@ -323,12 +316,6 @@
         const thumbWrapper = document.createElement("div");
         thumbWrapper.className = "zx-thumb-wrapper";
 
-        // Badge de plataforma
-        const platformBadge = document.createElement("span");
-        platformBadge.className = `platform-badge ${game.plataforma}`;
-        platformBadge.textContent = game.plataforma;
-        thumbWrapper.appendChild(platformBadge);
-
         const thumbUrl = (game.caratula || "").trim();
 
         if (thumbUrl) {
@@ -360,9 +347,15 @@
         titleEl.textContent = game.displayTitulo || game.titulo;
         meta.appendChild(titleEl);
 
+        // Badge de plataforma (entre título y año)
+        const platformBadge = document.createElement("span");
+        platformBadge.className = `platform-badge ${game.plataforma}`;
+        platformBadge.textContent = game.plataforma;
+        meta.appendChild(platformBadge);
+
         if (game.anio) {
             const yearEl = document.createElement("p");
-            yearEl.className = "zx-year";
+            yearEl.className = "zx-subtitle";
             yearEl.textContent = game.anio;
             meta.appendChild(yearEl);
         }
