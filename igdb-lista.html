@@ -273,16 +273,17 @@ csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYN
     card.className = "zx-card";
 
     // Cover
-    const coverDiv = document.createElement("div");
-    coverDiv.className = "zx-card-cover";
+const coverDiv = document.createElement("div");
+coverDiv.className = "zx-thumb-wrapper";
 
-    if (game.caratula) {
-      const img = document.createElement("img");
-      img.alt = game.displayTitulo || game.titulo;
-      img.loading = "lazy";
-      img.src = game.caratula;
-      coverDiv.appendChild(img);
-    }
+if (game.caratula) {
+  const img = document.createElement("img");
+  img.className = "zx-thumb-img";
+  img.alt = game.displayTitulo || game.titulo;
+  img.loading = "lazy";
+  img.src = game.caratula;
+  coverDiv.appendChild(img);
+}
 
     // Info
     const infoDiv = document.createElement("div");
