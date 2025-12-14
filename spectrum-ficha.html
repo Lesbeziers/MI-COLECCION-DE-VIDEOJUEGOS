@@ -405,6 +405,7 @@ function parseSpectrumCSV(text) {
     const idxZx2a = findColumnIndex(header, ["ZX +2A", "ZX+2A"]);
     const idxTspec = findColumnIndex(header, ["TSPEC"]);
     const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
+    const idxFavorito = findColumnIndex(header, ["FAVORITO"]);
     const idxVideo = findColumnIndex(header, ["VIDEO"]);
     const idxRevistas = findColumnIndex(header, ["REVISTAS"]);
     const idxMapa = findColumnIndex(header, ["MAPA"]);
@@ -459,6 +460,7 @@ function parseSpectrumCSV(text) {
             zx2a: getColumnValue(cols, idxZx2a),
             tspec: getColumnValue(cols, idxTspec),
             terminado: getColumnValue(cols, idxTerminado),
+            favorito: getColumnValue(cols, idxFavorito),
             videoUrl: getColumnValue(cols, idxVideo),
             revistasTexto: getColumnValue(cols, idxRevistas),
             revistas: parseRevistasList(getColumnValue(cols, idxRevistas)),
@@ -493,6 +495,8 @@ function parseListaCSV(text) {
     const idxContr  = header.indexOf("CONTRIBUCIONES");
     const idxGenero = header.indexOf("GENERO_MOSTRAR");
     const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
@@ -517,7 +521,9 @@ function parseListaCSV(text) {
             des:    getColumnValue(cols, idxDes),
             contr:  getColumnValue(cols, idxContr),
             genero: getColumnValue(cols, idxGenero),
-            subgenero: getColumnValue(cols, idxSubgenero)
+            subgenero: getColumnValue(cols, idxSubgenero),
+            terminado: getColumnValue(cols, idxTerminado),
+            favorito:  getColumnValue(cols, idxFavorito)
         });
     }
 
@@ -699,6 +705,20 @@ function updateCover(game) {
        coverImg.src = finalCoverUrl;
     coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
     coverImg.style.display = "block";
+
+    // Añadir estrella si es favorito
+    const isFavorito = (game.favorito || "").trim().toUpperCase() === "SI";
+    const existingStar = wrapper.querySelector(".ficha-favorito-star");
+    
+    if (isFavorito && !existingStar) {
+        const star = document.createElement("img");
+        star.src = "assets/img/ic_favorito.svg";
+        star.alt = "Favorito";
+        star.className = "ficha-favorito-star";
+        wrapper.appendChild(star);
+    } else if (!isFavorito && existingStar) {
+        existingStar.remove();
+    }
 }
 
 function updatePuntuacion(game) {
@@ -1623,6 +1643,12 @@ function attachVoiceStopToNavigation() {
             const qNorm = normalizeText(filterValue);
             filteredGames = games.filter(game => normalizeText(game.subgenero || "").includes(qNorm));
             currentGroupLabel = `Subgénero ${filterValue}`;
+        } else if (filterField === "favorito" && filterValue) {
+            filteredGames = games.filter(game => normalizeText(game.favorito) === "si");
+            currentGroupLabel = "Favoritos";
+        } else if (filterField === "terminado" && filterValue) {
+            filteredGames = games.filter(game => normalizeText(game.terminado) === "si");
+            currentGroupLabel = "Terminados";
         } else if (searchQuery) {
             const qNorm = normalizeText(searchQuery);
             
