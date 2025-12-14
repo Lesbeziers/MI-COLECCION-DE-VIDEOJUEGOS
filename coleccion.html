@@ -261,6 +261,8 @@
         const idxFavorito  = header.indexOf("FAVORITO");
         const idxTerminado = header.indexOf("TERMINADO");
         const idxFormato   = header.indexOf("FORMATO_MOSTRAR");
+        const idxGenero    = header.indexOf("GENERO_MOSTRAR");
+        const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
         const idxFichaPage = header.indexOf("FICHA_PAGE");
         
         for (let i = 1; i < lines.length; i++) {
@@ -283,6 +285,10 @@
             if (idxFormato >= 0 && cols[idxFormato]) {
                 formato = cols[idxFormato].trim();
             }
+
+            // GENERO y SUBGENERO
+            const genero     = (idxGenero >= 0 && cols[idxGenero]) ? cols[idxGenero].trim() : "";
+            const subgenero  = (idxSubgenero >= 0 && cols[idxSubgenero]) ? cols[idxSubgenero].trim() : "";
             
             const fichaPage  = (idxFichaPage >= 0 && cols[idxFichaPage]) ? cols[idxFichaPage].trim() : "";
 
@@ -300,6 +306,8 @@
                 favorito,
                 terminado,
                 formato,
+                genero,
+                subgenero,
                 fichaPage,
                 sortKey: displayTitulo.toLowerCase()
             });
@@ -688,6 +696,8 @@
                 const favoritoNorm   = normalizeText(game.favorito);
                 const terminadoNorm  = normalizeText(game.terminado);
                 const formatoNorm    = normalizeText(game.formato);
+                const generoNorm     = normalizeText(game.genero);
+                const subgeneroNorm  = normalizeText(game.subgenero);
 
                 return (
                     titleNorm.includes(qNorm)      ||
@@ -695,7 +705,9 @@
                     yearNorm.includes(qNorm)       ||
                     favoritoNorm.includes(qNorm)   ||
                     terminadoNorm.includes(qNorm)  ||
-                    formatoNorm.includes(qNorm)
+                    formatoNorm.includes(qNorm)    ||
+                    generoNorm.includes(qNorm)     ||
+                    subgeneroNorm.includes(qNorm)
                 );
             });
 
