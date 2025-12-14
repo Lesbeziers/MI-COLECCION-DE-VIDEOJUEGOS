@@ -263,6 +263,8 @@
         const idxFormato   = header.indexOf("FORMATO_MOSTRAR");
         const idxGenero    = header.indexOf("GENERO_MOSTRAR");
         const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+        const idxPublisher = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
         const idxFichaPage = header.indexOf("FICHA_PAGE");
         
         for (let i = 1; i < lines.length; i++) {
@@ -290,6 +292,10 @@
             const genero     = (idxGenero >= 0 && cols[idxGenero]) ? cols[idxGenero].trim() : "";
             const subgenero  = (idxSubgenero >= 0 && cols[idxSubgenero]) ? cols[idxSubgenero].trim() : "";
             
+            // PUBLISHER y DESARROLLO
+            const publisher  = (idxPublisher >= 0 && cols[idxPublisher]) ? cols[idxPublisher].trim() : "";
+            const desarrollo = (idxDesarrollo >= 0 && cols[idxDesarrollo]) ? cols[idxDesarrollo].trim() : "";
+            
             const fichaPage  = (idxFichaPage >= 0 && cols[idxFichaPage]) ? cols[idxFichaPage].trim() : "";
 
             if (!titulo) continue;
@@ -308,6 +314,8 @@
                 formato,
                 genero,
                 subgenero,
+                publisher,
+                desarrollo,
                 fichaPage,
                 sortKey: displayTitulo.toLowerCase()
             });
@@ -698,6 +706,8 @@
                 const formatoNorm    = normalizeText(game.formato);
                 const generoNorm     = normalizeText(game.genero);
                 const subgeneroNorm  = normalizeText(game.subgenero);
+                const publisherNorm  = normalizeText(game.publisher);
+                const desarrolloNorm = normalizeText(game.desarrollo);
 
                 return (
                     titleNorm.includes(qNorm)      ||
@@ -707,7 +717,9 @@
                     terminadoNorm.includes(qNorm)  ||
                     formatoNorm.includes(qNorm)    ||
                     generoNorm.includes(qNorm)     ||
-                    subgeneroNorm.includes(qNorm)
+                    subgeneroNorm.includes(qNorm)  ||
+                    publisherNorm.includes(qNorm)  ||
+                    desarrolloNorm.includes(qNorm)
                 );
             });
 
