@@ -332,13 +332,25 @@ function fetchIGDB_(igdbPlatformId, titulo, igdbUrl, anioHoja, nombrePlataforma)
       \});\
     \}\
 \
-    var videoUrl = '';\
+var videoUrl = '';\
     if (Array.isArray(game.videos) && game.videos.length > 0) \{\
       game.videos.forEach(function(v) \{\
         if (v && v.video_id && !videoUrl) \{\
           videoUrl = 'https://www.youtube.com/watch?v=' + v.video_id;\
         \}\
       \});\
+    \}\
+\
+    // Rating con fallback: primero critic, luego user, luego juego padre\
+    Logger.log('[IGDB DEBUG] aggregated_rating: ' + game.aggregated_rating + ', rating: ' + game.rating + ', version_parent: ' + game.version_parent);\
+    var ratingValue = null;\
+    if (typeof game.aggregated_rating === 'number' && !isNaN(game.aggregated_rating)) \{\
+      ratingValue = Math.round(game.aggregated_rating);\
+    \} else if (typeof game.rating === 'number' && !isNaN(game.rating)) \{\
+      ratingValue = Math.round(game.rating);\
+\} else \{\
+      Logger.log('[IGDB] Sin rating local, buscando por nombre...');\
+      ratingValue = fetchRatingByName_(game.name);\
     \}\
 \
     return \{\
@@ -355,8 +367,7 @@ function fetchIGDB_(igdbPlatformId, titulo, igdbUrl, anioHoja, nombrePlataforma)
       controlesAnchors: [],\
       versionAnchors: [],\
       distribuidorasAnchors: [],\
-      ratingDisplay: (typeof game.aggregated_rating === 'number' && !isNaN(game.aggregated_rating)) \
-        ? Math.round(game.aggregated_rating) + '/100' : '',\
+ratingDisplay: ratingValue !== null ? ratingValue + '/100' : '',\
       caratula: caratula,\
       screenshots: screenshots,\
       imagenesAdicionales: [],\
@@ -391,8 +402,8 @@ function fetchIGDB_(igdbPlatformId, titulo, igdbUrl, anioHoja, nombrePlataforma)
   \}\
 \
   try \{\
-    var fieldsBlock =\
-      'fields name, slug, first_release_date, aggregated_rating, ' +\
+var fieldsBlock =\
+      'fields name, slug, first_release_date, aggregated_rating, rating, version_parent, ' +\
       'genres.name, themes.name, game_modes.name, ' +\
       'involved_companies.company.name, involved_companies.developer, involved_companies.publisher, ' +\
       'cover.image_id, screenshots.image_id, videos.video_id, summary, storyline, platforms;';\
@@ -468,7 +479,7 @@ function fetchIGDB_(igdbPlatformId, titulo, igdbUrl, anioHoja, nombrePlataforma)
       \});\
     \}\
 \
-    Logger.log('[IGDB] Seleccionado: ' + candidates[0].name);\
+    Logger.log('[IGDB] Seleccionado: ' + candidates[0].name + ' (ID: ' + candidates[0].id + ')');\
     return gameToResult_(candidates[0]);\
 \
   \} catch (e) \{\
@@ -3627,6 +3638,40 @@ function fetchPS3_fromIGDB_(titulo, link, anioHoja) \{\
   /**\
    * Ejecuta una query a IGDB y devuelve los resultados\
    */\
+function fetchRatingByName_(gameName) \{\
+    if (!gameName) return null;\
+    var query = 'fields name, aggregated_rating, rating; search "' + gameName.replace(/"/g, '\\\\"') + '"; where aggregated_rating != null | rating != null; limit 5;';\
+    var endpoint = 'https://api.igdb.com/v4/games';\
+    var options = \{\
+      method: 'post',\
+      headers: \{\
+        'Client-ID': IGDB_CLIENT_ID,\
+        'Authorization': 'Bearer ' + IGDB_ACCESS_TOKEN,\
+        'Content-Type': 'text/plain'\
+      \},\
+      payload: query,\
+      muteHttpExceptions: true\
+    \};\
+    try \{\
+      var response = UrlFetchApp.fetch(endpoint, options);\
+      if (response.getResponseCode() !== 200) return null;\
+      var results = JSON.parse(response.getContentText());\
+      if (Array.isArray(results) && results.length > 0) \{\
+        for (var i = 0; i < results.length; i++) \{\
+          var g = results[i];\
+          Logger.log('[IGDB] Fallback rating encontrado en "' + g.name + '": aggregated=' + g.aggregated_rating + ', user=' + g.rating);\
+          if (typeof g.aggregated_rating === 'number' && !isNaN(g.aggregated_rating)) \{\
+            return Math.round(g.aggregated_rating);\
+          \} else if (typeof g.rating === 'number' && !isNaN(g.rating)) \{\
+            return Math.round(g.rating);\
+          \}\
+        \}\
+      \}\
+    \} catch (e) \{\
+      Logger.log('[IGDB] Error buscando rating por nombre: ' + e);\
+    \}\
+    return null;\
+  \}\
   function executeIgdbQuery_(query) \{\
     var endpoint = 'https://api.igdb.com/v4/games';\
     var options = \{\
