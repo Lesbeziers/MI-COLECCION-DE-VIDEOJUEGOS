@@ -167,7 +167,7 @@
     // CONFIGURACIÓN DE PLATAFORMAS IGDB
     // ============================================
     const PLATFORM_CONFIG = {
-      PS2: {
+PS2: {
   name: "PLAYSTATION 2",
   shortName: "PS2",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1412360946&single=true&output=csv",
@@ -177,16 +177,16 @@
   formatoCol: "PS2_TIPO_FORMATO",
   ubicacionCol: "PS2_UBICACION"
 },
-      PS3: {
-        name: "PlayStation 3",
-        shortName: "PS3",
-        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=511776549&single=true&output=csv",
-        listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1642803365&single=true&output=csv",
-        listaPage: "igdb-lista.html",
-        fichaPage: "igdb-ficha.html",
-        formatoCol: "PS3_TIPO_FORMATO",
-        ubicacionCol: "PS3_UBICACION"
-      },
+PS3: {
+  name: "PlayStation 3",
+  shortName: "PS3",
+  csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=511776549&single=true&output=csv",
+  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1642803365&single=true&output=csv",
+  listaPage: "igdb-lista.html",
+  fichaPage: "igdb-ficha.html",
+  formatoCol: "PS3_TIPO_FORMATO",
+  ubicacionCol: "PS3_UBICACION"
+  },
 SWITCH: {
   name: "Nintendo Switch",
   shortName: "SWITCH",
@@ -197,17 +197,27 @@ SWITCH: {
   formatoCol: "SWITCH_TIPO_FORMATO",
   ubicacionCol: "SWITCH_UBICACION"
 },
+SATURN: {
+  name: "SEGA SATURN",
+  shortName: "Saturn",
+  csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1892216742&single=true&output=csv",
+  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=183417442&single=true&output=csv",
+  listaPage: "igdb-lista.html",
+  fichaPage: "igdb-ficha.html",
+  formatoCol: "SATURN_TIPO_FORMATO",
+  ubicacionCol: "SATURN_UBICACION"
+},
 PS4: {
-      name: "PlayStation 4",
-      shortName: "PS4",
-      csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=555080380&single=true&output=csv",
-      listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1208428399&single=true&output=csv",
-      listaPage: "igdb-lista.html",
-      fichaPage: "igdb-ficha.html",
-      formatoCol: "PS4_TIPO_FORMATO",
-      ubicacionCol: "PS4_UBICACION"
-    }
-    };
+  name: "PlayStation 4",
+  shortName: "PS4",
+  csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=555080380&single=true&output=csv",
+  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1208428399&single=true&output=csv",
+  listaPage: "igdb-lista.html",
+  fichaPage: "igdb-ficha.html",
+  formatoCol: "PS4_TIPO_FORMATO",
+  ubicacionCol: "PS4_UBICACION"
+}
+};
 
     // Obtener plataforma de la URL
     function getPlatformFromUrl() {
