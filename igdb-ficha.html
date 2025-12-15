@@ -219,6 +219,9 @@ PS4: {
 }
 };
 
+    // URL del CSV de colección completa (para navegación desde coleccion.html)
+    const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
+
     // Obtener plataforma de la URL
     function getPlatformFromUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -510,6 +513,99 @@ function parseListaCSV(text) {
     }
 
     return rows;
+}
+
+// ============================================
+// PARSER CSV - COLECCIÓN (para navegación desde coleccion.html)
+// ============================================
+function parseColeccionCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentField = "";
+    let inQuotes = false;
+
+    // Parser robusto que soporta saltos de línea dentro de comillas
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (ch === '"') {
+            if (inQuotes && text[i + 1] === '"') {
+                currentField += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === "," && !inQuotes) {
+            currentRow.push(currentField.trim());
+            currentField = "";
+        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+            if (ch === "\r" && text[i + 1] === "\n") {
+                i++;
+            }
+            currentRow.push(currentField.trim());
+            if (currentRow.some(v => v !== "")) {
+                rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = "";
+        } else {
+            currentField += ch;
+        }
+    }
+
+    if (currentField.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(v => v !== "")) {
+            rows.push(currentRow);
+        }
+    }
+
+    if (rows.length === 0) return [];
+
+    const header = rows[0];
+    const games = [];
+
+    const idxID = header.indexOf("ID");
+    const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+    const idxPlataforma = header.indexOf("PLATAFORMA");
+    const idxAnio = header.indexOf("AÑO_MOSTRAR");
+    const idxFavorito = header.indexOf("FAVORITO");
+    const idxTerminado = header.indexOf("TERMINADO");
+    const idxFormato = header.indexOf("FORMATO_MOSTRAR");
+    const idxGenero = header.indexOf("GENERO_MOSTRAR");
+    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    const idxPublisher = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
+    const idxFichaPage = header.indexOf("FICHA_PAGE");
+
+    for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i];
+        const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
+        const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
+
+        if (!titulo) continue;
+
+        const displayTitulo = formatTitleWithArticle(titulo);
+
+        games.push({
+            id,
+            titulo,
+            displayTitulo,
+            sortKey: displayTitulo.toLowerCase(),
+            plataforma: idxPlataforma >= 0 && cols[idxPlataforma] ? cols[idxPlataforma].trim() : "",
+            anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
+            favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
+            terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : "",
+            formato: idxFormato >= 0 && cols[idxFormato] ? cols[idxFormato].trim() : "",
+            genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
+            subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
+            pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
+            desarrollo: idxDesarrollo >= 0 && cols[idxDesarrollo] ? cols[idxDesarrollo].trim() : "",
+            fichaPage: idxFichaPage >= 0 && cols[idxFichaPage] ? cols[idxFichaPage].trim() : ""
+        });
+    }
+
+    return games;
 }
 
     // ============================================
@@ -1385,6 +1481,17 @@ function updateImagenesAdicionales(game) {
 
     // Si viene de colección, mostrar etiqueta especial
     if (fromColeccion) {
+        if (searchQuery) {
+            const qNorm = normalizeText(searchQuery);
+            const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+            if (singleCharMatch) {
+                return `Letra ${searchQuery.toUpperCase()}`;
+            }
+            if (qNorm === "fav") return "Favoritos";
+            if (qNorm === "terminado") return "Terminados";
+            if (qNorm === "fisico") return "Formato Físico";
+            return `"${searchQuery}"`;
+        }
         return "Mi Colección";
     }
 
@@ -1469,7 +1576,9 @@ function attachVoiceStopToNavigation() {
                 sessionStorage.setItem("navCounter", counterText);
                 
                 const prevGame = sortedGamesList[currentGameIndex - 1];
-                let url = `igdb-ficha.html?platform=${CURRENT_PLATFORM}&id=${encodeURIComponent(prevGame.id)}`;
+                // Determinar la plataforma del juego anterior
+                const targetPlatform = prevGame.plataforma || CURRENT_PLATFORM;
+                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(prevGame.id)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
@@ -1501,7 +1610,9 @@ function attachVoiceStopToNavigation() {
                 sessionStorage.setItem("navCounter", counterText);
                 
                 const nextGame = sortedGamesList[currentGameIndex + 1];
-                let url = `igdb-ficha.html?platform=${CURRENT_PLATFORM}&id=${encodeURIComponent(nextGame.id)}`;
+                // Determinar la plataforma del juego siguiente
+                const targetPlatform = nextGame.plataforma || CURRENT_PLATFORM;
+                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(nextGame.id)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
@@ -1523,24 +1634,91 @@ function attachVoiceStopToNavigation() {
 
     async function loadGamesList(gameId) {
     try {
-        const response = await fetch(PS3_LISTA_CSV_URL);
+        const fromColeccion = getQueryParam("from") === "coleccion";
+        const searchQuery = getQueryParam("search");
+        const filterField = (getQueryParam("filterField") || "").toLowerCase();
+        const filterValue = (getQueryParam("filterValue") || "").trim();
+
+        // Elegir qué CSV cargar según el origen
+        const csvUrl = fromColeccion ? COLECCION_CSV_URL : PS3_LISTA_CSV_URL;
+
+        const response = await fetch(csvUrl);
         if (!response.ok) {
             throw new Error("No se pudo cargar la lista");
         }
 
         const text = await response.text();
-        const games = parseListaCSV(text);
+
+        // Parsear según el origen
+        let games;
+        if (fromColeccion) {
+            games = parseColeccionCSV(text);
+        } else {
+            games = parseListaCSV(text);
+        }
 
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
-
-        const searchQuery = getQueryParam("search");
-        const filterField = (getQueryParam("filterField") || "").toLowerCase();
-        const filterValue = (getQueryParam("filterValue") || "").trim();
 
         let filteredGames = games;
         currentGroupLabel = "";
 
-        if (filterField === "subgenero" && filterValue) {
+        if (fromColeccion) {
+            currentGroupLabel = "Mi Colección";
+
+            // Aplicar filtros de búsqueda si existen
+            if (searchQuery) {
+                const qNorm = normalizeText(searchQuery);
+                const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
+
+                if (singleCharMatch) {
+                    const char = normalizeText(singleCharMatch[1]);
+                    filteredGames = games.filter(game => {
+                        const titleNorm = normalizeText(game.sortKey || "");
+                        return titleNorm.startsWith(char);
+                    });
+                    currentGroupLabel = `Letra ${searchQuery.toUpperCase()}`;
+                } else if (qNorm === "fav") {
+                    filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+                    currentGroupLabel = "Favoritos";
+                } else if (qNorm === "terminado") {
+                    filteredGames = games.filter(game => normalizeText(game.terminado || "") === "si");
+                    currentGroupLabel = "Terminados";
+                } else if (qNorm === "fisico") {
+                    filteredGames = games.filter(game => normalizeText(game.formato || "").includes("fisico"));
+                    currentGroupLabel = "Formato Físico";
+                } else {
+                    // Verificar si es un filtro de plataforma
+                    const platformKeys = Object.keys(PLATFORM_CONFIG).map(k => k.toLowerCase());
+                    if (platformKeys.includes(qNorm)) {
+                        filteredGames = games.filter(game => 
+                            normalizeText(game.plataforma || "") === qNorm
+                        );
+                        currentGroupLabel = qNorm.toUpperCase();
+                    } else {
+                        filteredGames = games.filter(game => {
+                            const titleNorm = normalizeText(game.sortKey || "");
+                            const plataformaNorm = normalizeText(game.plataforma || "");
+                            const pubNorm = normalizeText(game.pub || "");
+                            const yearNorm = normalizeText(game.anio || "");
+                            const generoNorm = normalizeText(game.genero || "");
+                            const subgeneroNorm = normalizeText(game.subgenero || "");
+                            const desarrolloNorm = normalizeText(game.desarrollo || "");
+
+                            return (
+                                titleNorm.includes(qNorm) ||
+                                plataformaNorm.includes(qNorm) ||
+                                pubNorm.includes(qNorm) ||
+                                yearNorm.includes(qNorm) ||
+                                generoNorm.includes(qNorm) ||
+                                subgeneroNorm.includes(qNorm) ||
+                                desarrolloNorm.includes(qNorm)
+                            );
+                        });
+                        currentGroupLabel = `"${searchQuery}"`;
+                    }
+                }
+            }
+        } else if (filterField === "subgenero" && filterValue) {
             const qNorm = normalizeText(filterValue);
             filteredGames = games.filter(game => normalizeText(game.subgenero || "").includes(qNorm));
             currentGroupLabel = `Subgénero ${filterValue}`;
@@ -1759,9 +1937,11 @@ function setupSwipeNavigation() {
         if (Math.abs(distanceY) > Math.abs(distanceX) * maxVerticalRatio) return;
 
         if (distanceX < 0) {
+            // Swipe izquierda -> siguiente
             if (currentGameIndex < sortedGamesList.length - 1) {
                 const nextGame = sortedGamesList[currentGameIndex + 1];
-                let url = `igdb-ficha.html?platform=${CURRENT_PLATFORM}&id=${encodeURIComponent(nextGame.id)}`;
+                const targetPlatform = nextGame.plataforma || CURRENT_PLATFORM;
+                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(nextGame.id)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
@@ -1778,9 +1958,11 @@ function setupSwipeNavigation() {
                 window.location.href = url;
             }
         } else {
+            // Swipe derecha -> anterior
             if (currentGameIndex > 0) {
                 const prevGame = sortedGamesList[currentGameIndex - 1];
-                let url = `igdb-ficha.html?platform=${CURRENT_PLATFORM}&id=${encodeURIComponent(prevGame.id)}`;
+                const targetPlatform = prevGame.plataforma || CURRENT_PLATFORM;
+                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(prevGame.id)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
