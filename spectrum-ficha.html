@@ -1582,6 +1582,47 @@ function updateRevistas(game) {
     return "Juegos ZX Spectrum";
 }
 
+function getFichaPageForPlatform(platform) {
+    const normalized = (platform || "").toString().trim().toUpperCase();
+
+    if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZX SPECTRUM") {
+        return "spectrum-ficha.html";
+    }
+
+    return "igdb-ficha.html";
+}
+
+function buildNavigationUrl(targetPlatform, targetId) {
+    const page = getFichaPageForPlatform(targetPlatform || "SPECTRUM");
+    const params = new URLSearchParams();
+
+    if (page === "igdb-ficha.html") {
+        params.set("platform", targetPlatform || "SPECTRUM");
+    }
+
+    params.set("id", targetId);
+
+    const searchQuery = getQueryParam("search");
+    const filterField = getQueryParam("filterField");
+    const filterValue = getQueryParam("filterValue");
+    const fromColeccion = getQueryParam("from");
+
+    if (searchQuery) {
+        params.set("search", searchQuery);
+    }
+    if (filterField) {
+        params.set("filterField", filterField);
+    }
+    if (filterValue) {
+        params.set("filterValue", filterValue);
+    }
+    if (fromColeccion) {
+        params.set("from", fromColeccion);
+    }
+
+    return `${page}?${params.toString()}`;
+}
+
     // CORREGIDO: updateNavCounter con contexto y fallback
     function updateNavCounter() {
         const counterEl = document.querySelector(".game-nav-counter");
@@ -1638,11 +1679,6 @@ function attachVoiceStopToNavigation() {
     const prevArrow = document.querySelector(".game-nav-arrow--prev");
     const nextArrow = document.querySelector(".game-nav-arrow--next");
     const counterEl = document.querySelector(".game-nav-counter");
-    
-    const searchQuery = getQueryParam("search");
-    const filterField = getQueryParam("filterField");
-    const filterValue = getQueryParam("filterValue");
-    const fromColeccion = getQueryParam("from");
 
     if (prevArrow) {
         prevArrow.addEventListener("click", () => {
@@ -1655,21 +1691,8 @@ function attachVoiceStopToNavigation() {
                     counterEl.textContent = counterText;
                 }
                 sessionStorage.setItem("navCounter", counterText);
-                
                 const prevGame = sortedGamesList[currentGameIndex - 1];
-                let url = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(prevGame.plataforma, prevGame.id);
                 window.location.href = url;
             }
         });
@@ -1687,21 +1710,8 @@ function attachVoiceStopToNavigation() {
                     counterEl.textContent = counterText;
                 }
                 sessionStorage.setItem("navCounter", counterText);
-                
                 const nextGame = sortedGamesList[currentGameIndex + 1];
-                let url = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(nextGame.plataforma, nextGame.id);
                 window.location.href = url;
             }
         });
@@ -2068,19 +2078,7 @@ function setupSwipeNavigation() {
             // Swipe izquierda -> siguiente
             if (currentGameIndex < sortedGamesList.length - 1) {
                 const nextGame = sortedGamesList[currentGameIndex + 1];
-                let url = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(nextGame.plataforma, nextGame.id);
                 stopSynopsisVoice();
                 window.location.href = url;
             }
@@ -2088,19 +2086,7 @@ function setupSwipeNavigation() {
             // Swipe derecha -> anterior
             if (currentGameIndex > 0) {
                 const prevGame = sortedGamesList[currentGameIndex - 1];
-                let url = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(prevGame.plataforma, prevGame.id);
                 stopSynopsisVoice();
                 window.location.href = url;
             }
