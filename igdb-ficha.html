@@ -487,15 +487,11 @@ function parsePS3CSV(text) {
     if (!lines.length) return [];
 
     const header = parseCSVLine(lines[0]);
-    console.log("[DEBUG] Columnas del CSV:", header);
-    console.log("[DEBUG] Primera columna raw:", JSON.stringify(header[0]));
-    console.log("[DEBUG] Charcode primera columna:", header[0] ? [...header[0]].map(c => c.charCodeAt(0)) : []);
     const expectedCols = header.length;
     const rows = [];
 
     // Índices de columnas
     const idxID = header.indexOf("ID");
-    console.log("[DEBUG] Índice de columna ID:", idxID);
     const idxTitulo = findColumnIndex(header, ["TITULO", "TÍTULO"]);
     const idxAnio = findColumnIndex(header, ["AÑO", "ANO"]);
     const idxPublisher = header.indexOf("PUBLISHER");
@@ -560,12 +556,6 @@ function parsePS3CSV(text) {
             terminado: getColumnValue(cols, idxTerminado),
             videoUrl: getColumnValue(cols, idxVideo)
         });
-        
-        // Log primera fila para debug
-        if (rows.length === 1) {
-            console.log("[DEBUG] Primera fila parseada:", rows[0]);
-            console.log("[DEBUG] Columna 0 raw de primera fila:", cols[0]);
-        }
     }
 
     return rows;
@@ -1787,32 +1777,22 @@ function attachVoiceStopToNavigation() {
             }
         } else {
             // Si allGamesData está vacío (caso de ficha cacheada), cargar CSV
-            console.log(`[DEBUG] No viene de colección. allGamesData.length: ${allGamesData ? allGamesData.length : 'null'}`);
-            
             if (!allGamesData || allGamesData.length === 0) {
                 const cacheKey = `ficha_${CURRENT_PLATFORM}_${CACHE_VERSION}`;
-                console.log(`[DEBUG] allGamesData vacío, buscando en caché: ${cacheKey}`);
                 allGamesData = getCachedData(cacheKey);
-                console.log(`[DEBUG] Resultado de caché: ${allGamesData ? allGamesData.length + ' juegos' : 'null'}`);
                 
                 if (!allGamesData) {
-                    console.log(`[DEBUG] Descargando CSV: ${CONFIG.csvUrl}`);
                     const response = await fetch(CONFIG.csvUrl);
                     if (!response.ok) throw new Error("No se pudo cargar el CSV");
                     
                     const text = await response.text();
                     allGamesData = parsePS3CSV(text);
-                    console.log(`[DEBUG] CSV parseado: ${allGamesData.length} juegos`);
                     setCachedData(cacheKey, allGamesData);
                 }
             }
             
             // REUTILIZAR datos ya cargados - NO DESCARGA NADA
-            console.log("[DEBUG] allGamesData[0] ANTES de map:", allGamesData[0]);
-            console.log("[DEBUG] allGamesData[0].id:", allGamesData[0]?.id);
-            games = allGamesData
-                .filter(g => g.id && g.titulo) // Filtrar filas vacías
-                .map(g => ({
+            games = allGamesData.map(g => ({
                 id: g.id,
                 titulo: g.titulo,
                 displayTitulo: formatTitleWithArticle(g.titulo),
@@ -1826,17 +1806,12 @@ function attachVoiceStopToNavigation() {
                 terminado: g.terminado,
                 desarrollo: g.desarrollo
             }));
-            console.log("[DEBUG] games[0] DESPUÉS de map:", games[0]);
-            console.log("[DEBUG] games[0].id DESPUÉS de map:", games[0]?.id);
         }
 
         // Filtrar filas vacías antes de ordenar
         games = games.filter(g => g.id && g.titulo);
         
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
-        
-        console.log("[DEBUG] games[0] DESPUÉS de sort:", games[0]);
-        console.log("[DEBUG] games[0].id DESPUÉS de sort:", games[0]?.id);
 
         let filteredGames = games;
         currentGroupLabel = "";
@@ -1944,21 +1919,7 @@ function attachVoiceStopToNavigation() {
         }
 
         sortedGamesList = filteredGames;
-        
-        // DEBUG: Verificar búsqueda del ID
-        console.log(`[DEBUG] Buscando gameId: "${gameId}" (tipo: ${typeof gameId})`);
-        console.log(`[DEBUG] Total juegos en filteredGames: ${filteredGames.length}`);
-        console.log(`[DEBUG] filteredGames[0]:`, filteredGames[0]);
-        console.log(`[DEBUG] filteredGames[0].id:`, filteredGames[0]?.id);
-        if (filteredGames.length > 0) {
-            console.log(`[DEBUG] Primer ID en lista: "${filteredGames[0].id}" (tipo: ${typeof filteredGames[0].id})`);
-            console.log(`[DEBUG] Primeros 5 IDs:`, filteredGames.slice(0, 5).map(g => g.id));
-        }
-        
         currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
-        
-        console.log(`[DEBUG] currentGameIndex encontrado: ${currentGameIndex}`);
-        
         updateNavCounter();
         setupNavigation();
 
@@ -2028,7 +1989,6 @@ function attachVoiceStopToNavigation() {
             }
 
             // PASO 3: Cargar lista para navegación
-            console.log(`[DEBUG] Antes de loadGamesList - allGamesData.length: ${allGamesData.length}`);
             await loadGamesList(gameId);
             
             // PASO 4: Prefetch de fichas adyacentes (en background)
