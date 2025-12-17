@@ -419,7 +419,6 @@ function parseSpectrumCSV(text) {
     if (!lines.length) return [];
 
     const header = parseCSVLine(lines[0]);
-    console.log("Columnas del CSV:", header);
     const expectedCols = header.length;
     const rows = [];
 
@@ -1498,8 +1497,6 @@ function updateRevistas(game) {
             const prevIndex = currentGameIndex - 1;
             const nextIndex = currentGameIndex + 1;
             
-            console.log(`[Prefetch] Precargando fichas adyacentes...`);
-            
             if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
                 const prevGame = sortedGamesList[prevIndex];
                 prefetchGameData(prevGame.id);
@@ -1515,7 +1512,6 @@ function updateRevistas(game) {
     async function prefetchGameData(gameId) {
         const cached = getCachedFicha(gameId);
         if (cached) {
-            console.log(`[Prefetch] Ficha ${gameId} ya en caché ✓`);
             return;
         }
         
@@ -1535,7 +1531,6 @@ function updateRevistas(game) {
             const game = games.find(row => row.id === gameId);
             if (game) {
                 setCachedFicha(gameId, game);
-                console.log(`[Prefetch] Ficha ${gameId} precargada ✓`);
             }
             
         } catch (err) {
@@ -1587,23 +1582,36 @@ function updateRevistas(game) {
     return "Juegos ZX Spectrum";
 }
 
+    // CORREGIDO: updateNavCounter con contexto y fallback
     function updateNavCounter() {
-    const counterEl = document.querySelector(".game-nav-counter");
-    const titleEl = document.querySelector(".game-nav-title");
-    
-    if (counterEl && currentGameIndex >= 0) {
-        const position = currentGameIndex + 1;
-        const total = sortedGamesList.length;
-        const counterText = `${position.toLocaleString("es-ES")}/${total.toLocaleString("es-ES")}`;
-        counterEl.textContent = counterText;
-        sessionStorage.setItem("navCounter", counterText);
+        const counterEl = document.querySelector(".game-nav-counter");
+        const titleEl = document.querySelector(".game-nav-title");
+        
+        if (counterEl && currentGameIndex >= 0) {
+            const position = currentGameIndex + 1;
+            const total = sortedGamesList.length;
+            const counterText = `${position.toLocaleString("es-ES")}/${total.toLocaleString("es-ES")}`;
+            counterEl.textContent = counterText;
+            sessionStorage.setItem("navCounter", counterText);
+            
+            // Actualizar contexto de navegación
+            const fromColeccion = getQueryParam("from") === "coleccion";
+            const searchQuery = getQueryParam("search") || "";
+            const filterField = getQueryParam("filterField") || "";
+            const navContextKey = fromColeccion 
+                ? `coleccion_${searchQuery}_${filterField}`
+                : `spectrum_${searchQuery}_${filterField}`;
+            sessionStorage.setItem("navContext", navContextKey);
+        } else if (counterEl) {
+            // Si no encuentra el juego, mostrar placeholder
+            counterEl.textContent = "- / -";
+        }
+        
+        if (titleEl) {
+            const label = currentGroupLabel || computeGroupLabel();
+            titleEl.textContent = label;
+        }
     }
-    
-    if (titleEl) {
-        const label = currentGroupLabel || computeGroupLabel();
-        titleEl.textContent = label;
-    }
-}
 
 function attachVoiceStopToNavigation() {
     const navSelectors = [
@@ -1760,6 +1768,9 @@ function attachVoiceStopToNavigation() {
             }));
         }
 
+        // CORREGIDO: Filtrar filas vacías antes de ordenar
+        games = games.filter(g => g.id && g.titulo);
+        
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
 
         let filteredGames = games;
@@ -1892,7 +1903,6 @@ function attachVoiceStopToNavigation() {
                     const text = await response.text();
                     games = parseSpectrumCSV(text);
                     setCachedData(cacheKey, games);
-                    console.log(`[Caché] CSV Spectrum guardado en caché`);
                 }
                 
                 allGamesData = games;
@@ -1932,28 +1942,43 @@ function attachVoiceStopToNavigation() {
     }
 
     // ============================================
-    // INICIALIZACIÓN
+    // INICIALIZACIÓN - CORREGIDO con contexto
     // ============================================
     
     document.addEventListener("DOMContentLoaded", () => {
-    const titleEl = document.querySelector(".game-nav-title");
-    if (titleEl) {
-        titleEl.textContent = computeGroupLabel();
-    }
-
-    const savedCounter = sessionStorage.getItem("navCounter");
-    if (savedCounter) {
-        const counterEl = document.querySelector(".game-nav-counter");
-        if (counterEl) {
-            counterEl.textContent = savedCounter;
+        const titleEl = document.querySelector(".game-nav-title");
+        if (titleEl) {
+            titleEl.textContent = computeGroupLabel();
         }
-    }
-    
-    loadSpectrumFicha();
-    setupCoverModal();
-    setupSwipeNavigation();
-    attachVoiceStopToNavigation();
-});
+
+        // Construir clave de contexto para el contador
+        const fromColeccion = getQueryParam("from") === "coleccion";
+        const searchQuery = getQueryParam("search") || "";
+        const filterField = getQueryParam("filterField") || "";
+        const navContextKey = fromColeccion 
+            ? `coleccion_${searchQuery}_${filterField}`
+            : `spectrum_${searchQuery}_${filterField}`;
+        
+        // Solo restaurar contador si el contexto coincide
+        const savedContext = sessionStorage.getItem("navContext");
+        const savedCounter = sessionStorage.getItem("navCounter");
+        
+        if (savedCounter && savedContext === navContextKey) {
+            const counterEl = document.querySelector(".game-nav-counter");
+            if (counterEl) {
+                counterEl.textContent = savedCounter;
+            }
+        }
+        
+        // Guardar el contexto actual
+        sessionStorage.setItem("navContext", navContextKey);
+        
+        loadSpectrumFicha();
+        setupCoverModal();
+        setupSwipeNavigation();
+        attachVoiceStopToNavigation();
+    });
+
        // ============================================
 // MODAL CARÁTULA
 // ============================================
