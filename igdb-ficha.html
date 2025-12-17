@@ -1820,9 +1820,13 @@ function attachVoiceStopToNavigation() {
                 desarrollo: g.desarrollo
             }));
             console.log("[DEBUG] games[0] DESPUÉS de map:", games[0]);
+            console.log("[DEBUG] games[0].id DESPUÉS de map:", games[0]?.id);
         }
 
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+        
+        console.log("[DEBUG] games[0] DESPUÉS de sort:", games[0]);
+        console.log("[DEBUG] games[0].id DESPUÉS de sort:", games[0]?.id);
 
         let filteredGames = games;
         currentGroupLabel = "";
@@ -1934,6 +1938,8 @@ function attachVoiceStopToNavigation() {
         // DEBUG: Verificar búsqueda del ID
         console.log(`[DEBUG] Buscando gameId: "${gameId}" (tipo: ${typeof gameId})`);
         console.log(`[DEBUG] Total juegos en filteredGames: ${filteredGames.length}`);
+        console.log(`[DEBUG] filteredGames[0]:`, filteredGames[0]);
+        console.log(`[DEBUG] filteredGames[0].id:`, filteredGames[0]?.id);
         if (filteredGames.length > 0) {
             console.log(`[DEBUG] Primer ID en lista: "${filteredGames[0].id}" (tipo: ${typeof filteredGames[0].id})`);
             console.log(`[DEBUG] Primeros 5 IDs:`, filteredGames.slice(0, 5).map(g => g.id));
