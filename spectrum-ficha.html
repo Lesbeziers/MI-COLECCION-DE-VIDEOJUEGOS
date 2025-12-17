@@ -1874,7 +1874,7 @@ function attachVoiceStopToNavigation() {
 
         sortedGamesList = filteredGames;
 
-        const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || CURRENT_PLATFORM);
+        const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || "spectrum");
         if (fromColeccion) {
             currentGameIndex = filteredGames.findIndex(g =>
                 normalizeText(g.plataforma || "") === normalizedCurrentPlatform && g.id === gameId
