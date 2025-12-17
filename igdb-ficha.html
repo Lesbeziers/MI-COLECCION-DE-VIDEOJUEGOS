@@ -1929,7 +1929,15 @@ function attachVoiceStopToNavigation() {
         }
 
         sortedGamesList = filteredGames;
-        currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
+
+        const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || CURRENT_PLATFORM);
+        if (fromColeccion) {
+            currentGameIndex = filteredGames.findIndex(g =>
+                normalizeText(g.plataforma || "") === normalizedCurrentPlatform && g.id === gameId
+            );
+        } else {
+            currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
+        }
         updateNavCounter();
         setupNavigation();
 
