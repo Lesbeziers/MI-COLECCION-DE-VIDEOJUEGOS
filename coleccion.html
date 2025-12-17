@@ -151,13 +151,19 @@
     const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
 
     // Mapeo de plataformas a sus páginas de ficha
-    const PLATFORM_FICHA_CONFIG = {
-        "PS3": { page: "igdb-ficha.html", platform: "PS3" },
-        "PS4": { page: "igdb-ficha.html", platform: "PS4" },
-        "SWITCH": { page: "igdb-ficha.html", platform: "SWITCH" },
-        "SPECTRUM": { page: "spectrum-ficha.html", platform: null }
-        // Añadir más plataformas aquí
-    };
+const PLATFORM_FICHA_CONFIG = {
+    "PS3": { page: "igdb-ficha.html", platform: "PS3" },
+    "PS4": { page: "igdb-ficha.html", platform: "PS4" },
+    "SWITCH": { page: "igdb-ficha.html", platform: "SWITCH" },
+    "SPECTRUM": { page: "spectrum-ficha.html", platform: "SPECTRUM" },  // ← CAMBIO AQUÍ
+    "PS2": { page: "igdb-ficha.html", platform: "PS2" },
+    "SATURN": { page: "igdb-ficha.html", platform: "SATURN" },
+    "NES": { page: "igdb-ficha.html", platform: "NES" },
+    "SNES": { page: "igdb-ficha.html", platform: "SNES" },
+    "N64": { page: "igdb-ficha.html", platform: "N64" },
+    "PSX": { page: "igdb-ficha.html", platform: "PSX" }
+    // Añadir más plataformas aquí
+};
 
     // Lista global con TODOS los juegos
     let allGames = [];
@@ -444,25 +450,20 @@
     // =========================================
     // OBTENER URL DE FICHA PARA UN JUEGO
     // =========================================
-    function getFichaUrl(game) {
-        const config = PLATFORM_FICHA_CONFIG[game.plataforma];
-        
-        if (!config) {
-            // Fallback: usar igdb-ficha.html con la plataforma
-            return `igdb-ficha.html?platform=${encodeURIComponent(game.plataforma)}&id=${encodeURIComponent(game.id)}`;
-        }
-
-        // Si la ficha tiene page específica en el CSV, usarla
-        const page = game.fichaPage || config.page;
-
-        if (config.platform) {
-            // Plataformas IGDB (PS3, PS4, SWITCH)
-            return `${page}?platform=${config.platform}&id=${encodeURIComponent(game.id)}`;
-        } else {
-            // Spectrum u otras sin parámetro platform
-            return `${page}?id=${encodeURIComponent(game.id)}`;
-        }
+function getFichaUrl(game) {
+    const config = PLATFORM_FICHA_CONFIG[game.plataforma];
+    
+    if (!config) {
+        // Fallback: usar igdb-ficha.html con la plataforma
+        return `igdb-ficha.html?platform=${encodeURIComponent(game.plataforma)}&id=${encodeURIComponent(game.id)}`;
     }
+
+    // Si la ficha tiene page específica en el CSV, usarla
+    const page = game.fichaPage || config.page;
+
+    // TODAS las plataformas llevan parámetro platform
+    return `${page}?platform=${config.platform}&id=${encodeURIComponent(game.id)}`;
+}
 
     // =========================================
     // SCROLL AL INICIO
