@@ -176,13 +176,66 @@
 
    <script>
     // ============================================
+    // CONFIGURACIÓN DE CACHÉ Y PREFETCHING
+    // ============================================
+    const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+    const CACHE_VERSION = "v1";
+    const PREFETCH_DELAY = 2000; // 2 segundos
+
+    // ============================================
+    // FUNCIONES DE CACHÉ
+    // ============================================
+    
+    function getCachedData(key) {
+        try {
+            const cached = sessionStorage.getItem(key);
+            if (!cached) return null;
+            
+            const data = JSON.parse(cached);
+            const now = Date.now();
+            
+            if (now - data.timestamp > CACHE_DURATION) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+            
+            return data.value;
+        } catch {
+            return null;
+        }
+    }
+
+    function setCachedData(key, value) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify({
+                timestamp: Date.now(),
+                version: CACHE_VERSION,
+                value: value
+            }));
+        } catch (e) {
+            console.warn("No se pudo guardar en caché:", e);
+        }
+    }
+
+    // Caché de fichas individuales
+    function getCachedFicha(gameId) {
+        const key = `ficha_spectrum_${gameId}`;
+        return getCachedData(key);
+    }
+
+    function setCachedFicha(gameId, gameData) {
+        const key = `ficha_spectrum_${gameId}`;
+        setCachedData(key, gameData);
+    }
+
+    // ============================================
     // CONFIGURACIÓN
     // ============================================
     const ZX_SPECTRUM_CSV_URL = 
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
 
-    const ZX_LISTA_CSV_URL = 
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
+    // URL del CSV de colección completa (para navegación desde coleccion.html)
+    const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
 
     // Lista ordenada de juegos para navegación
     let sortedGamesList = [];
@@ -194,6 +247,9 @@
     let additionalImagesKeydownBound = false;
     let modalAbierta = false;
     let currentGroupLabel = "";
+
+    // Variable global para compartir datos
+    let allGamesData = [];
 
     // Función para volver a la lista
     function goBackToList() {
@@ -292,25 +348,19 @@ function parseCSV(text) {
 
         if (ch === '"') {
             if (inQuotes && text[i + 1] === '"') {
-                // Doble comilla dentro de campo: se convierte en una comilla
                 currentField += '"';
                 i++;
             } else {
-                // Entramos o salimos de comillas
                 inQuotes = !inQuotes;
             }
         } else if (ch === "," && !inQuotes) {
-            // Fin de campo
             currentRow.push(currentField.trim());
             currentField = "";
         } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
-            // Fin de fila (solo si no estamos dentro de comillas)
-            // Manejo de \r\n
             if (ch === "\r" && text[i + 1] === "\n") {
                 i++;
             }
             currentRow.push(currentField.trim());
-            // Evitar filas totalmente vacías
             if (currentRow.some(v => v !== "")) {
                 rows.push(currentRow);
             }
@@ -321,7 +371,6 @@ function parseCSV(text) {
         }
     }
 
-    // Último campo/fila si no termina en salto de línea
     if (currentField.length > 0 || currentRow.length > 0) {
         currentRow.push(currentField.trim());
         if (currentRow.some(v => v !== "")) {
@@ -418,8 +467,6 @@ function parseSpectrumCSV(text) {
         let rawLine = lines[i];
         let cols = parseCSVLine(rawLine);
 
-        // Si la fila viene "rota" en varias líneas (REVISTAS, SINOPSIS, etc.),
-        // vamos pegando líneas hasta tener el número correcto de columnas
         while (cols.length < expectedCols && i + 1 < lines.length) {
             rawLine += "\n" + lines[i + 1];
             i++;
@@ -436,12 +483,10 @@ function parseSpectrumCSV(text) {
             pub: getColumnValue(cols, idxPub),
             anio: getColumnValue(cols, idxAnio),
             caratula: getColumnValue(cols, idxCaratula),
-            imagenesAdicionales: getColumnValue(cols, idxImgAdic),
             imagenesAdicionales: rawAdditionalImages,
             imagenesArray: additionalImagesList,
             puntuacion: getColumnValue(cols, idxPuntuacion),
             screenshots: getColumnValue(cols, idxScreenshots),
-            // Campos Ficha
             anioFicha: getColumnValue(cols, idxAnioFicha),
             editor: getColumnValue(cols, idxEditor),
             desarrollo: getColumnValue(cols, idxDesarrollo),
@@ -450,9 +495,7 @@ function parseSpectrumCSV(text) {
             genero: getColumnValue(cols, idxGenero),
             subgenero: getColumnValue(cols, idxSubgenero),
             distribuidoras: getColumnValue(cols, idxDistribuidoras),
-            // Campo Sinopsis
             sinopsis: getColumnValue(cols, idxSinopsis),
-            // Campos Datos Técnicos
             jugadores: getColumnValue(cols, idxJugadores),
             controles: getColumnValue(cols, idxControles),
             version: getColumnValue(cols, idxVersion),
@@ -473,64 +516,95 @@ function parseSpectrumCSV(text) {
     return rows;
 }
 
-    // ============================================
-    // PARSER CSV - LISTA (para navegación)
-    // ============================================
-    // ============================================
-// PARSER CSV - LISTA (para navegación)
 // ============================================
-function parseListaCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (!lines.length) return [];
-
-    const header = parseCSVLine(lines[0]);
+// PARSER CSV - COLECCIÓN (para navegación desde coleccion.html)
+// ============================================
+function parseColeccionCSV(text) {
     const rows = [];
+    let currentRow = [];
+    let currentField = "";
+    let inQuotes = false;
 
-    const idxID     = header.indexOf("ID");
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (ch === '"') {
+            if (inQuotes && text[i + 1] === '"') {
+                currentField += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === "," && !inQuotes) {
+            currentRow.push(currentField.trim());
+            currentField = "";
+        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+            if (ch === "\r" && text[i + 1] === "\n") {
+                i++;
+            }
+            currentRow.push(currentField.trim());
+            if (currentRow.some(v => v !== "")) {
+                rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = "";
+        } else {
+            currentField += ch;
+        }
+    }
+
+    if (currentField.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(v => v !== "")) {
+            rows.push(currentRow);
+        }
+    }
+
+    if (rows.length === 0) return [];
+
+    const header = rows[0];
+    const games = [];
+
+    const idxID = header.indexOf("ID");
     const idxTitulo = header.indexOf("TITULO_MOSTRAR");
-    const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
-    const idxAnio   = header.indexOf("AÑO_MOSTRAR");
-    const idxAutor  = header.indexOf("AUTOR_MOSTRAR");
-    const idxDes    = header.indexOf("DESARROLLO");
-    const idxContr  = header.indexOf("CONTRIBUCIONES");
+    const idxPlataforma = header.indexOf("PLATAFORMA");
+    const idxAnio = header.indexOf("AÑO_MOSTRAR");
+    const idxFavorito = header.indexOf("FAVORITO");
+    const idxTerminado = header.indexOf("TERMINADO");
+    const idxFormato = header.indexOf("FORMATO_MOSTRAR");
     const idxGenero = header.indexOf("GENERO_MOSTRAR");
     const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
-    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
-    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
+    const idxPublisher = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
 
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue;
-
-        const cols = parseCSVLine(line);
-        const id     = getColumnValue(cols, idxID);
-        const titulo = getColumnValue(cols, idxTitulo);
+    for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i];
+        const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
+        const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
 
         if (!titulo) continue;
 
         const displayTitulo = formatTitleWithArticle(titulo);
 
-        rows.push({
+        games.push({
             id,
             titulo,
             displayTitulo,
             sortKey: displayTitulo.toLowerCase(),
-            pub:    getColumnValue(cols, idxPub),
-            anio:   getColumnValue(cols, idxAnio),
-            autor:  getColumnValue(cols, idxAutor),
-            des:    getColumnValue(cols, idxDes),
-            contr:  getColumnValue(cols, idxContr),
-            genero: getColumnValue(cols, idxGenero),
-            subgenero: getColumnValue(cols, idxSubgenero),
-            terminado: getColumnValue(cols, idxTerminado),
-            favorito:  getColumnValue(cols, idxFavorito)
+            plataforma: idxPlataforma >= 0 && cols[idxPlataforma] ? cols[idxPlataforma].trim() : "",
+            anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
+            favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
+            terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : "",
+            formato: idxFormato >= 0 && cols[idxFormato] ? cols[idxFormato].trim() : "",
+            genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
+            subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
+            pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
+            desarrollo: idxDesarrollo >= 0 && cols[idxDesarrollo] ? cols[idxDesarrollo].trim() : ""
         });
     }
 
-    return rows;
+    return games;
 }
-
-
 
     // ============================================
     // EXTRACCIÓN DE CARÁTULA
@@ -614,7 +688,6 @@ function updateTitle(game) {
         platformEl.style.display = "block";
     }
 
-    // Mostrar sección FICHA
     const fichaSection = document.querySelector(".ficha-section");
     if (fichaSection) {
         fichaSection.style.display = "block";
@@ -633,7 +706,6 @@ function updateCover(game) {
     const hasValidCover = coverUrl && coverUrl.toLowerCase() !== "null";
     const finalCoverUrl = hasValidCover ? coverUrl : fallbackCover;
 
-    // Ocultar imagen mientras se procesa
     coverImg.style.opacity = "0";
     coverImg.style.display = "block";
 
@@ -642,26 +714,17 @@ function updateCover(game) {
         const naturalH = coverImg.naturalHeight;
         const aspectRatio = naturalW / naturalH;
 
-        // Obtener tamaño REAL del wrapper (funciona en móvil y PC)
         const wrapperWidth = wrapper.offsetWidth;
         const wrapperHeight = wrapper.offsetHeight;
         const targetRatio = wrapperWidth / wrapperHeight;
 
-        // Calcular qué ancho tendría al escalar al alto del wrapper
         const scaledWidth = wrapperHeight * aspectRatio;
-
-        // ====================================
-        // VALOR AJUSTABLE: compresión horizontal
-        // 1.0 = sin comprimir, 0.9 = 90% del ancho, 0.85 = 85%, etc.
-        // ====================================
         const squeezeRatio = 0.97;
 
-        // Tolerancia para considerar aspect ratios "iguales" (3%)
         const ratioDiff = Math.abs(aspectRatio - targetRatio) / targetRatio;
         const isMatchingRatio = ratioDiff < 0.03;
 
         if (scaledWidth < wrapperWidth || isMatchingRatio) {
-            // Imagen ESTRECHA o ASPECT RATIO COINCIDENTE → rellenar todo
             coverImg.style.width = "100%";
             coverImg.style.height = "100%";
             coverImg.style.objectFit = "fill";
@@ -669,7 +732,6 @@ function updateCover(game) {
             coverImg.style.right = "0";
             coverImg.style.transform = "none";
         } else if (aspectRatio > targetRatio) {
-            // Imagen CUADRADA u HORIZONTAL → comprimir horizontalmente
             const compressedWidth = scaledWidth * squeezeRatio;
             coverImg.style.width = compressedWidth + "px";
             coverImg.style.height = "100%";
@@ -678,7 +740,6 @@ function updateCover(game) {
             coverImg.style.right = "0";
             coverImg.style.transform = "none";
         } else {
-            // Proporción MÁS VERTICAL que el contenedor → ajustar al alto
             coverImg.style.width = "auto";
             coverImg.style.height = "100%";
             coverImg.style.objectFit = "cover";
@@ -687,7 +748,6 @@ function updateCover(game) {
             coverImg.style.transform = "none";
         }
         
-        // Mostrar imagen ya procesada y ocultar label
         coverImg.style.opacity = "1";
         const coverLabel = wrapper.querySelector(".skeleton-label");
         if (coverLabel) coverLabel.style.display = "none";
@@ -706,7 +766,6 @@ function updateCover(game) {
     coverImg.alt = `Carátula de ${game.titulo || "juego ZX Spectrum"}`;
     coverImg.style.display = "block";
 
-    // Añadir estrella si es favorito
     const isFavorito = (game.favorito || "").trim().toUpperCase() === "SI";
     const existingStar = wrapper.querySelector(".ficha-favorito-star");
     
@@ -728,57 +787,40 @@ function updatePuntuacion(game) {
     if (!puntuacionEl || !ratingEl || !starsEl) return;
 
     const valor = (game.puntuacion || "").trim();
-    console.log("Puntuación del juego:", valor);
 
     if (valor) {
-        // 1) Texto debajo de ZX Spectrum
         puntuacionEl.innerHTML = `<b>Puntuación:</b> ${valor}`;
         puntuacionEl.style.display = "block";
         ratingEl.style.display = "flex";
 
-        // 2) Sacar la nota ("5,8" de "5,8 (5 votos)")
         const match = valor.match(/^(\d+[.,]?\d*)/);
         let nota = 0;
         if (match) {
             nota = parseFloat(match[1].replace(",", "."));
         }
 
-        // 3) Clamp 0–10
         if (isNaN(nota)) nota = 0;
         if (nota < 0) nota = 0;
         if (nota > 10) nota = 10;
 
-        // 4) Pasar a porcentaje 0–100
         const porcentaje = (nota / 10) * 100;
-        console.log("Nota numérica:", nota, "→ porcentaje barra:", porcentaje);
 
-        // 5) Elegir color
-        let color = "#ff4b4b"; // rojo
+        let color = "#ff4b4b";
         if (nota >= 7) {
-            color = "#00c853"; // verde
+            color = "#00c853";
         } else if (nota >= 5) {
-            color = "#ffd600"; // amarillo
+            color = "#ffd600";
         }
 
-        // 6) Aplicar variables CSS al span con animación garantizada
-
-// Primero reseteamos a 0% para que siempre haya "viaje"
-starsEl.style.setProperty("--fill", "0%");
-starsEl.style.setProperty("--rating-color", color);
-
-// Forzamos reflow para que el navegador pinte el 0%
-void starsEl.offsetWidth;
-
-// Ahora sí, llevamos el relleno al porcentaje final (se anima)
-starsEl.style.setProperty("--fill", porcentaje + "%");
-
+        starsEl.style.setProperty("--fill", "0%");
+        starsEl.style.setProperty("--rating-color", color);
+        void starsEl.offsetWidth;
+        starsEl.style.setProperty("--fill", porcentaje + "%");
 
     } else {
-        // Sin puntuación → ocultar
         puntuacionEl.innerHTML = "";
         puntuacionEl.style.display = "none";
         ratingEl.style.display = "none";
-
         starsEl.style.setProperty("--fill", "0%");
     }
 }
@@ -815,7 +857,6 @@ function updateScreenshots(game) {
         screenshot2Url = validUrls[1] || "";
     }
     
-    // Si hay al menos una URL, mostrar el contenedor
     if (screenshot1Url || screenshot2Url) {
         container.style.display = "flex";
     } else {
@@ -823,7 +864,6 @@ function updateScreenshots(game) {
         return;
     }
 
-    // Screenshot 1
     if (screenshot1Url) {
         screenshot1.src = screenshot1Url;
         screenshot1.style.display = "block";
@@ -835,7 +875,7 @@ function updateScreenshots(game) {
         screenshot1.style.display = "none";
         wrapper1.classList.add("empty");
     }
-    // Screenshot 2
+
     if (screenshot2Url) {
         screenshot2.src = screenshot2Url;
         screenshot2.style.display = "block";
@@ -865,7 +905,6 @@ function updateFichaDatos(game) {
     const container = document.getElementById("ficha-datos");
     if (!container) return;
 
-    // Definir los campos a mostrar (etiqueta, valor)
     const campos = [
         { label: "· AÑO", value: game.anioFicha },
         { label: "· EDITOR", value: game.editor },
@@ -877,7 +916,6 @@ function updateFichaDatos(game) {
         { label: "· DISTRIBUIDORAS", value: game.distribuidoras }
     ];
 
-    // Filtrar solo los que tienen valor
     const camposConValor = campos.filter(c => c.value && c.value.trim() !== "");
 
     if (camposConValor.length === 0) {
@@ -885,7 +923,6 @@ function updateFichaDatos(game) {
         return;
     }
 
-    // Generar HTML
     let html = "";
     camposConValor.forEach(campo => {
         html += `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${campo.value}</p>`;
@@ -896,7 +933,7 @@ function updateFichaDatos(game) {
 }
 
 // ============================================
-// SINOPSIS
+// SINOPSIS CON VOZ
 // ============================================
 let sinopsisVoiceButton = null;
 let sinopsisVoiceOnIcon = null;
@@ -979,17 +1016,7 @@ function toggleSynopsisVoice() {
 
 function setupVoiceButton() {
     if (!sinopsisVoiceButton || !speechSupported) return;
-
     sinopsisVoiceButton.addEventListener("click", toggleSynopsisVoice);
-
-    window.speechSynthesis.addEventListener("voiceschanged", () => {
-        if (isReadingSinopsis && currentUtterance) {
-            const updatedVoice = getPreferredSpanishVoice();
-            if (updatedVoice) {
-                currentUtterance.voice = updatedVoice;
-            }
-        }
-    });
 }
 
 function renderVoiceButton(container) {
@@ -1441,24 +1468,16 @@ function updateRevistas(game) {
                 element.addEventListener(evt, clearPressed);
             });
 
-            // Limpiar estado después de hacer clic (para enlaces externos)
             element.addEventListener("click", () => {
                 setTimeout(() => {
                     element.classList.remove("is-pressed");
                     element.blur();
                 }, 100);
             });
-
-            element.addEventListener("mouseup", clearPressed);
-            element.addEventListener("mouseleave", clearPressed);
-            element.addEventListener("touchend", () => {
-                setTimeout(clearPressed, 100);
-            });
         }
     });
 
     container.appendChild(row);
-    container.querySelectorAll(".utiles-button").forEach(btn => btn.blur());
     section.style.display = "block";
 }
 
@@ -1470,7 +1489,59 @@ function updateRevistas(game) {
         }
     }
 
-       
+    // ============================================
+    // PREFETCHING DE FICHAS ADYACENTES
+    // ============================================
+
+    function prefetchAdjacentGames() {
+        setTimeout(() => {
+            const prevIndex = currentGameIndex - 1;
+            const nextIndex = currentGameIndex + 1;
+            
+            console.log(`[Prefetch] Precargando fichas adyacentes...`);
+            
+            if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
+                const prevGame = sortedGamesList[prevIndex];
+                prefetchGameData(prevGame.id);
+            }
+            
+            if (nextIndex >= 0 && nextIndex < sortedGamesList.length) {
+                const nextGame = sortedGamesList[nextIndex];
+                prefetchGameData(nextGame.id);
+            }
+        }, PREFETCH_DELAY);
+    }
+
+    async function prefetchGameData(gameId) {
+        const cached = getCachedFicha(gameId);
+        if (cached) {
+            console.log(`[Prefetch] Ficha ${gameId} ya en caché ✓`);
+            return;
+        }
+        
+        try {
+            const cacheKey = `ficha_spectrum_${CACHE_VERSION}`;
+            let games = getCachedData(cacheKey);
+            
+            if (!games) {
+                const response = await fetch(ZX_SPECTRUM_CSV_URL);
+                if (!response.ok) return;
+                
+                const text = await response.text();
+                games = parseSpectrumCSV(text);
+                setCachedData(cacheKey, games);
+            }
+            
+            const game = games.find(row => row.id === gameId);
+            if (game) {
+                setCachedFicha(gameId, game);
+                console.log(`[Prefetch] Ficha ${gameId} precargada ✓`);
+            }
+            
+        } catch (err) {
+            console.warn(`[Prefetch] Error precargando ${gameId}:`, err);
+        }
+    }
 
     // ============================================
     // NAVEGACIÓN ENTRE JUEGOS
@@ -1482,8 +1553,22 @@ function updateRevistas(game) {
     const searchQuery = getQueryParam("search");
     const fromColeccion = getQueryParam("from") === "coleccion";
 
-    // Si viene de colección, mostrar etiqueta especial
     if (fromColeccion) {
+        if (searchQuery) {
+            const qNorm = normalizeText(searchQuery);
+            const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+            if (singleCharMatch) {
+                return `Letra ${searchQuery.toUpperCase()}`;
+            }
+            if (qNorm === "fav") return "Favoritos";
+            if (qNorm === "terminado") return "Terminados";
+            if (qNorm === "fisico") return "Formato Físico";
+            
+            // Verificar si es filtro de plataforma
+            if (qNorm === "spectrum" || qNorm === "zx") return "Mi Colección";
+            
+            return `"${searchQuery}"`;
+        }
         return "Mi Colección";
     }
 
@@ -1514,7 +1599,6 @@ function updateRevistas(game) {
         sessionStorage.setItem("navCounter", counterText);
     }
     
-    // Actualizar título según si hay búsqueda o no
     if (titleEl) {
         const label = currentGroupLabel || computeGroupLabel();
         titleEl.textContent = label;
@@ -1547,7 +1631,6 @@ function attachVoiceStopToNavigation() {
     const nextArrow = document.querySelector(".game-nav-arrow--next");
     const counterEl = document.querySelector(".game-nav-counter");
     
-    // Obtener el parámetro search actual para mantenerlo en la navegación
     const searchQuery = getQueryParam("search");
     const filterField = getQueryParam("filterField");
     const filterValue = getQueryParam("filterValue");
@@ -1620,39 +1703,124 @@ function attachVoiceStopToNavigation() {
 
     async function loadGamesList(gameId) {
     try {
-        const response = await fetch(ZX_LISTA_CSV_URL);
-        if (!response.ok) {
-            throw new Error("No se pudo cargar la lista");
-        }
-
-        const text = await response.text();
-        const games = parseListaCSV(text);
-
-        // Ordenar alfabéticamente
-        games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
-
-        // Comprobar si hay filtro de búsqueda
+        const fromColeccion = getQueryParam("from") === "coleccion";
         const searchQuery = getQueryParam("search");
         const filterField = (getQueryParam("filterField") || "").toLowerCase();
         const filterValue = (getQueryParam("filterValue") || "").trim();
 
+        let games;
+        
+        if (fromColeccion) {
+            // Cargar CSV de colección
+            const cacheKey = `coleccion_${CACHE_VERSION}`;
+            games = getCachedData(cacheKey);
+            
+            if (!games) {
+                const response = await fetch(COLECCION_CSV_URL);
+                if (!response.ok) throw new Error("No se pudo cargar colección");
+                
+                const text = await response.text();
+                games = parseColeccionCSV(text);
+                setCachedData(cacheKey, games);
+            }
+            
+            // Filtrar solo juegos de Spectrum
+            games = games.filter(g => {
+                const plat = normalizeText(g.plataforma || "");
+                return plat === "spectrum" || plat === "zx spectrum" || plat === "zx";
+            });
+        } else {
+            // Reutilizar allGamesData
+            if (!allGamesData || allGamesData.length === 0) {
+                const cacheKey = `ficha_spectrum_${CACHE_VERSION}`;
+                allGamesData = getCachedData(cacheKey);
+                
+                if (!allGamesData) {
+                    const response = await fetch(ZX_SPECTRUM_CSV_URL);
+                    if (!response.ok) throw new Error("No se pudo cargar el CSV");
+                    
+                    const text = await response.text();
+                    allGamesData = parseSpectrumCSV(text);
+                    setCachedData(cacheKey, allGamesData);
+                }
+            }
+            
+            games = allGamesData.map(g => ({
+                id: g.id,
+                titulo: g.titulo,
+                displayTitulo: formatTitleWithArticle(g.titulo),
+                sortKey: formatTitleWithArticle(g.titulo).toLowerCase(),
+                pub: g.pub,
+                anio: g.anio,
+                genero: g.genero,
+                subgenero: g.subgenero,
+                favorito: g.favorito,
+                terminado: g.terminado,
+                desarrollo: g.desarrollo
+            }));
+        }
+
+        games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
         let filteredGames = games;
         currentGroupLabel = "";
 
-        if (filterField === "subgenero" && filterValue) {
+        if (fromColeccion) {
+            currentGroupLabel = "Mi Colección";
+
+            if (searchQuery) {
+                const qNorm = normalizeText(searchQuery);
+                const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
+
+                if (singleCharMatch) {
+                    const char = normalizeText(singleCharMatch[1]);
+                    filteredGames = games.filter(game => {
+                        const titleNorm = normalizeText(game.sortKey || "");
+                        return titleNorm.startsWith(char);
+                    });
+                    currentGroupLabel = `Letra ${searchQuery.toUpperCase()}`;
+                } else if (qNorm === "fav") {
+                    filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+                    currentGroupLabel = "Favoritos";
+                } else if (qNorm === "terminado") {
+                    filteredGames = games.filter(game => normalizeText(game.terminado || "") === "si");
+                    currentGroupLabel = "Terminados";
+                } else if (qNorm === "fisico") {
+                    filteredGames = games.filter(game => normalizeText(game.formato || "").includes("fisico"));
+                    currentGroupLabel = "Formato Físico";
+                } else if (qNorm === "spectrum" || qNorm === "zx") {
+                    // Ya están filtrados, mantener todos
+                    currentGroupLabel = "Mi Colección";
+                } else {
+                    filteredGames = games.filter(game => {
+                        const titleNorm = normalizeText(game.sortKey || "");
+                        const pubNorm = normalizeText(game.pub || "");
+                        const yearNorm = normalizeText(game.anio || "");
+                        const generoNorm = normalizeText(game.genero || "");
+                        const subgeneroNorm = normalizeText(game.subgenero || "");
+                        const desarrolloNorm = normalizeText(game.desarrollo || "");
+
+                        return (
+                            titleNorm.includes(qNorm) ||
+                            pubNorm.includes(qNorm) ||
+                            yearNorm.includes(qNorm) ||
+                            generoNorm.includes(qNorm) ||
+                            subgeneroNorm.includes(qNorm) ||
+                            desarrolloNorm.includes(qNorm)
+                        );
+                    });
+                    currentGroupLabel = `"${searchQuery}"`;
+                }
+            }
+        } else if (filterField === "subgenero" && filterValue) {
             const qNorm = normalizeText(filterValue);
             filteredGames = games.filter(game => normalizeText(game.subgenero || "").includes(qNorm));
             currentGroupLabel = `Subgénero ${filterValue}`;
-        } else if (filterField === "favorito" && filterValue) {
-            filteredGames = games.filter(game => normalizeText(game.favorito) === "si");
-            currentGroupLabel = "Favoritos";
-        } else if (filterField === "terminado" && filterValue) {
-            filteredGames = games.filter(game => normalizeText(game.terminado) === "si");
-            currentGroupLabel = "Terminados";
+        } else if (filterField === "favorito") {
+            filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+            currentGroupLabel = `Favoritos`;
         } else if (searchQuery) {
             const qNorm = normalizeText(searchQuery);
-            
-            // Comprobar si es búsqueda por un solo carácter (letra o número)
             const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
             
             if (singleCharMatch) {
@@ -1661,16 +1829,11 @@ function attachVoiceStopToNavigation() {
                     const titleNorm = normalizeText(game.sortKey || "");
                     return titleNorm.startsWith(char);
                 });
-                
             } else {
-                // Búsqueda normal en todos los campos
                 filteredGames = games.filter(game => {
                     const titleNorm = normalizeText(game.sortKey || "");
                     const pubNorm = normalizeText(game.pub || "");
                     const yearNorm = normalizeText(game.anio || "");
-                    const autorNorm = normalizeText(game.autor || "");
-                    const desNorm = normalizeText(game.des || "");
-                    const contrNorm = normalizeText(game.contr || "");
                     const generoNorm = normalizeText(game.genero || "");
                     const subgeneroNorm = normalizeText(game.subgenero || "");
 
@@ -1678,9 +1841,6 @@ function attachVoiceStopToNavigation() {
                         titleNorm.includes(qNorm) ||
                         pubNorm.includes(qNorm) ||
                         yearNorm.includes(qNorm) ||
-                        autorNorm.includes(qNorm) ||
-                        desNorm.includes(qNorm) ||
-                        contrNorm.includes(qNorm) ||
                         generoNorm.includes(qNorm) ||
                         subgeneroNorm.includes(qNorm)
                     );
@@ -1692,14 +1852,8 @@ function attachVoiceStopToNavigation() {
         }
 
         sortedGamesList = filteredGames;
-
-        // Encontrar posición del juego actual
         currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
-
-        // Actualizar contador
         updateNavCounter();
-
-        // Configurar flechas
         setupNavigation();
 
     } catch (err) {
@@ -1721,17 +1875,35 @@ function attachVoiceStopToNavigation() {
         }
 
         try {
-            // Cargar datos del juego
-            const response = await fetch(ZX_SPECTRUM_CSV_URL);
-            if (!response.ok) {
-                throw new Error("No se pudo cargar el CSV");
-            }
-
-            const text = await response.text();
-            const games = parseSpectrumCSV(text);
-            const game = games.find(row => row.id === gameId);
-
+            // PASO 1: Intentar obtener ficha individual cacheada
+            let game = getCachedFicha(gameId);
+            
+            if (game) {
+                console.log(`[Caché] Ficha ${gameId} cargada desde caché ⚡`);
+            } else {
+                // PASO 2: Si no está cacheada, buscar en CSV
+                const cacheKey = `ficha_spectrum_${CACHE_VERSION}`;
+                let games = getCachedData(cacheKey);
+                
+                if (!games) {
+                    const response = await fetch(ZX_SPECTRUM_CSV_URL);
+                    if (!response.ok) throw new Error("No se pudo cargar el CSV");
+                    
+                    const text = await response.text();
+                    games = parseSpectrumCSV(text);
+                    setCachedData(cacheKey, games);
+                    console.log(`[Caché] CSV Spectrum guardado en caché`);
+                }
+                
+                allGamesData = games;
+                game = games.find(row => row.id === gameId);
+                
                 if (game) {
+                    setCachedFicha(gameId, game);
+                }
+            }
+            
+            if (game) {
                 updateTitle(game);
                 updateCover(game);
                 updatePuntuacion(game);
@@ -1743,12 +1915,15 @@ function attachVoiceStopToNavigation() {
                 updateImagenesAdicionales(game);
                 updateRevistas(game);
                 updateUtiles(game);
-                } else {
+            } else {
                 showError("Juego no encontrado");
-                }
+            }
 
-            // Cargar lista para navegación
+            // PASO 3: Cargar lista para navegación
             await loadGamesList(gameId);
+            
+            // PASO 4: Prefetch de fichas adyacentes
+            prefetchAdjacentGames();
 
         } catch (err) {
             console.error("Error cargando ZX_SPECTRUM:", err);
@@ -1761,13 +1936,11 @@ function attachVoiceStopToNavigation() {
     // ============================================
     
     document.addEventListener("DOMContentLoaded", () => {
-    // Mostrar título correcto desde el inicio (evita parpadeo)
     const titleEl = document.querySelector(".game-nav-title");
     if (titleEl) {
         titleEl.textContent = computeGroupLabel();
     }
 
-    // Recuperar contador guardado mientras carga
     const savedCounter = sessionStorage.getItem("navCounter");
     if (savedCounter) {
         const counterEl = document.querySelector(".game-nav-counter");
@@ -1793,20 +1966,17 @@ function setupCoverModal() {
 
     if (!coverImg || !modal || !modalImg || !closeBtn) return;
 
-    // Abrir modal al clicar carátula
     coverImg.addEventListener("click", function() {
         modalImg.src = coverImg.src;
         modal.classList.add("active");
         modalAbierta = true;
     });
 
-    // Cerrar con la X
     closeBtn.addEventListener("click", function() {
         modal.classList.remove("active");
         modalAbierta = false;
     });
 
-    // Cerrar clicando fuera de la imagen
     modal.addEventListener("click", function(e) {
         if (e.target === modal) {
             modal.classList.remove("active");
@@ -1819,7 +1989,6 @@ function setupCoverModal() {
         }, { passive: true });
     });
 
-    // Cerrar con ESC
     document.addEventListener("keydown", function(e) {
         if (e.key === "Escape" && modal.classList.contains("active")) {
             modal.classList.remove("active");
@@ -1838,12 +2007,10 @@ function setupSwipeNavigation() {
     let touchEndY = 0;
     let touchStartTime = 0;
     
-    // Configuración de sensibilidad
-    const minSwipeDistance = 100;  // Distancia mínima horizontal (px)
-    const maxSwipeTime = 500;      // Tiempo máximo para el swipe (ms)
-    const maxVerticalRatio = 0.5;  // El movimiento vertical no puede superar el 50% del horizontal
+    const minSwipeDistance = 100;
+    const maxSwipeTime = 500;
+    const maxVerticalRatio = 0.5;
     
-    // Obtener el parámetro search actual
     const searchQuery = getQueryParam("search");
     const filterField = getQueryParam("filterField");
     const filterValue = getQueryParam("filterValue");
@@ -1868,18 +2035,12 @@ function setupSwipeNavigation() {
         const distanceY = touchEndY - touchStartY;
         const elapsedTime = Date.now() - touchStartTime;
         
-        // Validaciones para evitar swipes accidentales:
-        // 1. La distancia horizontal debe superar el mínimo
         if (Math.abs(distanceX) < minSwipeDistance) return;
-        
-        // 2. El swipe no debe ser demasiado lento
         if (elapsedTime > maxSwipeTime) return;
-        
-        // 3. El movimiento debe ser principalmente horizontal
         if (Math.abs(distanceY) > Math.abs(distanceX) * maxVerticalRatio) return;
 
         if (distanceX < 0) {
-            // Swipe hacia la izquierda → siguiente ficha
+            // Swipe izquierda -> siguiente
             if (currentGameIndex < sortedGamesList.length - 1) {
                 const nextGame = sortedGamesList[currentGameIndex + 1];
                 let url = `spectrum-ficha.html?id=${encodeURIComponent(nextGame.id)}`;
@@ -1899,7 +2060,7 @@ function setupSwipeNavigation() {
                 window.location.href = url;
             }
         } else {
-            // Swipe hacia la derecha → ficha anterior
+            // Swipe derecha -> anterior
             if (currentGameIndex > 0) {
                 const prevGame = sortedGamesList[currentGameIndex - 1];
                 let url = `spectrum-ficha.html?id=${encodeURIComponent(prevGame.id)}`;
