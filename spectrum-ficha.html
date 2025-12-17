@@ -1729,24 +1729,16 @@ function attachVoiceStopToNavigation() {
         let games;
         
         if (fromColeccion) {
-            // Cargar CSV de colección
+            // Cargar CSV de colección completo
             const cacheKey = `coleccion_${CACHE_VERSION}`;
             games = getCachedData(cacheKey);
-            
             if (!games) {
                 const response = await fetch(COLECCION_CSV_URL);
                 if (!response.ok) throw new Error("No se pudo cargar colección");
-                
                 const text = await response.text();
                 games = parseColeccionCSV(text);
                 setCachedData(cacheKey, games);
             }
-            
-            // Filtrar solo juegos de Spectrum
-            games = games.filter(g => {
-                const plat = normalizeText(g.plataforma || "");
-                return plat === "spectrum" || plat === "zx spectrum" || plat === "zx";
-            });
         } else {
             // Reutilizar allGamesData
             if (!allGamesData || allGamesData.length === 0) {
