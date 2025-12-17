@@ -1623,6 +1623,47 @@ function updateImagenesAdicionales(game) {
     return `Juegos ${CONFIG.shortName}`;
 }
 
+function getFichaPageForPlatform(platform) {
+    const normalized = (platform || "").toString().trim().toUpperCase();
+
+    if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZX SPECTRUM") {
+        return "spectrum-ficha.html";
+    }
+
+    return "igdb-ficha.html";
+}
+
+function buildNavigationUrl(targetPlatform, targetId) {
+    const page = getFichaPageForPlatform(targetPlatform || CURRENT_PLATFORM);
+    const params = new URLSearchParams();
+
+    if (page === "igdb-ficha.html") {
+        params.set("platform", targetPlatform || CURRENT_PLATFORM);
+    }
+
+    params.set("id", targetId);
+
+    const searchQuery = getQueryParam("search");
+    const filterField = getQueryParam("filterField");
+    const filterValue = getQueryParam("filterValue");
+    const fromColeccion = getQueryParam("from");
+
+    if (searchQuery) {
+        params.set("search", searchQuery);
+    }
+    if (filterField) {
+        params.set("filterField", filterField);
+    }
+    if (filterValue) {
+        params.set("filterValue", filterValue);
+    }
+    if (fromColeccion) {
+        params.set("from", fromColeccion);
+    }
+
+    return `${page}?${params.toString()}`;
+}
+
     function updateNavCounter() {
     const counterEl = document.querySelector(".game-nav-counter");
     const titleEl = document.querySelector(".game-nav-title");
@@ -1678,11 +1719,6 @@ function attachVoiceStopToNavigation() {
     const prevArrow = document.querySelector(".game-nav-arrow--prev");
     const nextArrow = document.querySelector(".game-nav-arrow--next");
     const counterEl = document.querySelector(".game-nav-counter");
-    
-    const searchQuery = getQueryParam("search");
-    const filterField = getQueryParam("filterField");
-    const filterValue = getQueryParam("filterValue");
-    const fromColeccion = getQueryParam("from");
 
     if (prevArrow) {
         prevArrow.addEventListener("click", () => {
@@ -1695,23 +1731,10 @@ function attachVoiceStopToNavigation() {
                     counterEl.textContent = counterText;
                 }
                 sessionStorage.setItem("navCounter", counterText);
-                
                 const prevGame = sortedGamesList[currentGameIndex - 1];
                 // Determinar la plataforma del juego anterior
                 const targetPlatform = prevGame.plataforma || CURRENT_PLATFORM;
-                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(prevGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(targetPlatform, prevGame.id);
                 window.location.href = url;
             }
         });
@@ -1729,23 +1752,10 @@ function attachVoiceStopToNavigation() {
                     counterEl.textContent = counterText;
                 }
                 sessionStorage.setItem("navCounter", counterText);
-                
                 const nextGame = sortedGamesList[currentGameIndex + 1];
                 // Determinar la plataforma del juego siguiente
                 const targetPlatform = nextGame.plataforma || CURRENT_PLATFORM;
-                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(nextGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(targetPlatform, nextGame.id);
                 window.location.href = url;
             }
         });
@@ -2129,19 +2139,7 @@ function setupSwipeNavigation() {
             if (currentGameIndex < sortedGamesList.length - 1) {
                 const nextGame = sortedGamesList[currentGameIndex + 1];
                 const targetPlatform = nextGame.plataforma || CURRENT_PLATFORM;
-                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(nextGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(targetPlatform, nextGame.id);
                 stopAllVoice();
                 window.location.href = url;
             }
@@ -2150,19 +2148,7 @@ function setupSwipeNavigation() {
             if (currentGameIndex > 0) {
                 const prevGame = sortedGamesList[currentGameIndex - 1];
                 const targetPlatform = prevGame.plataforma || CURRENT_PLATFORM;
-                let url = `igdb-ficha.html?platform=${targetPlatform}&id=${encodeURIComponent(prevGame.id)}`;
-                if (searchQuery) {
-                    url += `&search=${encodeURIComponent(searchQuery)}`;
-                }
-                if (filterField) {
-                    url += `&filterField=${encodeURIComponent(filterField)}`;
-                }
-                if (filterValue) {
-                    url += `&filterValue=${encodeURIComponent(filterValue)}`;
-                }
-                if (fromColeccion) {
-                    url += `&from=${encodeURIComponent(fromColeccion)}`;
-                }
+                const url = buildNavigationUrl(targetPlatform, prevGame.id);
                 stopAllVoice();
                 window.location.href = url;
             }
