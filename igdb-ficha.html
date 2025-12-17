@@ -530,6 +530,11 @@ function parsePS3CSV(text) {
         }
 
         const thisId = getColumnValue(cols, idxID);
+        const thisTitulo = getColumnValue(cols, idxTitulo);
+        
+        // Saltar filas sin ID o título
+        if (!thisId || !thisTitulo) continue;
+        
         const screenshotsRaw = getColumnValue(cols, idxScreenshots);
         const screenshotsList = parseScreenshotsList(screenshotsRaw);
 
@@ -1805,7 +1810,9 @@ function attachVoiceStopToNavigation() {
             // REUTILIZAR datos ya cargados - NO DESCARGA NADA
             console.log("[DEBUG] allGamesData[0] ANTES de map:", allGamesData[0]);
             console.log("[DEBUG] allGamesData[0].id:", allGamesData[0]?.id);
-            games = allGamesData.map(g => ({
+            games = allGamesData
+                .filter(g => g.id && g.titulo) // Filtrar filas vacías
+                .map(g => ({
                 id: g.id,
                 titulo: g.titulo,
                 displayTitulo: formatTitleWithArticle(g.titulo),
@@ -1823,6 +1830,9 @@ function attachVoiceStopToNavigation() {
             console.log("[DEBUG] games[0].id DESPUÉS de map:", games[0]?.id);
         }
 
+        // Filtrar filas vacías antes de ordenar
+        games = games.filter(g => g.id && g.titulo);
+        
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
         
         console.log("[DEBUG] games[0] DESPUÉS de sort:", games[0]);
