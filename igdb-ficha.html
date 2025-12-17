@@ -487,12 +487,15 @@ function parsePS3CSV(text) {
     if (!lines.length) return [];
 
     const header = parseCSVLine(lines[0]);
-    console.log("Columnas del CSV:", header);
+    console.log("[DEBUG] Columnas del CSV:", header);
+    console.log("[DEBUG] Primera columna raw:", JSON.stringify(header[0]));
+    console.log("[DEBUG] Charcode primera columna:", header[0] ? [...header[0]].map(c => c.charCodeAt(0)) : []);
     const expectedCols = header.length;
     const rows = [];
 
     // Índices de columnas
     const idxID = header.indexOf("ID");
+    console.log("[DEBUG] Índice de columna ID:", idxID);
     const idxTitulo = findColumnIndex(header, ["TITULO", "TÍTULO"]);
     const idxAnio = findColumnIndex(header, ["AÑO", "ANO"]);
     const idxPublisher = header.indexOf("PUBLISHER");
@@ -552,6 +555,12 @@ function parsePS3CSV(text) {
             terminado: getColumnValue(cols, idxTerminado),
             videoUrl: getColumnValue(cols, idxVideo)
         });
+        
+        // Log primera fila para debug
+        if (rows.length === 1) {
+            console.log("[DEBUG] Primera fila parseada:", rows[0]);
+            console.log("[DEBUG] Columna 0 raw de primera fila:", cols[0]);
+        }
     }
 
     return rows;
