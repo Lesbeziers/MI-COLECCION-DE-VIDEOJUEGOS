@@ -1773,16 +1773,22 @@ function attachVoiceStopToNavigation() {
             }
         } else {
             // Si allGamesData está vacío (caso de ficha cacheada), cargar CSV
+            console.log(`[DEBUG] No viene de colección. allGamesData.length: ${allGamesData ? allGamesData.length : 'null'}`);
+            
             if (!allGamesData || allGamesData.length === 0) {
                 const cacheKey = `ficha_${CURRENT_PLATFORM}_${CACHE_VERSION}`;
+                console.log(`[DEBUG] allGamesData vacío, buscando en caché: ${cacheKey}`);
                 allGamesData = getCachedData(cacheKey);
+                console.log(`[DEBUG] Resultado de caché: ${allGamesData ? allGamesData.length + ' juegos' : 'null'}`);
                 
                 if (!allGamesData) {
+                    console.log(`[DEBUG] Descargando CSV: ${CONFIG.csvUrl}`);
                     const response = await fetch(CONFIG.csvUrl);
                     if (!response.ok) throw new Error("No se pudo cargar el CSV");
                     
                     const text = await response.text();
                     allGamesData = parsePS3CSV(text);
+                    console.log(`[DEBUG] CSV parseado: ${allGamesData.length} juegos`);
                     setCachedData(cacheKey, allGamesData);
                 }
             }
@@ -1912,7 +1918,19 @@ function attachVoiceStopToNavigation() {
         }
 
         sortedGamesList = filteredGames;
+        
+        // DEBUG: Verificar búsqueda del ID
+        console.log(`[DEBUG] Buscando gameId: "${gameId}" (tipo: ${typeof gameId})`);
+        console.log(`[DEBUG] Total juegos en filteredGames: ${filteredGames.length}`);
+        if (filteredGames.length > 0) {
+            console.log(`[DEBUG] Primer ID en lista: "${filteredGames[0].id}" (tipo: ${typeof filteredGames[0].id})`);
+            console.log(`[DEBUG] Primeros 5 IDs:`, filteredGames.slice(0, 5).map(g => g.id));
+        }
+        
         currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
+        
+        console.log(`[DEBUG] currentGameIndex encontrado: ${currentGameIndex}`);
+        
         updateNavCounter();
         setupNavigation();
 
@@ -1982,6 +2000,7 @@ function attachVoiceStopToNavigation() {
             }
 
             // PASO 3: Cargar lista para navegación
+            console.log(`[DEBUG] Antes de loadGamesList - allGamesData.length: ${allGamesData.length}`);
             await loadGamesList(gameId);
             
             // PASO 4: Prefetch de fichas adyacentes (en background)
