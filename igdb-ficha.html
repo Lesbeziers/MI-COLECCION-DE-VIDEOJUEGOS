@@ -164,6 +164,59 @@
 
    <script>
     // ============================================
+    // CONFIGURACIÓN DE CACHÉ Y PREFETCHING
+    // ============================================
+    const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+    const CACHE_VERSION = "v1"; // Cambia esto si actualizas estructura de datos
+    const PREFETCH_DELAY = 2000; // 2 segundos - tiempo para que usuario empiece a leer
+
+    // ============================================
+    // FUNCIONES DE CACHÉ
+    // ============================================
+    
+    function getCachedData(key) {
+        try {
+            const cached = sessionStorage.getItem(key);
+            if (!cached) return null;
+            
+            const data = JSON.parse(cached);
+            const now = Date.now();
+            
+            if (now - data.timestamp > CACHE_DURATION) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+            
+            return data.value;
+        } catch {
+            return null;
+        }
+    }
+
+    function setCachedData(key, value) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify({
+                timestamp: Date.now(),
+                version: CACHE_VERSION,
+                value: value
+            }));
+        } catch (e) {
+            console.warn("No se pudo guardar en caché:", e);
+        }
+    }
+
+    // Caché de fichas individuales
+    function getCachedFicha(platform, gameId) {
+        const key = `ficha_${platform}_${gameId}`;
+        return getCachedData(key);
+    }
+
+    function setCachedFicha(platform, gameId, gameData) {
+        const key = `ficha_${platform}_${gameId}`;
+        setCachedData(key, gameData);
+    }
+
+    // ============================================
     // CONFIGURACIÓN DE PLATAFORMAS IGDB
     // ============================================
     const PLATFORM_CONFIG = {
@@ -171,7 +224,6 @@ PSX: {
   name: "PLAYSTATION",
   shortName: "PSX",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=405975879&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=2032910551&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "PSX_TIPO_FORMATO",
@@ -181,7 +233,6 @@ PS2: {
   name: "PLAYSTATION 2",
   shortName: "PS2",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1412360946&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=688721386&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "PS2_TIPO_FORMATO",
@@ -191,7 +242,6 @@ PS3: {
   name: "PlayStation 3",
   shortName: "PS3",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=511776549&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1642803365&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "PS3_TIPO_FORMATO",
@@ -201,7 +251,6 @@ NES: {
   name: "Nintendo Entertainment System",
   shortName: "NES",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1428079783&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1083190689&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "NES_TIPO_FORMATO",
@@ -211,7 +260,6 @@ SNES: {
   name: "Super Nintendo",
   shortName: "SNES",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=287633811&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1155719935&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "SNES_TIPO_FORMATO",
@@ -221,7 +269,6 @@ N64: {
   name: "Nintendo 64",
   shortName: "N64",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=387524599&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1694416817&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "N64_TIPO_FORMATO",
@@ -231,7 +278,6 @@ SWITCH: {
   name: "Nintendo Switch",
   shortName: "SWITCH",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=175745331&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1129407639&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "SWITCH_TIPO_FORMATO",
@@ -241,7 +287,6 @@ SATURN: {
   name: "SEGA Saturn",
   shortName: "Saturn",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1892216742&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=183417442&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "SATURN_TIPO_FORMATO",
@@ -251,7 +296,6 @@ PS4: {
   name: "PlayStation 4",
   shortName: "PS4",
   csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=555080380&single=true&output=csv",
-  listaUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1208428399&single=true&output=csv",
   listaPage: "igdb-lista.html",
   fichaPage: "igdb-ficha.html",
   formatoCol: "PS4_TIPO_FORMATO",
@@ -273,7 +317,6 @@ PS4: {
 
     // URLs dinámicas según plataforma
     const PS3_CSV_URL = CONFIG.csvUrl;
-    const PS3_LISTA_CSV_URL = CONFIG.listaUrl;
 
     // Función para volver a la lista
     function goBackToList() {
@@ -302,6 +345,8 @@ PS4: {
     let modalAbierta = false;
     let currentGroupLabel = "";
 
+    // Variable global para compartir datos entre funciones
+    let allGamesData = [];
 
     // ============================================
     // UTILIDADES
@@ -497,58 +542,6 @@ function parsePS3CSV(text) {
             favorito: getColumnValue(cols, idxFavorito),
             terminado: getColumnValue(cols, idxTerminado),
             videoUrl: getColumnValue(cols, idxVideo)
-        });
-    }
-
-    return rows;
-}
-
-    // ============================================
-    // PARSER CSV - LISTA (para navegación)
-    // ============================================
-function parseListaCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (!lines.length) return [];
-
-    const header = parseCSVLine(lines[0]);
-    const rows = [];
-
-    const idxID        = header.indexOf("ID");
-    const idxTitulo    = header.indexOf("TITULO_MOSTRAR");
-    const idxPub       = header.indexOf("PUBLISHER_MOSTRAR");
-    const idxAnio      = header.indexOf("AÑO_MOSTRAR");
-    const idxGenero    = header.indexOf("GENERO_MOSTRAR");
-    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
-    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
-    const idxJugadores = header.indexOf("JUGADORES_MOSTRAR");
-    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
-    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
-
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue;
-
-        const cols = parseCSVLine(line);
-        const id     = getColumnValue(cols, idxID);
-        const titulo = getColumnValue(cols, idxTitulo);
-
-        if (!titulo) continue;
-
-        const displayTitulo = formatTitleWithArticle(titulo);
-
-        rows.push({
-            id,
-            titulo,
-            displayTitulo,
-            sortKey: displayTitulo.toLowerCase(),
-            pub:       getColumnValue(cols, idxPub),
-            anio:      getColumnValue(cols, idxAnio),
-            genero:    getColumnValue(cols, idxGenero),
-            subgenero: getColumnValue(cols, idxSubgenero),
-            favorito:  getColumnValue(cols, idxFavorito),
-            jugadores: getColumnValue(cols, idxJugadores),
-            terminado: getColumnValue(cols, idxTerminado),
-            desarrollo: getColumnValue(cols, idxDesarrollo)
         });
     }
 
@@ -794,7 +787,6 @@ function updatePuntuacion(game) {
     if (!puntuacionEl || !ratingEl || !starsEl) return;
 
     const valor = (game.puntuacion || "").trim();
-    console.log("Puntuación del juego:", valor);
 
     if (valor) {
         // Texto debajo de PlayStation 3
@@ -816,7 +808,6 @@ function updatePuntuacion(game) {
 
         // El porcentaje es directamente la nota (ya es de 0 a 100)
         const porcentaje = nota;
-        console.log("Nota numérica:", nota, "→ porcentaje barra:", porcentaje);
 
         // Elegir color (adaptado para escala 0-100)
         let color = "#ff4b4b"; // rojo < 50
@@ -1507,7 +1498,72 @@ function updateImagenesAdicionales(game) {
         }
     }
 
-       
+    // ============================================
+    // PREFETCHING DE FICHAS ADYACENTES
+    // ============================================
+
+    function prefetchAdjacentGames() {
+        // Esperar 2 segundos para que el usuario empiece a leer
+        setTimeout(() => {
+            const prevIndex = currentGameIndex - 1;
+            const nextIndex = currentGameIndex + 1;
+            
+            console.log(`[Prefetch] Precargando fichas adyacentes...`);
+            
+            // Prefetch anterior
+            if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
+                const prevGame = sortedGamesList[prevIndex];
+                const prevPlatform = prevGame.plataforma || CURRENT_PLATFORM;
+                prefetchGameData(prevPlatform, prevGame.id);
+            }
+            
+            // Prefetch siguiente
+            if (nextIndex >= 0 && nextIndex < sortedGamesList.length) {
+                const nextGame = sortedGamesList[nextIndex];
+                const nextPlatform = nextGame.plataforma || CURRENT_PLATFORM;
+                prefetchGameData(nextPlatform, nextGame.id);
+            }
+        }, PREFETCH_DELAY);
+    }
+
+    async function prefetchGameData(platform, gameId) {
+        // Verificar si ya está cacheada
+        const cached = getCachedFicha(platform, gameId);
+        if (cached) {
+            console.log(`[Prefetch] Ficha ${gameId} ya en caché ✓`);
+            return;
+        }
+        
+        try {
+            // Obtener datos del CSV (que ya está cacheado)
+            const cacheKey = `ficha_${platform}_${CACHE_VERSION}`;
+            let games = getCachedData(cacheKey);
+            
+            if (!games) {
+                // Si por alguna razón no está cacheado, descargarlo
+                const platformConfig = PLATFORM_CONFIG[platform];
+                if (!platformConfig) return;
+                
+                const response = await fetch(platformConfig.csvUrl);
+                if (!response.ok) return;
+                
+                const text = await response.text();
+                games = parsePS3CSV(text);
+                setCachedData(cacheKey, games);
+            }
+            
+            // Buscar el juego específico
+            const game = games.find(row => row.id === gameId);
+            if (game) {
+                // Cachear la ficha individual
+                setCachedFicha(platform, gameId, game);
+                console.log(`[Prefetch] Ficha ${gameId} precargada ✓`);
+            }
+            
+        } catch (err) {
+            console.warn(`[Prefetch] Error precargando ${gameId}:`, err);
+        }
+    }
 
     // ============================================
     // NAVEGACIÓN ENTRE JUEGOS
@@ -1679,22 +1735,52 @@ function attachVoiceStopToNavigation() {
         const filterField = (getQueryParam("filterField") || "").toLowerCase();
         const filterValue = (getQueryParam("filterValue") || "").trim();
 
-        // Elegir qué CSV cargar según el origen
-        const csvUrl = fromColeccion ? COLECCION_CSV_URL : PS3_LISTA_CSV_URL;
-
-        const response = await fetch(csvUrl);
-        if (!response.ok) {
-            throw new Error("No se pudo cargar la lista");
-        }
-
-        const text = await response.text();
-
-        // Parsear según el origen
         let games;
+        
         if (fromColeccion) {
-            games = parseColeccionCSV(text);
+            // Solo en colección necesitamos descargar CSV especial
+            const cacheKey = `coleccion_${CACHE_VERSION}`;
+            games = getCachedData(cacheKey);
+            
+            if (!games) {
+                const response = await fetch(COLECCION_CSV_URL);
+                if (!response.ok) throw new Error("No se pudo cargar colección");
+                
+                const text = await response.text();
+                games = parseColeccionCSV(text);
+                setCachedData(cacheKey, games);
+            }
         } else {
-            games = parseListaCSV(text);
+            // Si allGamesData está vacío (caso de ficha cacheada), cargar CSV
+            if (!allGamesData || allGamesData.length === 0) {
+                const cacheKey = `ficha_${CURRENT_PLATFORM}_${CACHE_VERSION}`;
+                allGamesData = getCachedData(cacheKey);
+                
+                if (!allGamesData) {
+                    const response = await fetch(CONFIG.csvUrl);
+                    if (!response.ok) throw new Error("No se pudo cargar el CSV");
+                    
+                    const text = await response.text();
+                    allGamesData = parsePS3CSV(text);
+                    setCachedData(cacheKey, allGamesData);
+                }
+            }
+            
+            // REUTILIZAR datos ya cargados - NO DESCARGA NADA
+            games = allGamesData.map(g => ({
+                id: g.id,
+                titulo: g.titulo,
+                displayTitulo: formatTitleWithArticle(g.titulo),
+                sortKey: formatTitleWithArticle(g.titulo).toLowerCase(),
+                pub: g.publisher,
+                anio: g.anio,
+                genero: g.genero,
+                subgenero: g.subgenero,
+                favorito: g.favorito,
+                jugadores: g.jugadores,
+                terminado: g.terminado,
+                desarrollo: g.desarrollo
+            }));
         }
 
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
@@ -1705,7 +1791,6 @@ function attachVoiceStopToNavigation() {
         if (fromColeccion) {
             currentGroupLabel = "Mi Colección";
 
-            // Aplicar filtros de búsqueda si existen
             if (searchQuery) {
                 const qNorm = normalizeText(searchQuery);
                 const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
@@ -1727,7 +1812,6 @@ function attachVoiceStopToNavigation() {
                     filteredGames = games.filter(game => normalizeText(game.formato || "").includes("fisico"));
                     currentGroupLabel = "Formato Físico";
                 } else {
-                    // Verificar si es un filtro de plataforma
                     const platformKeys = Object.keys(PLATFORM_CONFIG).map(k => k.toLowerCase());
                     if (platformKeys.includes(qNorm)) {
                         filteredGames = games.filter(game => 
@@ -1767,7 +1851,6 @@ function attachVoiceStopToNavigation() {
             currentGroupLabel = `Favoritos`;
         } else if (searchQuery) {
             const qNorm = normalizeText(searchQuery);
-            
             const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
             
             if (singleCharMatch) {
@@ -1776,9 +1859,7 @@ function attachVoiceStopToNavigation() {
                     const titleNorm = normalizeText(game.sortKey || "");
                     return titleNorm.startsWith(char);
                 });
-                
             } else if (qNorm === "fav") {
-                // Tratamiento especial para "fav"
                 filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
                 currentGroupLabel = `Favoritos`;
             } else {
@@ -1833,16 +1914,37 @@ function attachVoiceStopToNavigation() {
         }
 
         try {
-            const response = await fetch(CONFIG.csvUrl);
-            if (!response.ok) {
-                throw new Error("No se pudo cargar el CSV");
-            }
-
-            const text = await response.text();
-            const games = parsePS3CSV(text);
-            const game = games.find(row => row.id === gameId);
-
+            // PASO 1: Intentar obtener ficha individual cacheada
+            let game = getCachedFicha(CURRENT_PLATFORM, gameId);
+            
+            if (game) {
+                console.log(`[Caché] Ficha ${gameId} cargada desde caché ⚡`);
+            } else {
+                // PASO 2: Si no está cacheada, buscar en CSV
+                const cacheKey = `ficha_${CURRENT_PLATFORM}_${CACHE_VERSION}`;
+                let games = getCachedData(cacheKey);
+                
+                if (!games) {
+                    const response = await fetch(CONFIG.csvUrl);
+                    if (!response.ok) throw new Error("No se pudo cargar el CSV");
+                    
+                    const text = await response.text();
+                    games = parsePS3CSV(text);
+                    setCachedData(cacheKey, games);
+                    console.log(`[Caché] CSV ${CURRENT_PLATFORM} guardado en caché`);
+                }
+                
+                allGamesData = games;
+                game = games.find(row => row.id === gameId);
+                
+                // Cachear esta ficha para futuras visitas
                 if (game) {
+                    setCachedFicha(CURRENT_PLATFORM, gameId, game);
+                }
+            }
+            
+            if (game) {
+                // Renderizar ficha actual
                 updateTitle(game);
                 updateCover(game);
                 updatePuntuacion(game);
@@ -1854,11 +1956,15 @@ function attachVoiceStopToNavigation() {
                 updateDatosTecnicos(game);
                 updateGameplay(game);
                 updateImagenesAdicionales(game);
-                } else {
+            } else {
                 showError("Juego no encontrado");
-                }
+            }
 
+            // PASO 3: Cargar lista para navegación
             await loadGamesList(gameId);
+            
+            // PASO 4: Prefetch de fichas adyacentes (en background)
+            prefetchAdjacentGames();
 
         } catch (err) {
             console.error(`Error cargando ${CONFIG.shortName}:`, err);
