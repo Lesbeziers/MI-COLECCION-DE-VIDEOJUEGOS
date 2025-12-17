@@ -1803,6 +1803,8 @@ function attachVoiceStopToNavigation() {
             }
             
             // REUTILIZAR datos ya cargados - NO DESCARGA NADA
+            console.log("[DEBUG] allGamesData[0] ANTES de map:", allGamesData[0]);
+            console.log("[DEBUG] allGamesData[0].id:", allGamesData[0]?.id);
             games = allGamesData.map(g => ({
                 id: g.id,
                 titulo: g.titulo,
@@ -1817,6 +1819,7 @@ function attachVoiceStopToNavigation() {
                 terminado: g.terminado,
                 desarrollo: g.desarrollo
             }));
+            console.log("[DEBUG] games[0] DESPUÉS de map:", games[0]);
         }
 
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
