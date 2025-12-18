@@ -213,11 +213,12 @@
                 value: value
             }));
         } catch (e) {
+            // Si falla por quota, no pasa nada - seguimos sin caché
             console.warn("No se pudo guardar en caché:", e);
         }
     }
 
-    // Caché de fichas individuales
+    // Caché de fichas individuales (estas sí caben)
     function getCachedFicha(gameId) {
         const key = `ficha_spectrum_${gameId}`;
         return getCachedData(key);
@@ -231,8 +232,14 @@
     // ============================================
     // CONFIGURACIÓN
     // ============================================
+    
+    // CSV completo (solo para cargar ficha actual - NO SE CACHEA por ser demasiado grande)
     const ZX_SPECTRUM_CSV_URL = 
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv";
+
+    // CSV ligero para navegación (SÍ SE CACHEA)
+    const SPECTRUM_LISTA_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
 
     // URL del CSV de colección completa (para navegación desde coleccion.html)
     const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
@@ -247,9 +254,6 @@
     let additionalImagesKeydownBound = false;
     let modalAbierta = false;
     let currentGroupLabel = "";
-
-    // Variable global para compartir datos
-    let allGamesData = [];
 
     // Función para volver a la lista
     function goBackToList() {
@@ -412,7 +416,7 @@ function parseRevistasList(text) {
 
        
 // ============================================
-// PARSER CSV - FICHA (datos completos) con soporte de filas partidas
+// PARSER CSV - FICHA COMPLETA (datos completos)
 // ============================================
 function parseSpectrumCSV(text) {
     const lines = text.trim().split(/\r?\n/);
@@ -513,6 +517,51 @@ function parseSpectrumCSV(text) {
     }
 
     return rows;
+}
+
+// ============================================
+// PARSER CSV - LISTA LIGERA (para navegación)
+// ============================================
+function parseSpectrumListaCSV(text) {
+    const rows = parseCSV(text);
+    if (rows.length === 0) return [];
+
+    const header = rows[0];
+    const games = [];
+
+    const idxID = header.indexOf("ID");
+    const idxTitulo = findColumnIndex(header, ["TITULO_MOSTRAR", "TITULO", "TÍTULO"]);
+    const idxAnio = findColumnIndex(header, ["AÑO_MOSTRAR", "AÑO"]);
+    const idxPublisher = findColumnIndex(header, ["PUBLISHER_MOSTRAR", "PUBLISHER"]);
+    const idxGenero = findColumnIndex(header, ["GENERO_MOSTRAR", "GÉNERO", "GENERO"]);
+    const idxSubgenero = findColumnIndex(header, ["SUBGENERO_MOSTRAR", "SUBGÉNERO", "SUBGENERO"]);
+    const idxFavorito = header.indexOf("FAVORITO");
+    const idxTerminado = header.indexOf("TERMINADO");
+
+    for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i];
+        const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
+        const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
+
+        if (!id || !titulo) continue;
+
+        const displayTitulo = formatTitleWithArticle(titulo);
+
+        games.push({
+            id,
+            titulo,
+            displayTitulo,
+            sortKey: displayTitulo.toLowerCase(),
+            anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
+            pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
+            genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
+            subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
+            favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
+            terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : ""
+        });
+    }
+
+    return games;
 }
 
 // ============================================
@@ -1497,6 +1546,8 @@ function updateRevistas(game) {
             const prevIndex = currentGameIndex - 1;
             const nextIndex = currentGameIndex + 1;
             
+            console.log(`[Prefetch] Precargando fichas adyacentes...`);
+            
             if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
                 const prevGame = sortedGamesList[prevIndex];
                 prefetchGameData(prevGame.id);
@@ -1510,27 +1561,28 @@ function updateRevistas(game) {
     }
 
     async function prefetchGameData(gameId) {
+        // Verificar si ya está cacheada la ficha individual
         const cached = getCachedFicha(gameId);
         if (cached) {
+            console.log(`[Prefetch] Ficha ${gameId} ya en caché ✓`);
             return;
         }
         
         try {
-            const cacheKey = `ficha_spectrum_${CACHE_VERSION}`;
-            let games = getCachedData(cacheKey);
+            // Descargar CSV completo y buscar solo este juego
+            // NO cacheamos el CSV entero porque es demasiado grande
+            const response = await fetch(ZX_SPECTRUM_CSV_URL);
+            if (!response.ok) return;
             
-            if (!games) {
-                const response = await fetch(ZX_SPECTRUM_CSV_URL);
-                if (!response.ok) return;
-                
-                const text = await response.text();
-                games = parseSpectrumCSV(text);
-                setCachedData(cacheKey, games);
-            }
+            const text = await response.text();
+            const games = parseSpectrumCSV(text);
             
+            // Buscar el juego específico
             const game = games.find(row => row.id === gameId);
             if (game) {
+                // Cachear solo la ficha individual (esto SÍ cabe)
                 setCachedFicha(gameId, game);
+                console.log(`[Prefetch] Ficha ${gameId} precargada ✓`);
             }
             
         } catch (err) {
@@ -1719,6 +1771,9 @@ function attachVoiceStopToNavigation() {
     }
 }
 
+    // ============================================
+    // CARGA DE LISTA PARA NAVEGACIÓN (usa CSV ligero)
+    // ============================================
     async function loadGamesList(gameId) {
     try {
         const fromColeccion = getQueryParam("from") === "coleccion";
@@ -1740,37 +1795,25 @@ function attachVoiceStopToNavigation() {
                 setCachedData(cacheKey, games);
             }
         } else {
-            // Reutilizar allGamesData
-            if (!allGamesData || allGamesData.length === 0) {
-                const cacheKey = `ficha_spectrum_${CACHE_VERSION}`;
-                allGamesData = getCachedData(cacheKey);
-                
-                if (!allGamesData) {
-                    const response = await fetch(ZX_SPECTRUM_CSV_URL);
-                    if (!response.ok) throw new Error("No se pudo cargar el CSV");
-                    
-                    const text = await response.text();
-                    allGamesData = parseSpectrumCSV(text);
-                    setCachedData(cacheKey, allGamesData);
-                }
-            }
+            // OPTIMIZACIÓN: Usar CSV ligero para navegación
+            const cacheKey = `spectrum_lista_${CACHE_VERSION}`;
+            games = getCachedData(cacheKey);
             
-            games = allGamesData.map(g => ({
-                id: g.id,
-                titulo: g.titulo,
-                displayTitulo: formatTitleWithArticle(g.titulo),
-                sortKey: formatTitleWithArticle(g.titulo).toLowerCase(),
-                pub: g.pub,
-                anio: g.anio,
-                genero: g.genero,
-                subgenero: g.subgenero,
-                favorito: g.favorito,
-                terminado: g.terminado,
-                desarrollo: g.desarrollo
-            }));
+            if (!games) {
+                console.log("[Nav] Cargando lista ligera para navegación...");
+                const response = await fetch(SPECTRUM_LISTA_CSV_URL);
+                if (!response.ok) throw new Error("No se pudo cargar la lista");
+                
+                const text = await response.text();
+                games = parseSpectrumListaCSV(text);
+                setCachedData(cacheKey, games);
+                console.log(`[Nav] Lista cacheada: ${games.length} juegos`);
+            } else {
+                console.log(`[Nav] Lista cargada desde caché: ${games.length} juegos`);
+            }
         }
 
-        // CORREGIDO: Filtrar filas vacías antes de ordenar
+        // Filtrar filas vacías antes de ordenar
         games = games.filter(g => g.id && g.titulo);
         
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
@@ -1902,24 +1945,21 @@ function attachVoiceStopToNavigation() {
             if (game) {
                 console.log(`[Caché] Ficha ${gameId} cargada desde caché ⚡`);
             } else {
-                // PASO 2: Si no está cacheada, buscar en CSV
-                const cacheKey = `ficha_spectrum_${CACHE_VERSION}`;
-                let games = getCachedData(cacheKey);
+                // PASO 2: Si no está cacheada, descargar CSV completo
+                // NO intentamos cachear el CSV entero porque es demasiado grande
+                console.log(`[Ficha] Descargando datos para ${gameId}...`);
+                const response = await fetch(ZX_SPECTRUM_CSV_URL);
+                if (!response.ok) throw new Error("No se pudo cargar el CSV");
                 
-                if (!games) {
-                    const response = await fetch(ZX_SPECTRUM_CSV_URL);
-                    if (!response.ok) throw new Error("No se pudo cargar el CSV");
-                    
-                    const text = await response.text();
-                    games = parseSpectrumCSV(text);
-                    setCachedData(cacheKey, games);
-                }
+                const text = await response.text();
+                const games = parseSpectrumCSV(text);
                 
-                allGamesData = games;
                 game = games.find(row => row.id === gameId);
                 
+                // Cachear solo la ficha individual (esto SÍ cabe)
                 if (game) {
                     setCachedFicha(gameId, game);
+                    console.log(`[Caché] Ficha ${gameId} guardada en caché`);
                 }
             }
             
@@ -1939,7 +1979,7 @@ function attachVoiceStopToNavigation() {
                 showError("Juego no encontrado");
             }
 
-            // PASO 3: Cargar lista para navegación
+            // PASO 3: Cargar lista ligera para navegación
             await loadGamesList(gameId);
             
             // PASO 4: Prefetch de fichas adyacentes
@@ -1952,7 +1992,7 @@ function attachVoiceStopToNavigation() {
     }
 
     // ============================================
-    // INICIALIZACIÓN - CORREGIDO con contexto
+    // INICIALIZACIÓN
     // ============================================
     
     document.addEventListener("DOMContentLoaded", () => {
