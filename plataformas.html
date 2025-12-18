@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Plataformas</title>
     <link rel="stylesheet" href="assets/css/global.css">
+    <style>
+        /* Plataformas inactivas (sin onclick) al 50% de opacidad */
+        .platform-card:not([onclick]) {
+            opacity: 0.5;
+            cursor: default;
+        }
+    </style>
 </head>
 
 <body class="plataformas">
