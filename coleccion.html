@@ -69,6 +69,7 @@
         
         /* SEGA: Master System, Megadrive, Saturn, Dreamcast, Game Gear */
         .platform-badge.MASTERSYSTEM,
+        .platform-badge.MSYSTEM,
         .platform-badge.MEGADRIVE,
         .platform-badge.GENESIS,
         .platform-badge.SATURN,
@@ -177,6 +178,17 @@ const PLATFORM_FICHA_CONFIG = {
     "DREAMCAST": { page: "igdb-ficha.html", platform: "DREAMCAST" }
 };
 
+// Mapeo de plataformas a nombres mostrados
+const PLATFORM_DISPLAY_NAMES = {
+    "MSYSTEM": "Master System",
+    "ZXSPECTRUM": "ZX Spectrum",
+    "ZX_SPECTRUM": "ZX Spectrum",
+    "MEGADRIVE": "Megadrive",
+    "DREAMCAST": "Dreamcast",
+    "GAMECUBE": "GameCube",
+    "WIIU": "Wii U",
+    "PSVITA": "PS Vita"
+};
     // Lista global con TODOS los juegos
     let allGames = [];
     // Contexto del último filtro aplicado
@@ -446,7 +458,7 @@ const PLATFORM_FICHA_CONFIG = {
         const platformBadge = document.createElement("span");
         const platformClass = getPlatformClass(game.plataforma);
         platformBadge.className = `platform-badge ${platformClass}`;
-        platformBadge.textContent = game.plataforma;
+        platformBadge.textContent = PLATFORM_DISPLAY_NAMES[game.plataforma] || game.plataforma;
         meta.appendChild(platformBadge);
 
         if (game.anio) {
