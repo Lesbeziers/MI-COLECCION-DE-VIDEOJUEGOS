@@ -148,6 +148,7 @@
     // =========================================
     // CONFIGURACIÓN
     // =========================================
+    const DEBUG = false;
     const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
 
     // Mapeo de plataformas a sus páginas de ficha
@@ -285,7 +286,9 @@ const PLATFORM_FICHA_CONFIG = {
 
             const id         = (idxID >= 0 && cols[idxID]) ? cols[idxID].trim() : "";
             const titulo     = (idxTitulo >= 0 && cols[idxTitulo]) ? cols[idxTitulo].trim() : "";
-            const plataforma = (idxPlataforma >= 0 && cols[idxPlataforma]) ? cols[idxPlataforma].trim().toUpperCase() : "";
+            let plataforma = (idxPlataforma >= 0 && cols[idxPlataforma]) ? cols[idxPlataforma].trim().toUpperCase() : "";
+            if (plataforma === "ZX SPECTRUM") plataforma = "ZX_SPECTRUM";
+            if (plataforma === "SPECTRUM") plataforma = "ZX_SPECTRUM";
             const anio       = (idxAnio >= 0 && cols[idxAnio]) ? cols[idxAnio].trim() : "";
             const caratulaRaw = (idxCaratula >= 0 && cols[idxCaratula]) ? cols[idxCaratula].trim() : "";
             const caratula   = getValidThumbUrl(caratulaRaw);  // Procesar URLs múltiples
@@ -327,6 +330,7 @@ const PLATFORM_FICHA_CONFIG = {
                 publisher,
                 desarrollo,
                 fichaPage,
+                rowNumber: i + 1,
                 sortKey: displayTitulo.toLowerCase()
             });
         }
@@ -538,23 +542,26 @@ function getFichaUrl(game) {
 
             // Click handler
             card.addEventListener("click", () => {
-                if (game.id) {
-                    const searchInput = document.querySelector(".spectrum-search-input");
-                    const query = searchInput ? searchInput.value.trim() : "";
-                    let url = getFichaUrl(game);
-
-                    // Añadir parámetros de búsqueda para volver
-                    if (query) {
-                        url += "&search=" + encodeURIComponent(query);
-                    }
-                    if (currentFilterField && currentFilterValue) {
-                        url += `&filterField=${encodeURIComponent(currentFilterField)}&filterValue=${encodeURIComponent(currentFilterValue)}`;
-                    }
-                    // Añadir marca de que viene de colección
-                    url += "&from=coleccion";
-
-                    window.location.href = url;
+                if (!game.id) {
+                    console.warn(`Juego sin ID, no se navega: "${game.titulo}" | ${game.plataforma} | fila ${game.rowNumber}`);
+                    return;
                 }
+
+                const searchInput = document.querySelector(".spectrum-search-input");
+                const query = searchInput ? searchInput.value.trim() : "";
+                let url = getFichaUrl(game);
+
+                // Añadir parámetros de búsqueda para volver
+                if (query) {
+                    url += "&search=" + encodeURIComponent(query);
+                }
+                if (currentFilterField && currentFilterValue) {
+                    url += `&filterField=${encodeURIComponent(currentFilterField)}&filterValue=${encodeURIComponent(currentFilterValue)}`;
+                }
+                    // Añadir marca de que viene de colección
+                url += "&from=coleccion";
+
+                window.location.href = url;
             });
 
             card.style.cursor = "pointer";
@@ -757,7 +764,19 @@ function getFichaUrl(game) {
             games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
 
             allGames = games;
-            
+  
+            if (DEBUG) {
+                console.log("CSV URL final:", COLECCION_CSV_URL);
+                console.log("Filas parseadas:", games.length);
+                const zxExamples = games.filter(game => game.plataforma === "ZX_SPECTRUM").slice(0, 3);
+                zxExamples.forEach(game => {
+                    console.log("ZX ejemplo:", {
+                        id: game.id,
+                        plataforma: game.plataforma,
+                        page: getFichaUrl(game)
+                    });
+                });
+            }          
             setupImageObserver();
             renderGames(allGames, "");
             setupSearch();
