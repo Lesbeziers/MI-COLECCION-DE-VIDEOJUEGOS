@@ -1713,3 +1713,125 @@ body.ficha-final.loading .ficha-cover-wrapper {
         left: -1px;
     }
 }
+
+/* ============================================
+   COMMODORE 64 - CABECERA EXTENDIDA
+============================================ */
+.top-bar--c64 .top-bar-inner {
+    padding-bottom: 6px;
+}
+
+.c64-header-box {
+    width: 100%;
+}
+
+.c64-search-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.c64-search-box {
+    position: relative;
+    width: 85%;
+    max-width: 420px;
+}
+
+.c64-search-input {
+    width: 100%;
+    height: 38px;
+    background: none;
+    border: 2px solid #ccc;
+    color: #ddd;
+    padding: 0 40px 0 14px;
+    border-radius: 6px;
+}
+
+.c64-search-icon {
+    width: 18px !important;
+    height: 18px !important;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.c64-records-block {
+    padding: 9px 0 4px 0;
+}
+
+.c64-records-text {
+    font-size: 16px;
+    color: #ddd;
+    text-align: center;
+}
+
+/* ============================================
+   MÁRGENES DE CONTENIDO PRINCIPAL - C64
+============================================ */
+.top-bar--c64 + main.platforms-content {
+    margin-top: 0;
+}
+
+body.c64-lista main.platforms-content {
+    margin-top: 160px;
+}
+
+/* ============================================
+   LISTA DE JUEGOS COMMODORE 64
+============================================ */
+.c64-list-wrapper {
+    width: 100%;
+    max-width: 1080px;
+    margin: 10px auto 40px;
+}
+
+.c64-card {
+    display: flex;
+    gap: 14px;
+    padding: 10px 16px;
+    text-align: left;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.c64-thumb-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #3a3a3a;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.c64-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.c64-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.c64-title {
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.c64-subtitle {
+    font-size: 14px;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
