@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Commodore 64</title>
+    <link rel="stylesheet" href="assets/css/global.css">
+</head>
+
+<body class="c64-lista">
+
+    <!-- BANDA SUPERIOR -->
+    <header class="top-bar top-bar--c64">
+
+    <!-- FILA 1: ATRÁS + TÍTULO + HOME -->
+    <div class="top-bar-inner">
+        <img src="assets/img/ic_back.svg"
+             class="top-bar-back"
+             alt="Atrás"
+             onclick="window.location.href='plataformas.html'">
+
+        <h1 class="top-bar-title">COMMODORE 64</h1>
+
+        <img src="assets/img/ic_home.svg"
+             class="top-bar-home"
+             alt="Home"
+             onclick="window.location.href='index.html'">
+    </div>
+
+    <!-- FILA 2: BUSCADOR -->
+    <div class="c64-header-box">
+        <div class="c64-search-wrapper">
+            <div class="c64-search-box">
+                <input type="text"
+                       class="c64-search-input"
+                       placeholder="Buscar">
+
+                <img src="assets/img/ic_search.svg"
+                     class="c64-search-icon"
+                     alt="Buscar">
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 3: CONTADOR -->
+    <div class="c64-records-block">
+        <p class="c64-records-text">Cargando registros...</p>
+    </div>
+
+</header>
+
+
+    <!-- CONTENIDO DE LA PÁGINA C64 -->
+    <main class="platforms-content">
+
+        <!-- =========================================
+             LISTA C64
+        ========================================== -->
+        <section class="c64-list-wrapper">
+            <!-- Contenedor donde se inyectarán las tarjetas vía JS -->
+            <div id="c64-list" class="c64-list-grid">
+                <p class="c64-list-loading">Cargando listado de juegos...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+  // =========================================
+  // URL DEL FEED CSV C64_LISTA
+  // =========================================
+  const C64_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1289630212&single=true&output=csv";
+
+  // Lista global con TODOS los juegos (para el buscador)
+  let allGames = [];
+  // Contexto del último filtro aplicado
+  let currentFilterField = "";
+  let currentFilterValue = "";
+ 
+  // =========================================
+  // PARSER DE UNA LÍNEA CSV (RESPETA COMILLAS)
+  // =========================================
+  function parseCSVLine(line) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+
+      if (ch === '"') {
+        // Si estamos dentro de comillas y vemos "" → comilla escapada
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // saltamos la segunda
+        } else {
+          inQuotes = !inQuotes; // abrir/cerrar bloque de comillas
+        }
+      } else if (ch === "," && !inQuotes) {
+        // Separador de campo real
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+
+    // Último campo
+    result.push(current.trim());
+    return result;
+  }
+
+  // =========================================
+  // UTILIDAD PARA PARSEAR EL CSV COMPLETO
+  // =========================================
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length === 0) return [];
+
+    const header = parseCSVLine(lines[0]);
+    const rows = [];
+
+    const idxID     = header.indexOf("ID");
+    const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+    const idxPub    = header.indexOf("PUBLISHER_MOSTRAR");
+    const idxAnio   = header.indexOf("AÑO_MOSTRAR");
+    const idxThumb  = header.indexOf("THUMB_URL");
+
+    // 🔹 CAMBIO: C64 usa AUTORES (con roles) en lugar de AUTOR
+    const idxAutores = header.indexOf("AUTORES_MOSTRAR");
+    const idxDes     = header.indexOf("DESARROLLO");
+    const idxContr   = header.indexOf("CONTRIBUCIONES");
+    const idxGenero  = header.indexOf("GENERO_MOSTRAR");
+    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+    
+    // Columnas de datos técnicos
+    const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+    const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
+    const idxFunciona  = header.indexOf("FUNCIONA_MOSTRAR"); // 🔹 NUEVO para C64
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+
+      const cols = parseCSVLine(line);
+
+      const id    = (idxID     >= 0 && cols[idxID]     !== undefined) ? cols[idxID].trim()     : "";
+      const titulo= (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
+      const pub   = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
+      const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
+      const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) ? cols[idxThumb].trim()  : "";
+
+      const autores = (idxAutores >= 0 && cols[idxAutores] !== undefined) ? cols[idxAutores].trim() : "";
+      const des     = (idxDes     >= 0 && cols[idxDes]     !== undefined) ? cols[idxDes].trim()     : "";
+      const contr   = (idxContr   >= 0 && cols[idxContr]   !== undefined) ? cols[idxContr].trim()   : "";
+      const genero  = (idxGenero  >= 0 && cols[idxGenero]  !== undefined) ? cols[idxGenero].trim()  : "";
+      const subgenero = (idxSubgenero >= 0 && cols[idxSubgenero] !== undefined) ? cols[idxSubgenero].trim() : "";
+
+      // Datos técnicos
+      const terminado = (idxTerminado >= 0 && cols[idxTerminado] !== undefined) ? cols[idxTerminado].trim() : "";
+      const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
+      const funciona  = (idxFunciona  >= 0 && cols[idxFunciona]  !== undefined) ? cols[idxFunciona].trim()  : "";
+
+      // Si no hay título, descartamos la fila
+      if (!titulo) continue;
+
+      // Título SOLO para mostrar (con artículo al final)
+      const displayTitulo = formatTitleWithArticle(titulo);
+
+      rows.push({
+        id,
+        titulo,
+        displayTitulo,
+        pub,
+        anio,
+        thumb,
+        autores,
+        des,
+        contr,
+        genero,
+        subgenero,
+        terminado,
+        favorito,
+        funciona,
+        sortKey: displayTitulo.toLowerCase()
+      });
+
+    }
+
+    return rows;
+  }
+
+  // =========================================
+  // FORMATEO DE TÍTULOS CON ARTÍCULO AL FINAL
+  // Ej: "The Great Escape" → "Great Escape, The"
+  //     "La Abadía del Crimen" → "Abadía del Crimen, La"
+  // =========================================
+  function formatTitleWithArticle(title) {
+    if (!title) return "";
+    const t = title.trim();
+
+    // Artículos que queremos mover al final
+    const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+    const match = t.match(re);
+
+    if (!match) {
+      return t;  // Sin artículo al principio → se deja igual
+    }
+
+    const article = match[1]; // "The", "La", etc.
+    const rest    = match[2]; // El resto
+    return rest + ", " + article;
+  }
+
+  // =========================================
+  // NORMALIZAR TEXTO (minúsculas + sin tildes)
+  // para que el buscador sea más amable
+  // =========================================
+  function normalizeText(str) {
+    return (str || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // quita acentos
+  }
+
+  // =========================================
+  // CREACIÓN DE UNA TARJETA DE JUEGO
+  // =========================================
+  function createGameCard(game) {
+    const card = document.createElement("article");
+    card.className = "c64-card";
+
+    // --- Thumb ---
+    const thumbWrapper = document.createElement("div");
+    thumbWrapper.className = "c64-thumb-wrapper";
+
+    // Normalizamos el thumb siguiendo la convención de los slots separados por coma
+    // y el placeholder "--" en el primer slot para indicar que debe usarse el segundo.
+    const rawThumb = (game.thumb || "").trim();
+    const thumbParts = rawThumb ? rawThumb.split(",").map(p => p.trim()) : [];
+
+    let thumbUrl = "";
+
+    if (thumbParts.length > 0) {
+      const first = thumbParts[0];
+
+      if (first && first !== "--") {
+        thumbUrl = first;
+      } else {
+        const second = thumbParts[1];
+        if (second && second !== "--") {
+          thumbUrl = second;
+        }
+      }
+    }
+
+    if (thumbUrl) {
+      const img = document.createElement("img");
+      img.className = "c64-thumb-img";
+      img.loading = "lazy";
+      img.dataset.src = thumbUrl;
+      img.alt = game.titulo || "Screenshot";
+      img.style.opacity = "0";
+      img.style.transition = "opacity 0.3s ease";
+      img.onload = () => { img.style.opacity = "1"; };
+      thumbWrapper.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "c64-thumb-placeholder";
+      placeholder.textContent = "SIN SCREENSHOT";
+      thumbWrapper.appendChild(placeholder);
+    }
+
+    // --- Meta (textos) ---
+    const meta = document.createElement("div");
+    meta.className = "c64-meta";
+
+    const titleEl = document.createElement("h3");
+    titleEl.className = "c64-title";
+    titleEl.textContent = game.displayTitulo || game.titulo;
+    meta.appendChild(titleEl);
+
+    // Publisher en su propia línea
+    if (game.pub) {
+      const pubEl = document.createElement("p");
+      pubEl.className = "c64-subtitle";
+      pubEl.textContent = game.pub.replace(/[\"""«»„‟]+/g, "");
+      meta.appendChild(pubEl);
+    }
+
+    // Año en su propia línea
+    if (game.anio) {
+      const yearEl = document.createElement("p");
+      yearEl.className = "c64-subtitle";
+      yearEl.textContent = game.anio.replace(/[\"""«»„‟]+/g, "");
+      meta.appendChild(yearEl);
+    }
+
+    card.appendChild(thumbWrapper);
+    card.appendChild(meta);
+
+    return card;
+  }
+
+  // =========================================
+  // CARGAR THUMBS DE LOS ELEMENTOS VISIBLES
+  // Asigna el src real a las imágenes del listado actual
+  // =========================================
+  function loadVisibleThumbs() {
+    const container = document.getElementById("c64-list");
+    if (!container) return;
+
+    const images = container.querySelectorAll("img.c64-thumb-img[data-src]");
+    images.forEach(img => {
+      if (!img.src || img.src === window.location.href) {
+        img.src = img.dataset.src;
+      }
+    });
+  }
+
+  // =========================================
+  // PINTAR LISTA + ACTUALIZAR CONTADOR
+  // =========================================
+  function resetListScroll() {
+    const container = document.getElementById("c64-list");
+    if (!container) return;
+
+    requestAnimationFrame(() => {
+      container.scrollTop = 0;
+
+      const scrollableParent = container.closest(".platforms-content");
+      if (scrollableParent) {
+        scrollableParent.scrollTop = 0;
+      }
+
+      const scrollingElement = document.scrollingElement || document.documentElement;
+      if (scrollingElement) {
+        scrollingElement.scrollTop = 0;
+      }
+
+      if (typeof window !== "undefined" && window.scrollTo) {
+        window.scrollTo(0, 0);
+      }
+    });
+  }
+
+  function renderGames(gamesToRender, query = "") {
+    const container = document.getElementById("c64-list");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!gamesToRender.length) {
+      container.innerHTML = '<p class="c64-list-loading">No se han encontrado juegos que coincidan con la búsqueda.</p>';
+    } else {
+      gamesToRender.forEach(game => {
+        const card = createGameCard(game);
+
+        // 🔹 Hacer que toda la tarjeta sea clicable
+        card.addEventListener("click", () => {
+          if (game.id) {
+            const searchInput = document.querySelector(".c64-search-input");
+            const query = searchInput ? searchInput.value.trim() : "";
+            let url = "c64-ficha.html?id=" + encodeURIComponent(game.id);
+            if (query) {
+              url += "&search=" + encodeURIComponent(query);
+            }
+            if (currentFilterField && currentFilterValue) {
+              url += `&filterField=${encodeURIComponent(currentFilterField)}&filterValue=${encodeURIComponent(currentFilterValue)}`;
+            }
+            window.location.href = url;
+          }
+        });
+
+        // Cambiamos el cursor para que se note que es clicable
+        card.style.cursor = "pointer";
+
+        container.appendChild(card);
+      });
+    }
+
+    // Actualizar contador "X REGISTROS" o "N DE X REGISTROS"
+    const recordsEl = document.querySelector(".c64-records-text");
+    if (recordsEl) {
+      const total = allGames.length;
+      if (!query.trim()) {
+        recordsEl.textContent = total.toLocaleString("es-ES") + " REGISTROS";
+      } else {
+        const current = gamesToRender.length;
+        recordsEl.textContent =
+          current.toLocaleString("es-ES") +
+          " DE " +
+          total.toLocaleString("es-ES") +
+          " REGISTROS";
+      }
+    }
+
+    // Tras cada render de la lista, llevar el scroll al inicio
+    resetListScroll();
+
+    // Cargar los thumbs de los juegos filtrados
+    loadVisibleThumbs();
+  }
+    
+  // =========================================
+  // CONFIGURAR BUSCADOR
+  // =========================================
+  function setupSearch() {
+    const searchInput = document.querySelector(".c64-search-input");
+    if (!searchInput) return;
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value || "";
+      const trimmed = query.trim();
+
+      // =============================================
+      // UN SOLO CARÁCTER (letra o número) → mostrar solo 
+      // juegos que empiezan por ese carácter
+      // =============================================
+      const singleCharMatch = trimmed.match(/^([a-zñáéíóúü0-9])$/i);
+
+      if (singleCharMatch) {
+        const char = normalizeText(singleCharMatch[1]);
+
+        const filteredByChar = allGames.filter(game => {
+          const titleNorm = normalizeText(game.displayTitulo || game.titulo);
+          return titleNorm.startsWith(char);
+        });
+
+        renderGames(filteredByChar, trimmed);
+        currentFilterField = "";
+        currentFilterValue = "";
+        return; // ⬅️ IMPORTANTE: no seguir con el buscador normal
+      }
+
+      if (!trimmed) {
+        // Sin texto → lista completa
+        renderGames(allGames, "");
+        currentFilterField = "";
+        currentFilterValue = "";
+        return;
+      }
+
+      const qNorm = normalizeText(trimmed);
+
+      // =============================================
+      // FILTRO ESPECIAL: "fav" → juegos favoritos
+      // =============================================
+      if (qNorm === "fav") {
+        const filteredFav = allGames.filter(game => normalizeText(game.favorito) === "si");
+        renderGames(filteredFav, trimmed);
+        currentFilterField = "favorito";
+        currentFilterValue = trimmed;
+        return;
+      }
+
+      // =============================================
+      // FILTRO ESPECIAL: "terminado" → juegos terminados
+      // =============================================
+      if (qNorm === "terminado") {
+        const filteredTerminado = allGames.filter(game => normalizeText(game.terminado) === "si");
+        renderGames(filteredTerminado, trimmed);
+        currentFilterField = "terminado";
+        currentFilterValue = trimmed;
+        return;
+      }
+
+      // =============================================
+      // BÚSQUEDA GENERAL
+      // =============================================
+      const filtered = allGames.filter(game => {
+        const titleNorm     = normalizeText(game.displayTitulo || game.titulo);
+        const pubNorm       = normalizeText(game.pub);
+        const yearNorm      = normalizeText(game.anio);
+        const autoresNorm   = normalizeText(game.autores);
+        const desNorm       = normalizeText(game.des);
+        const contrNorm     = normalizeText(game.contr);
+        const generoNorm    = normalizeText(game.genero);
+        const subgeneroNorm = normalizeText(game.subgenero);
+
+        return (
+          titleNorm.includes(qNorm)     ||
+          pubNorm.includes(qNorm)       ||
+          yearNorm.includes(qNorm)      ||
+          autoresNorm.includes(qNorm)   ||
+          desNorm.includes(qNorm)       ||
+          contrNorm.includes(qNorm)     ||
+          generoNorm.includes(qNorm)    ||
+          subgeneroNorm.includes(qNorm)
+        );
+      });
+
+      // Guardar contexto del filtro si es un subgénero exacto
+      currentFilterField = "";
+      currentFilterValue = trimmed;
+
+      const isExactSubgenero =
+        filtered.length > 0 &&
+        filtered.every(game => normalizeText(game.subgenero) === qNorm);
+
+      if (isExactSubgenero) {
+        currentFilterField = "subgenero";
+      }
+        
+      renderGames(filtered, query);
+    });
+  }
+
+  // =========================================
+  // CARGA INICIAL DE LA LISTA
+  // =========================================
+  async function loadC64List() {
+    const container = document.getElementById("c64-list");
+    if (!container) return;
+
+    try {
+      container.innerHTML = '<p class="c64-list-loading">Cargando listado de juegos...</p>';
+
+      const response = await fetch(C64_LISTA_CSV_URL);
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el CSV");
+      }
+
+      const text = await response.text();
+      const games = parseCSV(text);
+
+      // Ordenar alfabéticamente usando sortKey (ya en minúsculas)
+      games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+      // Guardamos la lista completa para el buscador
+      allGames = games;
+
+      // Pintamos la lista completa (estado inicial, sin filtro)
+      renderGames(allGames, "");
+
+      // Configuramos el buscador (una sola vez)
+      setupSearch();
+
+    } catch (err) {
+      console.error("Error al cargar la lista C64:", err);
+      container.innerHTML = '<p class="c64-list-loading">Error al cargar la lista de juegos.</p>';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadC64List);
+</script>
+
+
+</body>
+</html>
