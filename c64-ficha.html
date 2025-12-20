@@ -411,9 +411,9 @@
             const rawAdditionalImages = getColumnValue(cols, idxImgAdic);
             const additionalImagesList = parseAdditionalImagesList(rawAdditionalImages);
             
-            // Limpiar THUMB: tomar solo primera URL
+            // Guardar screenshots completo (se procesará en updateScreenshots)
             let rawThumb = getColumnValue(cols, idxScreenshots);
-            rawThumb = rawThumb.replace(/[\r\n]+/g, ' ').trim().split(/\s+/)[0];
+            rawThumb = rawThumb.replace(/[\r\n]+/g, ',').trim();
 
             rows.push({
                 id: thisId,
@@ -451,11 +451,16 @@
     }
 
     function parseAdditionalImagesList(text) {
-        return (text || "")
-            .split(/\r?\n/)
-            .map(line => line.trim())
-            .filter(line => line !== "");
-    }
+    if (!text) return [];
+    
+    // Extraer todas las URLs válidas
+    const urlRegex = /https?:\/\/[^\s]+/g;
+    const matches = text.match(urlRegex);
+    
+    if (!matches) return [];
+    
+    return matches.map(url => url.trim()).filter(url => url && url !== "--");
+}
 
     function parseRevistasList(text) {
         return (text || "")
@@ -679,14 +684,44 @@
         return "";
     }
 
-    function getYouTubeThumbnail(embedUrl) {
-        if (!embedUrl) return "";
-        const match = embedUrl.match(/embed\/([^?&#\/]+)/);
-        if (match && match[1]) {
-            return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
-        }
-        return "";
+function normalizeYouTubeUrl(url) {
+    if (!url) return "";
+    
+    // Si ya es embed, devolverla tal cual
+    if (url.includes("/embed/")) return url;
+    
+    // Extraer ID de varios formatos
+    let videoId = null;
+    
+    // Formato: https://www.youtube.com/watch?v=VIDEO_ID
+    const watchMatch = url.match(/[?&]v=([^&#]+)/);
+    if (watchMatch) {
+        videoId = watchMatch[1];
     }
+    
+    // Formato: https://youtu.be/VIDEO_ID
+    const shortMatch = url.match(/youtu\.be\/([^?&#]+)/);
+    if (shortMatch) {
+        videoId = shortMatch[1];
+    }
+    
+    // Si encontramos ID, convertir a embed
+    if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    return url;
+}
+
+function getYouTubeThumbnail(url) {
+    if (!url) return "";
+    const normalizedUrl = normalizeYouTubeUrl(url);
+    const match = normalizedUrl.match(/embed\/([^?&#\/]+)/);
+    if (match && match[1]) {
+        return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+    }
+    return "";
+}
 
     // ============================================
     // ACTUALIZACIÓN DE UI
@@ -1048,7 +1083,7 @@
 
         if (!section || !frame || !placeholder) return;
 
-        const videoUrl = (game.videoUrl || "").trim();
+        const videoUrl = normalizeYouTubeUrl((game.videoUrl || "").trim());
 
         if (!videoUrl) {
             section.style.display = "none";
