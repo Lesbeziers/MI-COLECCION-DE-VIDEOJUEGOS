@@ -1119,6 +1119,114 @@ if (isPS3) {
   // FLUJO ORIGINAL ZX SPECTRUM
   // (copiado tal cual de tu script estable)
   // ===============================
+  // ====================================
+  // FLUJO COMMODORE 64 (LEMON64)
+  // ====================================
+  const isC64 = /c64|commodore.*64/i.test(sh.getName());
+  
+  if (isC64) {
+    const titulo = get('TÍTULO') || get('TITULO');
+    
+    if (!titulo) return uiAlert_('Falta el campo "TÍTULO" en la fila.');
+
+    const link = get('LINK');
+    if (!link) return uiAlert_('Falta el campo "LINK".');
+
+    // ====================================
+    // LEER DATOS TÉCNICOS DESDE LA HOJA
+    // ====================================
+    const tecnicos = {
+      formato: String(get('FORMATO') || '').trim(),
+      funciona: String(get('FUNCIONA') || '').trim(),
+      favorito: String(get('FAVORITO') || '').trim(),
+      terminado: String(get('TERMINADO') || '').trim(),
+      // Campos no usados en C64 (compatibilidad con buildPreviewHtml_)
+      zx2a: '',
+      tspec: '',
+      ubicacion: '',
+      tipoFormato: '',
+      masInfo: ''
+    };
+
+    // ====================================
+    // LEER OVERRIDES MANUALES DESDE LA HOJA
+    // ====================================
+    const overrides = {
+      caratula: String(get('CARÁTULA') || get('CARATULA') || '').trim(),
+      anio: String(get('AÑO') || get('ANO') || '').trim(),
+      publisher: String(get('PUBLISHER') || '').trim(),
+      desarrollador: String(get('DESARROLLADOR') || '').trim(),
+      autores: String(get('AUTORES') || '').trim(),
+      video: String(get('VIDEO') || '').trim(),
+      genero: String(get('GÉNERO') || get('GENERO') || '').trim(),
+      subgenero: String(get('SUBGÉNERO') || get('SUBGENERO') || '').trim(),
+      jugadores: String(get('JUGADORES') || '').trim(),
+      controles: String(get('CONTROLES') || '').trim(),
+      screenshots: String(get('SCREENSHOTS') || '').trim(),
+      imagenesExtra: String(get('IMÁGENES') || get('IMAGENES') || '').trim(),
+      instrucciones: String(get('INSTRUCCIONES') || '').trim(),
+      puntuacion: String(get('PUNTUACIÓN') || get('PUNTUACION') || '').trim(),
+      sinopsis: String(get('SINOPSIS') || '').trim(),
+      revistas: String(get('REVISTAS') || '').trim()
+    };
+
+    // ====================================
+    // SCRAPING DE LEMON64
+    // ====================================
+    Logger.log('[C64] Scrapeando: ' + titulo + ' | Link: ' + link);
+    const data = fetchC64_fromLemon64_(titulo, link, overrides);
+    
+    // ====================================
+    // PROCESAR IMÁGENES ADICIONALES
+    // ====================================
+    if (overrides.imagenesExtra) {
+      const imagenesInput = overrides.imagenesExtra;
+      const extraImages = getExtraImagesForGame(imagenesInput, data.caratula, data.screenshots);
+      
+      // Combinar con las auto-detectadas (sin duplicados)
+      const allExtra = [...new Set([...(data.imagenesAdicionales || []), ...extraImages])];
+      data.imagenesAdicionales = allExtra;
+    }
+
+    // ====================================
+    // COMBINAR REVISTAS (AUTO + MANUAL)
+    // ====================================
+    const revistasUser = parseSheetRevistas_(overrides.revistas);
+    if (Array.isArray(data.revistas)) {
+      data.revistas = data.revistas.concat(revistasUser);
+    } else {
+      data.revistas = revistasUser;
+    }
+
+    // ====================================
+    // FORMATEAR PUNTUACIÓN
+    // ====================================
+    if (!overrides.puntuacion && data.ratingScore10) {
+      data.ratingDisplay = data.ratingScore10 + '/10';
+    }
+
+    // ====================================
+    // SINOPSIS (usar override si existe)
+    // ====================================
+    let sinopsisText = overrides.sinopsis || data.sinopsis || '';
+
+    // ====================================
+    // ESCRIBIR DATOS EN LA HOJA (SOLO CELDAS VACÍAS)
+    // ====================================
+    writeBackC64RowFromData_(sh, row, headers, data, {
+      sinopsis: sinopsisText
+    });
+
+    // ====================================
+    // GENERAR Y MOSTRAR FICHA HTML
+    // ====================================
+    const html = buildPreviewHtml_(titulo, 'Commodore 64', link, data, tecnicos, sinopsisText);
+    SpreadsheetApp.getUi()
+      .showSidebar(HtmlService.createHtmlOutput(html).setTitle('Ficha C64'));
+    
+    Logger.log('[C64] Ficha generada exitosamente');
+    return;
+  }
   const isZX = /spectrum/i.test(sh.getName());
   const titulo = get('TÍTULO');
   
@@ -1623,6 +1731,365 @@ function fetchZX_fromSpectrumComputing_(titulo, link, coverManual) {
     Logger.log('[ERROR] fetchZX_fromSpectrumComputing_: ' + e);
     return {};
   }
+}
+
+/**
+ * ============================================
+ * SCRAPING LEMON64 PARA COMMODORE 64
+ * ============================================
+ * 
+ * Extrae datos desde Lemon64.com:
+ * - Datos básicos (año, publisher, desarrollador, autores)
+ * - Carátula (Front Cover)
+ * - Screenshots (2 primeras)
+ * - Imágenes adicionales (desde la 3ª)
+ * - Puntuación (Score con imágenes)
+ * - Género, tags, jugadores, controles
+ * - Vídeo YouTube
+ * - Revistas
+ * - Instrucciones
+ * 
+ * ============================================
+ */
+
+function fetchC64_fromLemon64_(titulo, link, overrides) {
+  try {
+    const res = UrlFetchApp.fetch(link, { muteHttpExceptions: true });
+    const html = res.getContentText();
+    const data = {};
+
+    // ====================================
+    // HELPERS PARA EXTRAER DATOS
+    // ====================================
+    
+    // Buscar fila por etiqueta (ej: "Developer:", "Year:")
+    const findRow = (label) => {
+      const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = `<td[^>]*class="[^"]*align-top[^"]*text-nowrap[^"]*"[^>]*>\\s*${escaped}\\s*:?\\s*</td>\\s*<td[^>]*class="[^"]*credits-data[^"]*"[^>]*>([\\s\\S]*?)</td>`;
+      const m = new RegExp(pattern, 'i').exec(html);
+      return m ? m[1] : '';
+    };
+
+    // ====================================
+    // ID LEMON64
+    // ====================================
+    const idMatch = html.match(/Game ID:\s*(\d+)/i);
+    data.idLemon64 = idMatch ? idMatch[1] : '';
+
+    // ====================================
+    // AÑO
+    // ====================================
+    const yearHtml = findRow('Year|Released');
+    const yearMatch = yearHtml.match(/list_year=(\d{4})/);
+    data.anio = yearMatch ? yearMatch[1] : '';
+
+    // ====================================
+    // PUBLISHER
+    // ====================================
+    const publisherHtml = findRow('Publisher');
+    const pubAnchors = parseAnchors_(publisherHtml, link);
+    data.publisherAnchors = pubAnchors.length ? pubAnchors : [];
+
+    // ====================================
+    // DESARROLLADOR
+    // ====================================
+    const devHtml = findRow('Developer');
+    const devAnchors = parseAnchors_(devHtml, link);
+    
+    // Si no hay desarrollador, usar publisher
+    data.desarrolladorAnchors = devAnchors.length 
+      ? devAnchors 
+      : (pubAnchors.length ? pubAnchors : []);
+
+    // ====================================
+    // AUTORES (con roles: Coder, Musician, etc.)
+    // ====================================
+    const autoresRegex = /<td[^>]*class="[^"]*align-top[^"]*text-nowrap[^"]*"[^>]*>\s*([^<:]+)\s*:\s*<\/td>\s*<td[^>]*class="[^"]*credits-data[^"]*"[^>]*>\s*<a[^>]+href=["'][^"']*list_individual[^"']*["'][^>]*>([^<]+)<\/a>/gi;
+    const autores = [];
+    let autorMatch;
+    
+    while ((autorMatch = autoresRegex.exec(html)) !== null) {
+      const rol = stripTags_(autorMatch[1]).trim();
+      const nombre = stripTags_(autorMatch[2]).trim();
+      
+      // Excluir roles que no son autores creativos
+      const rolesExcluidos = /publisher|copyright|released|distributor/i;
+      if (!rolesExcluidos.test(rol) && nombre) {
+        autores.push(`${nombre} (${rol})`);
+      }
+    }
+    
+    data.autores = autores.join(', ');
+    data.autorAnchors = autores.map(a => ({ text: a, href: '#' }));
+
+    // ====================================
+    // GÉNERO
+    // ====================================
+    const genreRegex = /<a[^>]+href=["'][^"']*list_genre=([^"'&]+)[^"']*["'][^>]*>([^<]+)<\/a>/gi;
+    const genres = [];
+    let genreMatch;
+    
+    while ((genreMatch = genreRegex.exec(html)) !== null) {
+      const genreName = stripTags_(genreMatch[2]).trim();
+      if (genreName) genres.push({ text: genreName, href: '#' });
+    }
+    
+    data.generoAnchors = genres;
+
+    // ====================================
+    // SUBGÉNERO (Tags)
+    // ====================================
+    const tagRegex = /<a[^>]+href=["'][^"']*list_tag=([^"']+)["'][^>]*class=["'][^"']*game_tag[^"']*["'][^>]*>([^<]+)<\/a>/gi;
+    const tags = [];
+    let tagMatch;
+    
+    while ((tagMatch = tagRegex.exec(html)) !== null) {
+      const tagName = stripTags_(tagMatch[2]).trim();
+      if (tagName) tags.push({ text: tagName, href: '#' });
+    }
+    
+    data.subgeneroAnchors = tags;
+
+    // ====================================
+    // JUGADORES (convertir a Single Player / Multiple Players)
+    // ====================================
+    const playersHtml = findRow('Players');
+    const playersText = stripTags_(playersHtml).trim();
+    const jugadores = [];
+    
+    if (playersText) {
+      // Si contiene "1" (pero no 10, 11, etc.) → Single Player
+      if (/\b1\b/.test(playersText) && !/1[0-9]/.test(playersText)) {
+        jugadores.push('Single Player');
+      }
+      
+      // Si contiene 2-9 o "simultaneous" → Multiple Players
+      if (/[2-9]/.test(playersText) || /simultaneous/i.test(playersText)) {
+        jugadores.push('Multiple Players');
+      }
+    }
+    
+    data.jugadoresAnchors = jugadores.map(j => ({ text: j, href: '#' }));
+
+    // ====================================
+    // CONTROLES
+    // ====================================
+    const controlHtml = findRow('Main Control');
+    const controlText = stripTags_(controlHtml).trim();
+    data.controlesAnchors = controlText ? [{ text: controlText, href: '#' }] : [];
+
+    // ====================================
+    // CARÁTULA (Front Cover scan)
+    // ====================================
+    let autoCover = '';
+    const coverMatch = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*alt=["'][^"']*Front Cover scan[^"']*["']/i);
+    
+    if (coverMatch && coverMatch[1]) {
+      autoCover = coverMatch[1].startsWith('http') 
+        ? coverMatch[1] 
+        : 'https://www.lemon64.com' + coverMatch[1];
+    }
+    
+    // Aplicar override manual si existe
+    const manualCover = (overrides && overrides.caratula) ? String(overrides.caratula).trim() : '';
+    data.caratula = manualCover || autoCover || FALLBACK_COVER_URL;
+
+    // ====================================
+    // SCREENSHOTS (primeras 2)
+    // ====================================
+    const screenshotRegex = /<a[^>]+class=["'][^"']*lslide[^"']*["'][^>]*>\s*<img[^>]+src=["']([^"']+)["'][^>]*alt=["'][^"']*screenshot[^"']*["']/gi;
+    const allScreenshots = [];
+    let screenMatch;
+    
+    while ((screenMatch = screenshotRegex.exec(html)) !== null) {
+      let url = screenMatch[1];
+      if (!url.startsWith('http')) {
+        url = 'https://www.lemon64.com' + url;
+      }
+      allScreenshots.push(url);
+    }
+    
+    // Eliminar duplicados (los clones del slider)
+    const uniqueScreenshots = [...new Set(allScreenshots)];
+    
+    data.screenshots = uniqueScreenshots.slice(0, 2);
+    data.imagenesAdicionales = uniqueScreenshots.slice(2);
+
+    // ====================================
+    // VIDEO (YouTube)
+    // ====================================
+    const videoMatch = html.match(/<a[^>]+href=["'](https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^"']+)["']/i);
+    data.video = videoMatch ? videoMatch[1] : '';
+
+    // ====================================
+    // REVISTAS
+    // ====================================
+    data.revistas = extractLemon64MagazineReviews_(html);
+
+    // ====================================
+    // INSTRUCCIONES (primer documento)
+    // ====================================
+    const docMatch = html.match(/<a[^>]+href=["']([^"']*\/doc\/[^"']+)["']/i);
+    if (docMatch && docMatch[1]) {
+      data.instrucciones = docMatch[1].startsWith('http') 
+        ? docMatch[1] 
+        : 'https://www.lemon64.com' + docMatch[1];
+    } else {
+      data.instrucciones = '';
+    }
+
+    // ====================================
+    // PUNTUACIÓN (extraer de imágenes PNG)
+    // ====================================
+    const scoreImgsRegex = /<div[^>]*class=["'][^"']*votes-score[^"']*["'][^>]*>([\s\S]*?)<\/div>/i;
+    const scoreBlock = scoreImgsRegex.exec(html);
+    
+    if (scoreBlock && scoreBlock[1]) {
+      const scoreHtml = scoreBlock[1];
+      const imgRegex = /<img[^>]+src=["'][^"']*\/score\/([^"']+)\.png["']/gi;
+      const digits = [];
+      let imgMatch;
+      
+      while ((imgMatch = imgRegex.exec(scoreHtml)) !== null) {
+        const filename = imgMatch[1];
+        
+        // Ignorar "score" y "score-2x"
+        if (filename.includes('score')) continue;
+        
+        // Convertir "dot" en "."
+        if (filename === 'dot') {
+          digits.push('.');
+        } else {
+          // Números: "7" → "7"
+          digits.push(filename);
+        }
+      }
+      
+      const scoreValue = digits.join('');
+      data.ratingDisplay = scoreValue || '';
+      
+      // Intentar parsear como número
+      const numScore = parseFloat(scoreValue);
+      if (!isNaN(numScore)) {
+        data.ratingScore10 = numScore;
+      }
+    } else {
+      data.ratingDisplay = '';
+    }
+
+    // ====================================
+    // APLICAR OVERRIDES MANUALES
+    // ====================================
+    if (overrides) {
+      if (overrides.anio) data.anio = overrides.anio;
+      if (overrides.video) data.video = overrides.video;
+      if (overrides.genero) {
+        data.generoAnchors = splitByCommaToAnchors_(overrides.genero, link);
+      }
+      if (overrides.subgenero) {
+        data.subgeneroAnchors = splitByCommaToAnchors_(overrides.subgenero, link);
+      }
+      if (overrides.publisher) {
+        data.publisherAnchors = splitByCommaToAnchors_(overrides.publisher, link);
+      }
+      if (overrides.desarrollador) {
+        data.desarrolladorAnchors = splitByCommaToAnchors_(overrides.desarrollador, link);
+      }
+      if (overrides.autores) {
+        data.autores = overrides.autores;
+        data.autorAnchors = splitByCommaToAnchors_(overrides.autores, link);
+      }
+      if (overrides.jugadores) {
+        data.jugadoresAnchors = splitByCommaToAnchors_(overrides.jugadores, link);
+      }
+      if (overrides.controles) {
+        data.controlesAnchors = splitByCommaToAnchors_(overrides.controles, link);
+      }
+      if (overrides.screenshots) {
+        const parts = overrides.screenshots.split(/\s*,\s*/).map(x => x.trim()).filter(Boolean);
+        data.screenshots = parts.slice(0, 2);
+        data.imagenesAdicionales = parts.slice(2);
+      }
+      if (overrides.imagenesExtra) {
+        const extraUrls = overrides.imagenesExtra.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+        data.imagenesAdicionales = [...new Set([...data.imagenesAdicionales, ...extraUrls])];
+      }
+      if (overrides.instrucciones) {
+        data.instrucciones = overrides.instrucciones;
+      }
+      if (overrides.puntuacion) {
+        data.ratingDisplay = overrides.puntuacion;
+      }
+    }
+
+    // ====================================
+    // CAMPOS VACÍOS/NO APLICABLES
+    // ====================================
+    data.contributorsAnchors = []; // No aplicable en C64
+    data.versionAnchors = []; // No aplicable (todos son C64)
+    data.distribuidorasAnchors = []; // No aplicable
+    data.mapa = ''; // Lemon64 no tiene mapas
+    data.sinopsis = ''; // Lemon64 no tiene sinopsis (se rellena manual)
+
+    return data;
+
+  } catch (e) {
+    Logger.log('[ERROR] fetchC64_fromLemon64_: ' + e);
+    return {};
+  }
+}
+
+// ====================================
+// HELPER: EXTRAER REVISTAS DE LEMON64
+// ====================================
+
+function extractLemon64MagazineReviews_(html) {
+  const revistas = [];
+  
+  // Buscar tabla de revistas
+  const magazineTableRegex = /<table[^>]*class=["'][^"']*table-common[^"']*table-stripes[^"']*["'][^>]*>([\s\S]*?)<\/table>/gi;
+  let tableMatch;
+  
+  while ((tableMatch = magazineTableRegex.exec(html)) !== null) {
+    const tableHtml = tableMatch[1];
+    
+    // Verificar que es la tabla de revistas (debe tener "Magazine" o enlaces a revistas)
+    if (!/<strong>/.test(tableHtml) && !tableHtml.includes('magazine')) continue;
+    
+    // Extraer cada fila <tr>
+    const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    let rowMatch;
+    
+    while ((rowMatch = rowRegex.exec(tableHtml)) !== null) {
+      const rowHtml = rowMatch[1];
+      
+      // Ignorar fila de promedio
+      if (/average.*rating/i.test(rowHtml)) continue;
+      
+      // Extraer enlace y nombre de revista
+      const linkMatch = rowHtml.match(/<a[^>]+href=["']([^"']+)["'][^>]*>\s*(?:<[^>]+>)*\s*<strong>([^<]+)<\/strong>/i);
+      
+      if (linkMatch) {
+        const url = linkMatch[1];
+        const nombre = stripTags_(linkMatch[2]).trim();
+        
+        // Extraer detalles adicionales (número, fecha)
+        const fullText = stripTags_(rowHtml).replace(/\s+/g, ' ').trim();
+        
+        // Formato: "ACE No. 14 (nov 88), p61"
+        const detailsMatch = fullText.match(/(?:No\.|Nº|Issue)?\s*\d+[^,]*(?:\([^)]+\))?[^,]*/i);
+        const detalles = detailsMatch ? detailsMatch[0].trim() : '';
+        
+        revistas.push({
+          mag: nombre,
+          title: detalles || nombre,
+          href: url.startsWith('http') ? url : 'https://www.lemon64.com' + url
+        });
+      }
+    }
+  }
+  
+  return revistas;
 }
 
 // ====================================
@@ -2475,6 +2942,177 @@ function slugifyForZXArt_(title) {
   s = s.split("").map(ch => accentMap[ch] || ch).join("");
   s = s.replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
   return s.replace(/ /g, "-");
+}
+
+/**
+ * ============================================
+ * ESCRIBIR DATOS EN LA HOJA COMMODORE 64
+ * ============================================
+ * 
+ * Escribe los datos scrapeados desde Lemon64 en la hoja C64.
+ * Solo rellena celdas VACÍAS (respeta datos manuales).
+ * 
+ * Columnas gestionadas:
+ * - ID_LEMON64, AÑO, PUBLISHER, DESARROLLADOR, AUTORES
+ * - GÉNERO, SUBGÉNERO, JUGADORES, CONTROLES
+ * - CARÁTULA, SCREENSHOTS, IMÁGENES, VIDEO
+ * - REVISTAS, INSTRUCCIONES, PUNTUACIÓN
+ * 
+ * ============================================
+ */
+
+function writeBackC64RowFromData_(sh, row, headers, data, extras) {
+  if (!data) return;
+
+  // ====================================
+  // HELPER: NORMALIZAR NOMBRES DE COLUMNAS
+  // ====================================
+  function normalizeHeaderKey_(s) {
+    let t = String(s || '').toLowerCase().trim();
+    // Quitar acentos
+    t = t.replace(/[áàäâ]/g, 'a').replace(/[éèëê]/g, 'e').replace(/[íìïî]/g, 'i')
+         .replace(/[óòöô]/g, 'o').replace(/[úùüû]/g, 'u').replace(/ñ/g, 'n');
+    return t.replace(/\s+/g, ' ');
+  }
+
+  // ====================================
+  // HELPER: ENCONTRAR ÍNDICE DE COLUMNA
+  // ====================================
+  function colIndex_(name) {
+    const target = normalizeHeaderKey_(name || '');
+    for (let i = 0; i < headers.length; i++) {
+      if (normalizeHeaderKey_(headers[i]) === target) return i + 1;
+    }
+    return 0;
+  }
+
+  // ====================================
+  // HELPER: LIMPIAR VALOR
+  // ====================================
+  function cleanValue_(v) {
+    if (v == null) return '';
+    let t = String(v).trim();
+    if (!t || t === '????' || /^dato no disponible$/i.test(t)) return '';
+    return t;
+  }
+
+  // ====================================
+  // HELPER: ESCRIBIR SI ESTÁ VACÍO
+  // ====================================
+  function writeIfEmpty_(colName, value) {
+    const col = colIndex_(colName);
+    const v = cleanValue_(value);
+    if (!col || !v) return;
+    
+    const rng = sh.getRange(row, col);
+    const currentValue = String(rng.getValue() || '').trim();
+    
+    if (!currentValue) {
+      rng.setValue(v);
+      Logger.log('[C64] Escrito en ' + colName + ': ' + v.substring(0, 50));
+    } else {
+      Logger.log('[C64] Respetado valor manual en ' + colName);
+    }
+  }
+
+  // ====================================
+  // HELPER: CONVERTIR ANCHORS A TEXTO
+  // ====================================
+  function anchorsToText_(arr) {
+    return (Array.isArray(arr) ? arr : [])
+      .map(a => (a && a.text) ? String(a.text) : '')
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  // ====================================
+  // HELPER: CONVERTIR REVISTAS A MARKDOWN
+  // ====================================
+  function revistasToMarkdown_(arr) {
+    if (!Array.isArray(arr) || !arr.length) return '';
+    
+    return arr.map(r => {
+      const mag = r.mag || 'Revista';
+      const title = r.title || mag;
+      const href = r.href || '#';
+      
+      return `[${mag} - ${title}](${href})`;
+    }).join('\n');
+  }
+
+  // ====================================
+  // ESCRIBIR DATOS EN LA HOJA
+  // ====================================
+
+  // ID Lemon64
+  writeIfEmpty_('ID_LEMON64', data.idLemon64);
+
+  // Año
+  writeIfEmpty_('AÑO', data.anio);
+  writeIfEmpty_('ANO', data.anio); // Por si acaso sin tilde
+
+  // Publisher
+  writeIfEmpty_('PUBLISHER', anchorsToText_(data.publisherAnchors));
+
+  // Desarrollador
+  writeIfEmpty_('DESARROLLADOR', anchorsToText_(data.desarrolladorAnchors));
+
+  // Autores (ya viene como texto con roles)
+  writeIfEmpty_('AUTORES', data.autores);
+
+  // Género
+  writeIfEmpty_('GÉNERO', anchorsToText_(data.generoAnchors));
+  writeIfEmpty_('GENERO', anchorsToText_(data.generoAnchors));
+
+  // Subgénero
+  writeIfEmpty_('SUBGÉNERO', anchorsToText_(data.subgeneroAnchors));
+  writeIfEmpty_('SUBGENERO', anchorsToText_(data.subgeneroAnchors));
+
+  // Jugadores
+  writeIfEmpty_('JUGADORES', anchorsToText_(data.jugadoresAnchors));
+
+  // Controles
+  writeIfEmpty_('CONTROLES', anchorsToText_(data.controlesAnchors));
+
+  // Carátula
+  writeIfEmpty_('CARÁTULA', data.caratula);
+  writeIfEmpty_('CARATULA', data.caratula);
+
+  // Screenshots (primeras 2, separadas por salto de línea)
+  if (Array.isArray(data.screenshots) && data.screenshots.length) {
+    writeIfEmpty_('SCREENSHOTS', data.screenshots.join('\n'));
+  }
+
+  // Imágenes adicionales (desde 3ª, separadas por ", ")
+  if (Array.isArray(data.imagenesAdicionales) && data.imagenesAdicionales.length) {
+    writeIfEmpty_('IMÁGENES', data.imagenesAdicionales.join(', '));
+    writeIfEmpty_('IMAGENES', data.imagenesAdicionales.join(', '));
+  }
+
+  // Video
+  writeIfEmpty_('VIDEO', data.video);
+
+  // Revistas (formato Markdown con enlaces)
+  const revistasMarkdown = revistasToMarkdown_(data.revistas);
+  if (revistasMarkdown) {
+    writeIfEmpty_('REVISTAS', revistasMarkdown);
+  }
+
+  // Instrucciones
+  writeIfEmpty_('INSTRUCCIONES', data.instrucciones);
+
+  // Puntuación
+  writeIfEmpty_('PUNTUACIÓN', data.ratingDisplay);
+  writeIfEmpty_('PUNTUACION', data.ratingDisplay);
+
+  // ====================================
+  // EXTRAS (sinopsis si viene en extras)
+  // ====================================
+  if (extras && extras.sinopsis) {
+    writeIfEmpty_('SINOPSIS', extras.sinopsis);
+  }
+
+  Logger.log('[C64] Escritura completada en fila ' + row);
 }
 
 /**
