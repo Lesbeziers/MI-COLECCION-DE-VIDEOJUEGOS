@@ -1,4 +1,4 @@
-/**
+/**global
  * ============================================
  * GENERADOR DE FICHAS ZX SPECTRUM - v2.0
  * ============================================
@@ -877,14 +877,14 @@ function onOpen() {
     .addItem('Rellenar ID (fila actual)', 'menuRellenarIdFilaActual')
     .addToUi();
   
-  // Menú 2: ZX SP (antes era "Fichas")
-  ui.createMenu('ZX SP')
-    .addItem('Vista previa de ficha (fila actual)', 'menuPreviewFichaActual')
+  // Menú 2: RETRO (antes era "ZX SP")
+  ui.createMenu('RETRO')
+    .addItem('Crear ficha RETRO', 'menuPreviewFichaActual')
     .addToUi();
     
   // Menú 3: IGDB
   ui.createMenu('IGDB')
-    .addItem('Actualizar desde IGDB (fila actual)', 'menuActualizarFilaActual')
+    .addItem('Crear ficha IGDB', 'menuActualizarFilaActual')
     .addToUi();
 }
 
@@ -1671,39 +1671,39 @@ function fetchZX_fromSpectrumComputing_(titulo, link, coverManual) {
     }
 
     // ====================================
-    // SCREENSHOTS (LOADING + RUNNING)
-    // ====================================
-    
-    const top2 = extractTopScreens_(html, link);
-    data.screenshots = top2.slice(0, 2);
+// SCREENSHOTS (LOADING + RUNNING)
+// ====================================
 
-    // ====================================
-    // IMÁGENES ADICIONALES
-    // ====================================
-    
-    const addImgs = new Map();
-    
-    const pushAdditional = (u) => {
-      if (!u) return;
-      const abs = absolutize_(link, u);
-      const imgSrc = scrToImg_(abs);
-      const key = normalizeKey_(imgSrc);
-      const isTop = (data.screenshots || []).some(s => normalizeKey_(s) === key);
-      if (!isTop && !addImgs.has(key)) addImgs.set(key, imgSrc);
-    };
+data.screenshots = extractLemon64Screenshots_(html);
+Logger.log('[C64] Screenshots asignadas: ' + (data.screenshots || []).length);
 
-    // Buscar en panel de Screenshots
-    const shotsPanel = getPanel_(html, 'Screenshots');
-    if (shotsPanel) {
-      [...shotsPanel.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>/ig)].forEach(m => pushAdditional(m[1]));
-      [...shotsPanel.matchAll(/<img[^>]+src=["']([^"']+)["']/ig)].forEach(m => pushAdditional(m[1]));
-    }
+// ====================================
+// IMÁGENES ADICIONALES
+// ====================================
 
-    // Buscar todas las imágenes .scr, .png, .jpg en el HTML
-    [...html.matchAll(/<a[^>]+href=["']([^"']+\.(?:scr|png|jpe?g|webp|gif))["'][^>]*>/ig)]
-      .forEach(m => pushAdditional(m[1]));
-    
-    data.imagenesAdicionales = Array.from(addImgs.values());
+const addImgs = new Map();
+
+const pushAdditional = (u) => {
+  if (!u) return;
+  const abs = absolutize_(link, u);
+  const imgSrc = scrToImg_(abs);
+  const key = normalizeKey_(imgSrc);
+  const isTop = (data.screenshots || []).some(s => normalizeKey_(s) === key);
+  if (!isTop && !addImgs.has(key)) addImgs.set(key, imgSrc);
+};
+
+// Buscar en panel de Screenshots
+const shotsPanel = getPanel_(html, 'Screenshots');
+if (shotsPanel) {
+  [...shotsPanel.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>/ig)].forEach(m => pushAdditional(m[1]));
+  [...shotsPanel.matchAll(/<img[^>]+src=["']([^"']+)["']/ig)].forEach(m => pushAdditional(m[1]));
+}
+
+// Buscar todas las imágenes .scr, .png, .jpg en el HTML
+[...html.matchAll(/<a[^>]+href=["']([^"']+\.(?:scr|png|jpe?g|webp|gif))["'][^>]*>/ig)]
+  .forEach(m => pushAdditional(m[1]));
+
+data.imagenesAdicionales = Array.from(addImgs.values());
 
     // ====================================
     // INSTRUCCIONES (PDF O TXT)
@@ -1776,6 +1776,44 @@ function fetchZX_fromSpectrumComputing_(titulo, link, coverManual) {
  * ============================================
  */
 
+// ====================================
+// HELPER: EXTRAER SCREENSHOTS DE LEMON64
+// ====================================
+function extractLemon64Screenshots_(html) {
+  const screenshots = [];
+  
+  // Buscar galería de screenshots
+  const galleryRegex = /<div[^>]*class=["'][^"']*screenshot-gallery[^"']*["'][^>]*>([\s\S]*?)<\/div>/i;
+  const galleryMatch = html.match(galleryRegex);
+  
+  if (!galleryMatch) {
+    Logger.log('[C64 SCREENSHOTS] No se encontró galería');
+    return screenshots;
+  }
+  
+  const galleryHtml = galleryMatch[1];
+  
+  // Extraer URLs de imágenes (data-thumb o src)
+  const imgRegex = /data-thumb=["']([^"']+)["']|<img[^>]+src=["']([^"']+)["'][^>]*alt=["'][^"']*screenshot/gi;
+  let imgMatch;
+  
+  while ((imgMatch = imgRegex.exec(galleryHtml)) !== null) {
+    const imgUrl = imgMatch[1] || imgMatch[2];
+    
+    if (imgUrl && !screenshots.includes(imgUrl)) {
+      // Convertir URL relativa a absoluta
+      const fullUrl = imgUrl.startsWith('http') ? imgUrl : 'https://www.lemon64.com' + imgUrl;
+      screenshots.push(fullUrl);
+      
+      // Solo tomar las primeras 2
+      if (screenshots.length >= 2) break;
+    }
+  }
+  
+  Logger.log('[C64 SCREENSHOTS] Extraídas: ' + screenshots.length);
+  return screenshots;
+}
+
 function fetchC64_fromLemon64_(titulo, link, overrides) {
   try {
     const res = UrlFetchApp.fetch(link, { muteHttpExceptions: true });
@@ -1801,17 +1839,18 @@ function fetchC64_fromLemon64_(titulo, link, overrides) {
     data.idLemon64 = idMatch ? idMatch[1] : '';
 
 // ====================================
-    // AÑO
-    // ====================================
-    const yearHtml = findRow('Year|Released');
-    let yearMatch = yearHtml.match(/list_year=(\d{4})/);
-    
-    // Si no encuentra con el patrón de enlace, buscar cualquier año de 4 dígitos
-    if (!yearMatch) {
-      yearMatch = yearHtml.match(/\b(19\d{2}|20\d{2})\b/);
-    }
-    
-    data.anio = yearMatch ? yearMatch[1] : '';
+// AÑO
+// ====================================
+const yearHtml = findRow('Released'); // Lemon64 usa "Released:" no "Year:"
+let yearMatch = yearHtml.match(/list_year=(\d{4})/);
+
+// Si no encuentra con el patrón de enlace, buscar cualquier año de 4 dígitos
+if (!yearMatch) {
+  yearMatch = yearHtml.match(/\b(19\d{2}|20\d{2})\b/);
+}
+
+data.anio = yearMatch ? yearMatch[1] : '';
+Logger.log('[C64 AÑO] Extraído: ' + data.anio);
 
     // ====================================
     // PUBLISHER
@@ -2072,63 +2111,59 @@ function fetchC64_fromLemon64_(titulo, link, overrides) {
 // ====================================
 // HELPER: EXTRAER REVISTAS DE LEMON64
 // ====================================
-
 function extractLemon64MagazineReviews_(html) {
   const revistas = [];
   
-  // Buscar tabla de revistas (debe tener "Magazine" o "Review" en algún lugar cercano)
-  const magazineTableRegex = /<table[^>]*class=["'][^"']*table-common[^"']*table-stripes[^"']*["'][^>]*>([\s\S]*?)<\/table>/gi;
-  let tableMatch;
+  // Buscar desde "Magazine Reviews" hasta "YouTube Links" (siguiente sección)
+  const magazineSectionRegex = /Magazine Reviews[\s\S]*?<table[^>]*class=["'][^"']*table-common[^"']*table-stripes[^"']*["'][^>]*>([\s\S]*?)<\/table>[\s\S]*?YouTube Links/i;
   
-  while ((tableMatch = magazineTableRegex.exec(html)) !== null) {
-    const tableHtml = tableMatch[1];
-    
-    // Verificar que es tabla de revistas (debe tener "Magazine" o enlaces con "magazine")
-    if (!tableHtml.includes('Magazine') && !tableHtml.includes('magazine')) continue;
-    
-    // NO procesar si tiene "Longplay" o "video" (son tablas de vídeos)
-    if (/Longplay|video/i.test(tableHtml)) continue;
-    
-    // Extraer cada fila <tr>
-    const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-    let rowMatch;
-    
-    while ((rowMatch = rowRegex.exec(tableHtml)) !== null) {
-      const rowHtml = rowMatch[1];
-      
-      // Ignorar fila de promedio
-      if (/average.*rating/i.test(rowHtml)) continue;
-      
-      // Ignorar filas sin enlaces (cabeceras)
-      if (!/<a[^>]+href/.test(rowHtml)) continue;
-      
-      // Extraer enlace y nombre de revista
-      const linkMatch = rowHtml.match(/<a[^>]+href=["']([^"']+)["'][^>]*>\s*(?:<[^>]+>)*\s*<strong>([^<]+)<\/strong>/i);
-      
-      if (linkMatch) {
-        const url = linkMatch[1];
-        const nombre = stripTags_(linkMatch[2]).trim();
-        
-        // Validar que es una revista real (tiene nombre reconocible)
-        if (!nombre || nombre.length < 2) continue;
-        if (/^(Info|photo|Longplay|video)$/i.test(nombre)) continue;
-        
-        // Extraer detalles adicionales (número, fecha)
-        const fullText = stripTags_(rowHtml).replace(/\s+/g, ' ').trim();
-        
-        // Formato: "ACE No. 14 (nov 88), p61"
-        const detailsMatch = fullText.match(/(?:No\.|Nº|Issue)?\s*\d+[^,]*(?:\([^)]+\))?[^,]*/i);
-        const detalles = detailsMatch ? detailsMatch[0].trim() : '';
-        
-        revistas.push({
-          mag: nombre,
-          title: detalles || nombre,
-          href: url.startsWith('http') ? url : 'https://www.lemon64.com' + url
-        });
-      }
-    }
+  const sectionMatch = html.match(magazineSectionRegex);
+  
+  if (!sectionMatch) {
+    Logger.log('[C64 REVISTAS] No se encontró sección Magazine Reviews');
+    return revistas;
   }
   
+  const magazineHtml = sectionMatch[1];
+  Logger.log('[C64 REVISTAS] Sección encontrada, longitud: ' + magazineHtml.length);
+  
+  // Buscar directamente enlaces con <strong>NOMBRE</strong>
+  const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>[\s\S]*?<strong>([^<]+)<\/strong>([^<]*)<\/a>/gi;
+  let linkMatch;
+  let contador = 0;
+  
+  while ((linkMatch = linkRegex.exec(magazineHtml)) !== null) {
+    contador++;
+    const url = linkMatch[1];
+    const nombreRevista = stripTags_(linkMatch[2]).trim();
+    const detalles = stripTags_(linkMatch[3]).trim();
+    
+    Logger.log('[C64 REVISTAS] Candidato #' + contador + ': "' + nombreRevista + '"');
+    
+    // Ignorar basura y promedio
+    if (!nombreRevista || nombreRevista.length < 2) {
+      Logger.log('  → Descartado: nombre muy corto');
+      continue;
+    }
+    if (/^(Info|photo|Longplay|video|screenshot)$/i.test(nombreRevista)) {
+      Logger.log('  → Descartado: basura conocida');
+      continue;
+    }
+    if (/average.*rating/i.test(nombreRevista)) {
+      Logger.log('  → Descartado: es el promedio');
+      continue;
+    }
+    
+    revistas.push({
+      mag: nombreRevista,
+      title: detalles ? `${nombreRevista} ${detalles}` : nombreRevista,
+      href: url.startsWith('http') ? url : 'https://www.lemon64.com' + url
+    });
+    
+    Logger.log('  → ✓ AÑADIDA');
+  }
+  
+  Logger.log('[C64 REVISTAS] Total revistas extraídas: ' + revistas.length);
   return revistas;
 }
 
@@ -2637,7 +2672,14 @@ function makeZxartSlug_(title) {
 // ====================================
 
 function makeLemon64Slug_(titulo) {
-  return String(titulo || '')
+  let slug = String(titulo || '').trim();
+  
+  // REGLA LEMON64: Eliminar "The " del principio
+  if (/^The\s+/i.test(slug)) {
+    slug = slug.replace(/^The\s+/i, '');
+  }
+  
+  return slug
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
     .replace(/[^a-z0-9]+/g, '-') // todo excepto letras/números → guión
@@ -3362,8 +3404,9 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
 
   // ====================================
   // DATOS TÉCNICOS (ADAPTADO A ZX / PS3)
+  // ====================================// ====================================
+  // DATOS TÉCNICOS
   // ====================================
-// Detectar tipo de plataforma
   const isPS3 = (plataforma && plataforma.toLowerCase().includes('playstation'));
   const isC64 = (plataforma && plataforma.toLowerCase().includes('commodore'));
   const isZX = !isPS3 && !isC64;
@@ -3371,7 +3414,7 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
   let tecnicosLines = '';
 
   if (isPS3) {
-    // Datos técnicos para PS3
+    // Datos técnicos para plataformas IGDB (PS3, Switch, etc.)
     tecnicosLines = [
       renderLineLinks('Modos de juego', d.jugadoresAnchors),
       (tecnicos && tecnicos.ubicacion && tecnicos.ubicacion !== '--') ? renderLineText('Ubicación', tecnicos.ubicacion) : '',
@@ -3398,27 +3441,17 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
       renderLineText('Terminado', tecnicos && tecnicos.terminado)
     ].filter(Boolean).join('');
   }
-    // Datos técnicos para ZX Spectrum
-    tecnicosLines = [
-      renderLineLinks('Modos de juego', d.jugadoresAnchors),
-      renderLineLinks('Formato', makeLocalAnchors(tecnicos && tecnicos.formato)),
-        renderLineLinks('ZX +2A', makeLocalAnchors(tecnicos && tecnicos.zx2a)),
-        renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
-        renderLineText('Terminado', tecnicos && tecnicos.terminado)
-      ].filter(Boolean).join('');
-  }
 
   const tecnicosHtml = tecnicosLines
     ? `<div class="row"><div class="section-title">Datos Técnicos</div><div class="info">${tecnicosLines}</div></div>`
     : '';
-
   // ====================================
   // MÁS INFO (SOLO PS3, SECCIÓN SEPARADA)
   // ====================================
   // Se muestra solo si hay contenido en MAS_INFO y es ficha PS3
   // Respeta saltos de línea del texto original
-  const masInfoHtml = (() => {
-    if (!isIGDBFicha) return '';
+ const masInfoHtml = (() => {
+    if (!isPS3) return '';
     const masInfoText = (tecnicos && tecnicos.masInfo) ? String(tecnicos.masInfo).trim() : '';
     if (!masInfoText) return '';
     
