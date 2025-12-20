@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Commodore 64</title>
     <link rel="stylesheet" href="assets/css/global.css">
-<style>
-    body.c64-lista main.platforms-content {
-        margin-top: 160px !important;
-    }
-    
-    .c64-list-wrapper {
-        margin-top: 10px;
-    }
-</style>
+    <style>
+        body.c64-lista main.platforms-content {
+            margin-top: 160px !important;
+        }
+        
+        .c64-list-wrapper {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body class="c64-lista">
@@ -73,11 +73,12 @@
         </section>
 
     </main>
-<script>
+
+    <script>
   // =========================================
   // URL DEL FEED CSV C64_LISTA
   // =========================================
-  const DEBUG = true;  // ← AÑADE ESTA LÍNEA
+  const DEBUG = true;
   const C64_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1289630212&single=true&output=csv&nocache=1";
 
   // Lista global con TODOS los juegos (para el buscador)
@@ -135,7 +136,7 @@
     const idxAnio   = header.indexOf("AÑO_MOSTRAR");
     const idxThumb  = header.indexOf("THUMB_URL");
 
-    // 🔹 CAMBIO: C64 usa AUTORES (con roles) en lugar de AUTOR
+    // C64 usa AUTORES (con roles) en lugar de AUTOR
     const idxAutores = header.indexOf("AUTORES_MOSTRAR");
     const idxDes     = header.indexOf("DESARROLLO");
     const idxContr   = header.indexOf("CONTRIBUCIONES");
@@ -145,7 +146,7 @@
     // Columnas de datos técnicos
     const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
     const idxFavorito  = header.indexOf("FAVORITO_MOSTRAR");
-    const idxFunciona  = header.indexOf("FUNCIONA_MOSTRAR"); // 🔹 NUEVO para C64
+    const idxFunciona  = header.indexOf("FUNCIONA_MOSTRAR");
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
@@ -169,8 +170,6 @@
       const terminado = (idxTerminado >= 0 && cols[idxTerminado] !== undefined) ? cols[idxTerminado].trim() : "";
       const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
       const funciona  = (idxFunciona  >= 0 && cols[idxFunciona]  !== undefined) ? cols[idxFunciona].trim()  : "";
-
-  const funciona  = (idxFunciona  >= 0 && cols[idxFunciona]  !== undefined) ? cols[idxFunciona].trim()  : "";
 
       // DEBUG: ver qué datos se están parseando
       if (DEBUG && i <= 5) {
@@ -372,7 +371,7 @@
       gamesToRender.forEach(game => {
         const card = createGameCard(game);
 
-        // 🔹 Hacer que toda la tarjeta sea clicable
+        // Hacer que toda la tarjeta sea clicable
         card.addEventListener("click", () => {
           if (game.id) {
             const searchInput = document.querySelector(".c64-search-input");
@@ -538,7 +537,17 @@
       }
 
       const text = await response.text();
+      
+      if (DEBUG) {
+        console.log("CSV cargado, primeras 500 caracteres:");
+        console.log(text.substring(0, 500));
+      }
+      
       const games = parseCSV(text);
+
+      if (DEBUG) {
+        console.log(`Total juegos parseados: ${games.length}`);
+      }
 
       // Ordenar alfabéticamente usando sortKey (ya en minúsculas)
       games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
