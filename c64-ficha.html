@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Commodore 64 – Ficha</title>
+    <link rel="stylesheet" href="assets/css/global.css">
+</head>
+
+<body class="ficha-final loading">
+
+    <!-- CABECERA -->
+    <header class="top-bar top-bar--c64">
+        <div class="top-bar-inner top-bar-inner--ficha">
+
+<img src="assets/img/ic_back.svg"
+     class="top-bar-back"
+     alt="Atrás"
+     onclick="goBackToList()">
+
+           <!-- Navegación juego a juego (centrada) -->
+<div class="game-nav-bar game-nav-bar--inline">
+    <div class="game-nav-center">
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--prev"
+             alt="Anterior">
+
+        <span class="game-nav-title"></span>
+
+        <img src="assets/img/ic_back.svg"
+             class="game-nav-arrow game-nav-arrow--next game-nav-arrow--next-real"
+             alt="Siguiente">
+    </div>
+    <div class="game-nav-counter-line">
+        <span class="game-nav-counter">- / -</span>
+    </div>
+</div>
+
+            <!-- Botón HOME (derecha) -->
+            <img src="assets/img/ic_home.svg"
+                 class="top-bar-home"
+                 alt="Home"
+                 onclick="window.location.href='index.html'">
+
+        </div>
+    </header>
+
+    <!-- CONTENIDO -->
+<main class="platforms-content">
+    
+<!-- BLOQUE SUPERIOR: Carátula + Info básica -->
+<div class="ficha-hero">
+    <div class="ficha-cover-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Carátula</span>
+        <img id="ficha-cover"
+             class="ficha-cover"
+             alt="Carátula del juego"
+             style="display:none; opacity:0; transition:opacity 0.2s ease-in-out;">
+    </div>
+    <div class="ficha-hero-info">
+        <h1 id="ficha-title" class="loading-title">Cargando ficha...</h1>
+
+        <!-- Estos empiezan ocultos -->
+        <p class="ficha-platform" style="display:none;">Commodore 64</p>
+        <p class="ficha-puntuacion" id="ficha-puntuacion" style="display:none;"></p>
+
+        <div class="ficha-rating" style="display:none;">
+            <span class="ficha-rating-stars" id="ficha-rating-stars">★★★★★</span>
+        </div>
+    </div>
+</div>
+
+<!-- SCREENSHOTS -->
+<div class="ficha-screenshots" style="display:none;">
+    <div class="screenshot-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Loading Screen</span>
+        <img id="screenshot-1" class="screenshot-img" alt="Screenshot 1" style="display:none;">
+    </div>
+    <div class="screenshot-wrapper">
+        <span class="skeleton-label" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:rgba(255,255,255,0.4); font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; pointer-events:none;">Gameplay Screen</span>
+        <img id="screenshot-2" class="screenshot-img" alt="Screenshot 2" style="display:none;">
+    </div>
+</div>
+
+<!-- SECCIÓN FICHA -->
+<div class="ficha-section">
+    <h2 class="ficha-section-title">FICHA</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-datos" id="ficha-datos" style="display:none;">
+        <!-- Los datos se rellenan por JS -->
+    </div>
+</div>
+
+<!-- SECCIÓN SINOPSIS -->
+<div class="ficha-section" id="sinopsis-section" style="display:none;">
+    <h2 class="ficha-section-title">SINOPSIS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-sinopsis" id="ficha-sinopsis">
+        <!-- El texto se rellena por JS -->
+    </div>
+</div>
+
+<!-- SECCIÓN DATOS TÉCNICOS -->
+<div class="ficha-section" id="datos-tecnicos-section" style="display:none;">
+    <h2 class="ficha-section-title">DATOS TÉCNICOS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-datos ficha-datos-tecnicos" id="ficha-datos-tecnicos">
+        <!-- Los datos se rellenan por JS -->
+    </div>
+</div>
+
+   <!-- SECCIÓN GAMEPLAY -->
+<div class="ficha-section ficha-section--flush" id="gameplay-section" style="display:none;">
+    <h2 class="ficha-section-title">GAMEPLAY</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-gameplay" id="ficha-gameplay">
+        <div class="ficha-gameplay-frame" id="ficha-gameplay-frame">
+            <div class="ficha-gameplay-placeholder" id="ficha-gameplay-placeholder">
+                <div class="ficha-gameplay-play"></div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+    <!-- SECCIÓN IMÁGENES ADICIONALES -->
+<div class="ficha-section ficha-section--flush" id="imagenes-section" style="display:none;">
+    <h2 class="ficha-section-title">IMÁGENES</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-imagenes" id="ficha-imagenes">
+        <div class="ficha-imagenes-frame" id="ficha-imagenes-frame">
+            <img id="ficha-imagenes-img" class="ficha-imagenes-img" alt="Imagen adicional" style="display:none;">
+        </div>
+        <div class="ficha-imagenes-nav" id="ficha-imagenes-nav" style="display:none;">
+            <img src="assets/img/ic_back.svg" class="ficha-imagenes-arrow ficha-imagenes-arrow--prev" alt="Anterior">
+            <span class="ficha-imagenes-counter">
+                <span id="imagenes-current">1</span> / <span id="imagenes-total">1</span>
+            </span>
+            <img src="assets/img/ic_back.svg" class="ficha-imagenes-arrow ficha-imagenes-arrow--next" alt="Siguiente">
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN REVISTAS -->
+<div class="ficha-section" id="revistas-section" style="display:none;">
+    <h2 class="ficha-section-title">REVISTAS</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-revistas" id="ficha-revistas"></div>
+</div>
+
+   <!-- SECCIÓN ÚTILES (solo Instrucciones y Enlace, centrados) -->
+<div class="ficha-section" id="utiles-section" style="display:none;">
+    <h2 class="ficha-section-title">ÚTILES</h2>
+    <div class="ficha-section-line"></div>
+    <div class="ficha-utiles" id="ficha-utiles">
+        <div class="utiles-buttons-row" style="justify-content: center;">
+            <div class="utiles-button" data-type="instrucciones">
+                <div class="utiles-icon"></div>
+                <div class="utiles-label">INSTRUCCIONES</div>
+            </div>
+            <div class="utiles-button" data-type="enlace">
+                <div class="utiles-icon"></div>
+                <div class="utiles-label">ENLACE</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>
+
+<script>
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
+    
+    const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+    const CACHE_VERSION = "v1";
+    const PREFETCH_DELAY = 2000;
+
+    // CSV completo C64
+    const C64_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1251405676&single=true&output=csv";
+
+    // CSV ligero para navegación
+    const C64_LISTA_CSV_URL = 
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1289630212&single=true&output=csv";
+
+    // CSV de colección completa
+    const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
+
+    let sortedGamesList = [];
+    let currentGameIndex = -1;
+    let additionalImages = [];
+    let additionalImageIndex = 0;
+    let additionalImagesKeydownBound = false;
+    let modalAbierta = false;
+    let currentGroupLabel = "";
+
+    function goBackToList() {
+      const params = new URLSearchParams(window.location.search);
+      const fromColeccion = params.get("from") === "coleccion";
+      
+      if (fromColeccion) {
+        window.location.href = "coleccion.html";
+        return;
+      }
+      
+      window.location.href = "c64-lista.html";
+    }
+
+    // ============================================
+    // FUNCIONES DE CACHÉ
+    // ============================================
+    
+    function getCachedData(key) {
+        try {
+            const cached = sessionStorage.getItem(key);
+            if (!cached) return null;
+            
+            const data = JSON.parse(cached);
+            const now = Date.now();
+            
+            if (now - data.timestamp > CACHE_DURATION) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+            
+            return data.value;
+        } catch {
+            return null;
+        }
+    }
+
+    function setCachedData(key, value) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify({
+                timestamp: Date.now(),
+                version: CACHE_VERSION,
+                value: value
+            }));
+        } catch (e) {
+            console.warn("No se pudo guardar en caché:", e);
+        }
+    }
+
+    function getCachedFicha(gameId) {
+        const key = `ficha_c64_${gameId}`;
+        return getCachedData(key);
+    }
+
+    function setCachedFicha(gameId, gameData) {
+        const key = `ficha_c64_${gameId}`;
+        setCachedData(key, gameData);
+    }
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    
+    function getQueryParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function parseCSVLine(line) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+
+            if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+
+        result.push(current.trim());
+        return result;
+    }
+
+    function findColumnIndex(header, names) {
+        for (const name of names) {
+            const idx = header.indexOf(name);
+            if (idx >= 0) return idx;
+        }
+        return -1;
+    }
+
+    function getColumnValue(cols, idx) {
+        return idx >= 0 && cols[idx] !== undefined ? cols[idx].trim() : "";
+    }
+       
+    function normalizeUrlValue(value) {
+        const trimmed = (value || "").trim();
+        return trimmed ? trimmed : "";
+    }
+
+    function formatTitleWithArticle(title) {
+        if (!title) return "";
+        const t = title.trim();
+        const re = /^(the|a|an|el|la|los|las|lo)\s+(.*)$/i;
+        const match = t.match(re);
+        if (!match) return t;
+        return match[2] + ", " + match[1];
+    }
+
+    function normalizeText(str) {
+        return (str || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // ============================================
+    // PARSER CSV MEJORADO (respeta saltos de línea)
+    // ============================================
+    function parseCSV(text) {
+        const lines = [];
+        let currentLine = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+
+            if (ch === '"') {
+                if (inQuotes && text[i + 1] === '"') {
+                    currentLine += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+                currentLine += ch;
+            } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+                if (ch === '\r' && text[i + 1] === '\n') {
+                    i++;
+                }
+                if (currentLine.trim()) {
+                    lines.push(currentLine);
+                }
+                currentLine = "";
+            } else {
+                currentLine += ch;
+            }
+        }
+        if (currentLine.trim()) {
+            lines.push(currentLine);
+        }
+
+        if (lines.length === 0) return [];
+        
+        const header = parseCSVLine(lines[0]);
+        const expectedCols = header.length;
+        const rows = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
+        const idxPub = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxAnio = header.indexOf("AÑO_MOSTRAR");
+        const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
+        const idxImgAdic = findColumnIndex(header, [
+            "IMÁGENES",
+            "IMAGENES",
+            "IMAGENES_ADICIONALES",
+            "IMÁGENES_ADICIONALES"
+        ]);
+        const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
+        const idxScreenshots = findColumnIndex(header, ["SCREENSHOTS"]);
+        
+        // Campos específicos C64
+        const idxAnioFicha = findColumnIndex(header, ["AÑO"]);
+        const idxEditor = findColumnIndex(header, ["PUBLISHER"]);
+        const idxDesarrollo = findColumnIndex(header, ["DESARROLLADOR"]);
+        const idxAutores = findColumnIndex(header, ["AUTORES"]); // C64 usa AUTORES en lugar de AUTOR
+        const idxContribuciones = findColumnIndex(header, ["CONTRIBUCIONES"]);
+        const idxGenero = findColumnIndex(header, ["GÉNERO", "GENERO"]);
+        const idxSubgenero = findColumnIndex(header, ["SUBGÉNERO", "SUBGENERO"]);
+        const idxSinopsis = findColumnIndex(header, ["SINOPSIS"]);
+        const idxJugadores = findColumnIndex(header, ["JUGADORES"]);
+        const idxControles = findColumnIndex(header, ["CONTROLES"]);
+        const idxFormato = findColumnIndex(header, ["FORMATO"]);
+        const idxFunciona = findColumnIndex(header, ["FUNCIONA"]); // Campo específico C64
+        const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
+        const idxFavorito = findColumnIndex(header, ["FAVORITO"]);
+        const idxVideo = findColumnIndex(header, ["VIDEO"]);
+        const idxRevistas = findColumnIndex(header, ["REVISTAS"]);
+        const idxInstrucciones = findColumnIndex(header, ["INSTRUCCIONES"]);
+        const idxEnlace = findColumnIndex(header, ["LINK"]);
+
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+
+            let rawLine = lines[i];
+            let cols = parseCSVLine(rawLine);
+
+            while (cols.length < expectedCols && i + 1 < lines.length) {
+                rawLine += "\n" + lines[i + 1];
+                i++;
+                cols = parseCSVLine(rawLine);
+            }
+
+            const thisId = getColumnValue(cols, idxID);
+            const rawAdditionalImages = getColumnValue(cols, idxImgAdic);
+            const additionalImagesList = parseAdditionalImagesList(rawAdditionalImages);
+            
+            // Limpiar THUMB: tomar solo primera URL
+            let rawThumb = getColumnValue(cols, idxScreenshots);
+            rawThumb = rawThumb.replace(/[\r\n]+/g, ' ').trim().split(/\s+/)[0];
+
+            rows.push({
+                id: thisId,
+                titulo: getColumnValue(cols, idxTit),
+                pub: getColumnValue(cols, idxPub),
+                anio: getColumnValue(cols, idxAnio),
+                caratula: getColumnValue(cols, idxCaratula),
+                imagenesAdicionales: rawAdditionalImages,
+                imagenesArray: additionalImagesList,
+                puntuacion: getColumnValue(cols, idxPuntuacion),
+                screenshots: rawThumb,
+                anioFicha: getColumnValue(cols, idxAnioFicha),
+                editor: getColumnValue(cols, idxEditor),
+                desarrollo: getColumnValue(cols, idxDesarrollo),
+                autores: getColumnValue(cols, idxAutores), // C64: AUTORES con roles
+                contribuciones: getColumnValue(cols, idxContribuciones),
+                genero: getColumnValue(cols, idxGenero),
+                subgenero: getColumnValue(cols, idxSubgenero),
+                sinopsis: getColumnValue(cols, idxSinopsis),
+                jugadores: getColumnValue(cols, idxJugadores),
+                controles: getColumnValue(cols, idxControles),
+                formato: getColumnValue(cols, idxFormato),
+                funciona: getColumnValue(cols, idxFunciona), // C64: campo FUNCIONA
+                terminado: getColumnValue(cols, idxTerminado),
+                favorito: getColumnValue(cols, idxFavorito),
+                videoUrl: getColumnValue(cols, idxVideo),
+                revistasTexto: getColumnValue(cols, idxRevistas),
+                revistas: parseRevistasList(getColumnValue(cols, idxRevistas)),
+                instruccionesUrl: normalizeUrlValue(getColumnValue(cols, idxInstrucciones)),
+                enlaceUrl: normalizeUrlValue(getColumnValue(cols, idxEnlace))
+            });
+        }
+
+        return rows;
+    }
+
+    function parseAdditionalImagesList(text) {
+        return (text || "")
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line !== "");
+    }
+
+    function parseRevistasList(text) {
+        return (text || "")
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line !== "")
+            .map(line => {
+                const markdownMatch = line.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+                if (markdownMatch) {
+                    return {
+                        texto: markdownMatch[1].trim(),
+                        url: markdownMatch[2].trim()
+                    };
+                }
+
+                return {
+                    texto: line,
+                    url: ""
+                };
+            })
+            .filter(entry => entry.texto);
+    }
+
+    // Parser CSV ligero para navegación
+    function parseC64ListaCSV(text) {
+        const lines = [];
+        let currentLine = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+
+            if (ch === '"') {
+                if (inQuotes && text[i + 1] === '"') {
+                    currentLine += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+                currentLine += ch;
+            } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+                if (ch === '\r' && text[i + 1] === '\n') {
+                    i++;
+                }
+                if (currentLine.trim()) {
+                    lines.push(currentLine);
+                }
+                currentLine = "";
+            } else {
+                currentLine += ch;
+            }
+        }
+        if (currentLine.trim()) {
+            lines.push(currentLine);
+        }
+
+        if (lines.length === 0) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const games = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTitulo = findColumnIndex(header, ["TITULO_MOSTRAR", "TITULO", "TÍTULO"]);
+        const idxAnio = findColumnIndex(header, ["AÑO_MOSTRAR", "AÑO"]);
+        const idxPublisher = findColumnIndex(header, ["PUBLISHER_MOSTRAR", "PUBLISHER"]);
+        const idxGenero = findColumnIndex(header, ["GENERO_MOSTRAR", "GÉNERO", "GENERO"]);
+        const idxSubgenero = findColumnIndex(header, ["SUBGENERO_MOSTRAR", "SUBGÉNERO", "SUBGENERO"]);
+        const idxFavorito = header.indexOf("FAVORITO_MOSTRAR");
+        const idxTerminado = header.indexOf("TERMINADO_MOSTRAR");
+
+        for (let i = 1; i < lines.length; i++) {
+            const cols = parseCSVLine(lines[i]);
+            const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
+            const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
+
+            if (!id || !titulo) continue;
+
+            const displayTitulo = formatTitleWithArticle(titulo);
+
+            games.push({
+                id,
+                titulo,
+                displayTitulo,
+                sortKey: displayTitulo.toLowerCase(),
+                anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
+                pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
+                genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
+                subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
+                favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
+                terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : ""
+            });
+        }
+
+        return games;
+    }
+
+    // Parser colección (para navegación desde coleccion.html)
+    function parseColeccionCSV(text) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+
+            if (ch === '"') {
+                if (inQuotes && text[i + 1] === '"') {
+                    currentField += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                currentRow.push(currentField.trim());
+                currentField = "";
+            } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+                if (ch === "\r" && text[i + 1] === "\n") {
+                    i++;
+                }
+                currentRow.push(currentField.trim());
+                if (currentRow.some(v => v !== "")) {
+                    rows.push(currentRow);
+                }
+                currentRow = [];
+                currentField = "";
+            } else {
+                currentField += ch;
+            }
+        }
+
+        if (currentField.length > 0 || currentRow.length > 0) {
+            currentRow.push(currentField.trim());
+            if (currentRow.some(v => v !== "")) {
+                rows.push(currentRow);
+            }
+        }
+
+        if (rows.length === 0) return [];
+
+        const header = rows[0];
+        const games = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+        const idxPlataforma = header.indexOf("PLATAFORMA");
+        const idxAnio = header.indexOf("AÑO_MOSTRAR");
+        const idxFavorito = header.indexOf("FAVORITO");
+        const idxTerminado = header.indexOf("TERMINADO");
+
+        for (let i = 1; i < rows.length; i++) {
+            const cols = rows[i];
+            const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
+            const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
+
+            if (!titulo) continue;
+
+            const displayTitulo = formatTitleWithArticle(titulo);
+
+            games.push({
+                id,
+                titulo,
+                displayTitulo,
+                sortKey: displayTitulo.toLowerCase(),
+                plataforma: idxPlataforma >= 0 && cols[idxPlataforma] ? cols[idxPlataforma].trim() : "",
+                anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
+                favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
+                terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : ""
+            });
+        }
+
+        return games;
+    }
+
+    function extractURLs(text) {
+        const urlRegex = /https?:\/\/[^\s,]+/g;
+        const urls = [];
+        let match;
+
+        while ((match = urlRegex.exec(text)) !== null) {
+            const cleanUrl = match[0].replace(/["',]+$/g, "");
+            urls.push({
+                url: cleanUrl,
+                index: match.index
+            });
+        }
+
+        return urls;
+    }
+
+    function findBestCover(imagenesText) {
+        const urls = extractURLs(imagenesText);
+        if (urls.length === 0) return "";
+
+        let bestUrl = urls[0].url;
+
+        for (const item of urls) {
+            const contextStart = Math.max(0, item.index - 80);
+            const context = imagenesText
+                .slice(contextStart, item.index)
+                .toLowerCase();
+
+            if (context.includes("inlay") && context.includes("front")) {
+                bestUrl = item.url;
+                break;
+            }
+        }
+
+        return bestUrl;
+    }
+
+    function getCoverURL(game) {
+        if (game.caratula) {
+            return game.caratula;
+        }
+
+        if (game.imagenesAdicionales) {
+            return findBestCover(game.imagenesAdicionales);
+        }
+
+        return "";
+    }
+
+    function getYouTubeThumbnail(embedUrl) {
+        if (!embedUrl) return "";
+        const match = embedUrl.match(/embed\/([^?&#\/]+)/);
+        if (match && match[1]) {
+            return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+        }
+        return "";
+    }
+
+    // ============================================
+    // ACTUALIZACIÓN DE UI
+    // ============================================
+    
+    function updateTitle(game) {
+        const title = game.titulo || "Juego Commodore 64";
+        document.title = `${title} – Commodore 64`;
+
+        const h1 = document.getElementById("ficha-title");
+        if (h1) {
+            h1.textContent = title;
+            h1.classList.remove("loading-title");
+        }
+
+        const platformEl = document.querySelector(".ficha-platform");
+        if (platformEl) {
+            platformEl.style.display = "block";
+        }
+
+        const fichaSection = document.querySelector(".ficha-section");
+        if (fichaSection) {
+            fichaSection.style.display = "block";
+        }
+
+        document.body.classList.remove("loading");
+    }
+
+    function updateCover(game) {
+        const coverImg = document.getElementById("ficha-cover");
+        const wrapper = document.querySelector(".ficha-cover-wrapper");
+        if (!coverImg || !wrapper) return;
+
+        const fallbackCover = "assets/img/CaratulaNoDisponible.png";
+        const coverUrl = (getCoverURL(game) || "").trim();
+        const hasValidCover = coverUrl && coverUrl.toLowerCase() !== "null";
+        const finalCoverUrl = hasValidCover ? coverUrl : fallbackCover;
+
+        coverImg.style.opacity = "0";
+        coverImg.style.display = "block";
+
+        coverImg.onload = function() {
+            const naturalW = coverImg.naturalWidth;
+            const naturalH = coverImg.naturalHeight;
+            const aspectRatio = naturalW / naturalH;
+
+            const wrapperWidth = wrapper.offsetWidth;
+            const wrapperHeight = wrapper.offsetHeight;
+            const targetRatio = wrapperWidth / wrapperHeight;
+
+            const scaledWidth = wrapperHeight * aspectRatio;
+            const squeezeRatio = 0.97;
+
+            const ratioDiff = Math.abs(aspectRatio - targetRatio) / targetRatio;
+            const isMatchingRatio = ratioDiff < 0.03;
+
+            if (scaledWidth < wrapperWidth || isMatchingRatio) {
+                coverImg.style.width = "100%";
+                coverImg.style.height = "100%";
+                coverImg.style.objectFit = "fill";
+                coverImg.style.left = "auto";
+                coverImg.style.right = "0";
+                coverImg.style.transform = "none";
+            } else if (aspectRatio > targetRatio) {
+                const compressedWidth = scaledWidth * squeezeRatio;
+                coverImg.style.width = compressedWidth + "px";
+                coverImg.style.height = "100%";
+                coverImg.style.objectFit = "fill";
+                coverImg.style.left = "auto";
+                coverImg.style.right = "0";
+                coverImg.style.transform = "none";
+            } else {
+                coverImg.style.width = "auto";
+                coverImg.style.height = "100%";
+                coverImg.style.objectFit = "cover";
+                coverImg.style.left = "auto";
+                coverImg.style.right = "0";
+                coverImg.style.transform = "none";
+            }
+            
+            coverImg.style.opacity = "1";
+            const coverLabel = wrapper.querySelector(".skeleton-label");
+            if (coverLabel) coverLabel.style.display = "none";
+            wrapper.classList.add("loaded");
+        };
+
+        coverImg.onerror = function() {
+            const fallbackAbsolute = new URL(fallbackCover, window.location.href).href;
+            if (coverImg.src !== fallbackAbsolute) {
+                coverImg.onerror = null;
+                coverImg.src = fallbackCover;
+            }
+        };
+
+        coverImg.src = finalCoverUrl;
+        coverImg.alt = `Carátula de ${game.titulo || "juego Commodore 64"}`;
+        coverImg.style.display = "block";
+
+        const isFavorito = (game.favorito || "").trim().toUpperCase() === "SI";
+        const existingStar = wrapper.querySelector(".ficha-favorito-star");
+        
+        if (isFavorito && !existingStar) {
+            const star = document.createElement("img");
+            star.src = "assets/img/ic_favorito.svg";
+            star.alt = "Favorito";
+            star.className = "ficha-favorito-star";
+            wrapper.appendChild(star);
+        } else if (!isFavorito && existingStar) {
+            existingStar.remove();
+        }
+    }
+
+    function updatePuntuacion(game) {
+        const puntuacionEl = document.getElementById("ficha-puntuacion");
+        const ratingEl = document.querySelector(".ficha-rating");
+        const starsEl = document.getElementById("ficha-rating-stars");
+        if (!puntuacionEl || !ratingEl || !starsEl) return;
+
+        const valor = (game.puntuacion || "").trim();
+
+        if (valor) {
+            puntuacionEl.innerHTML = `<b>Puntuación:</b> ${valor}`;
+            puntuacionEl.style.display = "block";
+            ratingEl.style.display = "flex";
+
+            const match = valor.match(/^(\d+[.,]?\d*)/);
+            let nota = 0;
+            if (match) {
+                nota = parseFloat(match[1].replace(",", "."));
+            }
+
+            if (isNaN(nota)) nota = 0;
+            if (nota < 0) nota = 0;
+            if (nota > 10) nota = 10;
+
+            const porcentaje = (nota / 10) * 100;
+
+            let color = "#ff4b4b";
+            if (nota >= 7) {
+                color = "#00c853";
+            } else if (nota >= 5) {
+                color = "#ffd600";
+            }
+
+            starsEl.style.setProperty("--fill", "0%");
+            starsEl.style.setProperty("--rating-color", color);
+            void starsEl.offsetWidth;
+            starsEl.style.setProperty("--fill", porcentaje + "%");
+
+        } else {
+            puntuacionEl.innerHTML = "";
+            puntuacionEl.style.display = "none";
+            ratingEl.style.display = "none";
+            starsEl.style.setProperty("--fill", "0%");
+        }
+    }
+
+    function updateScreenshots(game) {
+        const screenshot1 = document.getElementById("screenshot-1");
+        const screenshot2 = document.getElementById("screenshot-2");
+        const wrapper1 = screenshot1?.parentElement;
+        const wrapper2 = screenshot2?.parentElement;
+        const container = document.querySelector(".ficha-screenshots");
+
+        if (!screenshot1 || !screenshot2 || !container) return;
+
+        const screenshotsRaw = (game.screenshots || "").trim();
+        const startsWithSkip = screenshotsRaw.startsWith("--");
+        const parts = screenshotsRaw
+            ? screenshotsRaw.split(",").map(u => u.trim())
+            : [];
+
+        let screenshot1Url = "";
+        let screenshot2Url = "";
+
+        if (startsWithSkip) {
+            const [, ...rest] = parts;
+            const remainingUrls = rest.filter(u => u && u !== "--");
+            screenshot2Url = remainingUrls[0] || "";
+        } else {
+            const validUrls = parts.filter(u => u);
+            screenshot1Url = validUrls[0] || "";
+            screenshot2Url = validUrls[1] || "";
+        }
+        
+        if (screenshot1Url || screenshot2Url) {
+            container.style.display = "flex";
+        } else {
+            container.style.display = "none";
+            return;
+        }
+
+        if (screenshot1Url) {
+            screenshot1.src = screenshot1Url;
+            screenshot1.style.display = "block";
+            screenshot1.onclick = () => openModal(screenshot1Url);
+            wrapper1.classList.remove("empty");
+            const label1 = wrapper1.querySelector(".skeleton-label");
+            if (label1) label1.style.display = "none";
+        } else {
+            screenshot1.style.display = "none";
+            wrapper1.classList.add("empty");
+        }
+
+        if (screenshot2Url) {
+            screenshot2.src = screenshot2Url;
+            screenshot2.style.display = "block";
+            screenshot2.onclick = () => openModal(screenshot2Url);
+            wrapper2.classList.remove("empty");
+            const label2 = wrapper2.querySelector(".skeleton-label");
+            if (label2) label2.style.display = "none";
+        } else {
+            screenshot2.style.display = "none";
+            wrapper2.classList.add("empty");
+        }
+    }
+
+    function openModal(src) {
+        const modal = document.getElementById("cover-modal");
+        const modalImg = document.getElementById("cover-modal-img");
+        if (modal && modalImg) {
+            modalImg.src = src;
+            modal.classList.add("active");
+        }
+    }
+
+    // ============================================
+    // DATOS DE LA FICHA (C64 con AUTORES)
+    // ============================================
+    function updateFichaDatos(game) {
+        const container = document.getElementById("ficha-datos");
+        if (!container) return;
+
+        const campos = [
+            { label: "· AÑO", value: game.anioFicha },
+            { label: "· EDITOR", value: game.editor },
+            { label: "· DESARROLLO", value: game.desarrollo },
+            { label: "· CONTRIBUCIONES", value: game.contribuciones },
+            { label: "· GÉNERO", value: game.genero },
+            { label: "· SUBGÉNERO", value: game.subgenero }
+        ];
+
+        let html = "";
+
+        campos.forEach(campo => {
+            if (campo.value && campo.value.trim() !== "") {
+                html += `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${campo.value}</p>`;
+            }
+        });
+
+        // AUTORES: uno debajo de otro con "· "
+        const autoresRaw = (game.autores || "").trim();
+        if (autoresRaw) {
+            const autoresList = autoresRaw.split(",").map(a => a.trim()).filter(a => a);
+            if (autoresList.length > 0) {
+                html += `<p class="ficha-dato"><span class="ficha-dato-label">· AUTORES:</span></p>`;
+                autoresList.forEach(autor => {
+                    html += `<p class="ficha-dato" style="margin-left: 20px;">· ${autor}</p>`;
+                });
+            }
+        }
+
+        if (!html) {
+            container.style.display = "none";
+            return;
+        }
+
+        container.innerHTML = html;
+        container.style.display = "block";
+    }
+
+    // ============================================
+    // SINOPSIS
+    // ============================================
+    function updateSinopsis(game) {
+        const section = document.getElementById("sinopsis-section");
+        const container = document.getElementById("ficha-sinopsis");
+        if (!section || !container) return;
+
+        const sinopsis = (game.sinopsis || "").trim();
+
+        if (!sinopsis) {
+            section.style.display = "none";
+            return;
+        }
+
+        const textParagraph = document.createElement("p");
+        textParagraph.className = "ficha-sinopsis-texto";
+        textParagraph.textContent = sinopsis;
+        container.innerHTML = "";
+        container.appendChild(textParagraph);
+        
+        section.style.display = "block";
+    }
+
+    // ============================================
+    // DATOS TÉCNICOS (incluye FUNCIONA para C64)
+    // ============================================
+    function updateDatosTecnicos(game) {
+        const section = document.getElementById("datos-tecnicos-section");
+        const container = document.getElementById("ficha-datos-tecnicos");
+        if (!section || !container) return;
+
+        const getStatusClass = (label, value) => {
+            const normalized = (value || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+
+            const isCompatibilityField = label.includes("FUNCIONA");
+            const isCompletionField = label.includes("TERMINADO");
+
+            if (!isCompatibilityField && !isCompletionField) return "";
+
+            if (normalized === "no probado" && isCompatibilityField) return "status status--pending";
+            if (normalized === "no") return "status status--no";
+            if (normalized === "si") return "status status--yes";
+
+            return "";
+        };
+        
+        const campos = [
+            { label: "· JUGADORES", value: game.jugadores },
+            { label: "· CONTROLES", value: game.controles },
+            { label: "· FORMATO", value: game.formato },
+            { label: "· FUNCIONA", value: game.funciona }, // Campo específico C64
+            { label: "· TERMINADO", value: game.terminado }
+        ];
+
+        const camposConValor = campos.filter(campo => campo.value && campo.value.trim() !== "");
+
+        if (!camposConValor.length) {
+            section.style.display = "none";
+            return;
+        }
+
+        const html = camposConValor
+            .map(campo => {
+                const statusClass = getStatusClass(campo.label, campo.value);
+                const valueHtml = statusClass
+                    ? `<span class="${statusClass}">${campo.value}</span>`
+                    : campo.value;
+
+                return `<p class="ficha-dato"><span class="ficha-dato-label">${campo.label}:</span> ${valueHtml}</p>`;
+            })
+            .join("");
+
+        container.innerHTML = html;
+        section.style.display = "block";
+    }
+
+    // ============================================
+    // GAMEPLAY
+    // ============================================
+    function updateGameplay(game) {
+        const section = document.getElementById("gameplay-section");
+        const frame = document.getElementById("ficha-gameplay-frame");
+        const placeholder = document.getElementById("ficha-gameplay-placeholder");
+
+        if (!section || !frame || !placeholder) return;
+
+        const videoUrl = (game.videoUrl || "").trim();
+
+        if (!videoUrl) {
+            section.style.display = "none";
+            return;
+        }
+
+        const thumbnail = getYouTubeThumbnail(videoUrl);
+        if (thumbnail) {
+            placeholder.style.backgroundImage = `url('${thumbnail}')`;
+        } else {
+            placeholder.style.backgroundImage = "";
+        }
+
+        if (!placeholder.dataset.bound) {
+            placeholder.dataset.bound = "true";
+            placeholder.addEventListener("click", () => {
+                const iframe = document.createElement("iframe");
+                const separator = videoUrl.includes("?") ? "&" : "?";
+                iframe.src = `${videoUrl}${separator}autoplay=1`;
+                iframe.className = "ficha-gameplay-iframe";
+                iframe.title = "Gameplay";
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                iframe.allowFullscreen = true;
+                iframe.loading = "lazy";
+
+                frame.innerHTML = "";
+                frame.appendChild(iframe);
+            });
+        }
+
+        section.style.display = "block";
+    }
+
+    // ============================================
+    // IMÁGENES ADICIONALES
+    // ============================================
+    function renderAdditionalImage() {
+        if (!additionalImages.length) return;
+
+        const imgEl = document.getElementById("ficha-imagenes-img");
+        const counterCurrent = document.getElementById("imagenes-current");
+        const counterTotal = document.getElementById("imagenes-total");
+        const modal = document.getElementById("imagenes-modal");
+        const modalImg = document.getElementById("imagenes-modal-img");
+
+        if (!imgEl || !counterCurrent || !counterTotal) return;
+
+        const url = additionalImages[additionalImageIndex];
+
+        imgEl.src = url;
+        imgEl.style.display = "block";
+        counterCurrent.textContent = (additionalImageIndex + 1).toString();
+        counterTotal.textContent = additionalImages.length.toString();
+
+        if (modal && modal.classList.contains("active") && modalImg) {
+            modalImg.src = url;
+        }
+    }
+
+    function changeAdditionalImage(step) {
+        if (!additionalImages.length) return;
+
+        additionalImageIndex = (additionalImageIndex + step + additionalImages.length) % additionalImages.length;
+        renderAdditionalImage();
+        modalAbierta = true;
+    }
+
+    function openAdditionalImagesModal() {
+        const modal = document.getElementById("imagenes-modal");
+        if (!modal || !additionalImages.length) return;
+
+        modal.classList.add("active");
+        renderAdditionalImage();
+    }
+
+    function closeAdditionalImagesModal() {
+        const modal = document.getElementById("imagenes-modal");
+        if (modal) {
+            modal.classList.remove("active");
+        }
+        modalAbierta = false;
+    }
+
+    function setupAdditionalImagesModalControls() {
+        const modal = document.getElementById("imagenes-modal");
+        const closeBtn = document.querySelector(".imagenes-modal-close");
+        const prevArrow = document.querySelector(".imagenes-modal-arrow--prev");
+        const nextArrow = document.querySelector(".imagenes-modal-arrow--next");
+
+        if (closeBtn && !closeBtn.dataset.bound) {
+            closeBtn.dataset.bound = "true";
+            closeBtn.addEventListener("click", closeAdditionalImagesModal);
+        }
+
+        if (modal && !modal.dataset.bound) {
+            modal.dataset.bound = "true";
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) {
+                    closeAdditionalImagesModal();
+                }
+            });
+
+            ["touchstart", "touchmove", "touchend"].forEach(eventName => {
+                modal.addEventListener(eventName, (e) => {
+                    e.stopPropagation();
+                }, { passive: true });
+            });
+        }
+
+        if (prevArrow && !prevArrow.dataset.bound) {
+            prevArrow.dataset.bound = "true";
+            prevArrow.addEventListener("click", () => changeAdditionalImage(-1));
+        }
+
+        if (nextArrow && !nextArrow.dataset.bound) {
+            nextArrow.dataset.bound = "true";
+            nextArrow.addEventListener("click", () => changeAdditionalImage(1));
+        }
+
+        if (!additionalImagesKeydownBound) {
+            additionalImagesKeydownBound = true;
+            document.addEventListener("keydown", (e) => {
+                if (!modal || !modal.classList.contains("active")) return;
+
+                if (e.key === "Escape") {
+                    closeAdditionalImagesModal();
+                } else if (e.key === "ArrowLeft") {
+                    changeAdditionalImage(-1);
+                } else if (e.key === "ArrowRight") {
+                    changeAdditionalImage(1);
+                }
+            });
+        }
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const minSwipeDistance = 40;
+
+        if (modal && !modal.dataset.swipeBound) {
+            modal.dataset.swipeBound = "true";
+            modal.addEventListener("touchstart", (e) => {
+                e.stopPropagation();
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            modal.addEventListener("touchend", (e) => {
+                e.stopPropagation();
+                touchEndX = e.changedTouches[0].screenX;
+                const distance = touchEndX - touchStartX;
+
+                if (Math.abs(distance) < minSwipeDistance) return;
+
+                if (distance < 0) {
+                    changeAdditionalImage(1);
+                } else {
+                    changeAdditionalImage(-1);
+                }
+            }, { passive: true });
+        }
+    }
+
+    function updateImagenesAdicionales(game) {
+        const section = document.getElementById("imagenes-section");
+        const nav = document.getElementById("ficha-imagenes-nav");
+        const imgEl = document.getElementById("ficha-imagenes-img");
+        if (!section || !nav || !imgEl) return;
+
+        additionalImages = Array.isArray(game.imagenesArray)
+            ? game.imagenesArray
+            : parseAdditionalImagesList(game.imagenesAdicionales);
+        additionalImageIndex = 0;
+
+        if (!additionalImages.length) {
+            section.style.display = "none";
+            nav.style.display = "none";
+            imgEl.style.display = "none";
+            return;
+        }
+
+        const prevArrow = nav.querySelector(".ficha-imagenes-arrow--prev");
+        const nextArrow = nav.querySelector(".ficha-imagenes-arrow--next");
+
+        section.style.display = "block";
+        nav.style.display = "flex";
+        imgEl.style.display = "block";
+
+        if (prevArrow && !prevArrow.dataset.bound) {
+            prevArrow.dataset.bound = "true";
+            prevArrow.addEventListener("click", () => changeAdditionalImage(-1));
+        }
+
+        if (nextArrow && !nextArrow.dataset.bound) {
+            nextArrow.dataset.bound = "true";
+            nextArrow.addEventListener("click", () => changeAdditionalImage(1));
+        }
+
+        if (!imgEl.dataset.bound) {
+            imgEl.dataset.bound = "true";
+            imgEl.addEventListener("click", openAdditionalImagesModal);
+        }
+
+        setupAdditionalImagesModalControls();
+        renderAdditionalImage();
+    }
+
+    function splitRevistaTexto(texto) {
+        const separator = " - ";
+        const idx = texto.indexOf(separator);
+
+        if (idx >= 0) {
+            return {
+                titulo: texto.slice(0, idx).trim(),
+                detalle: texto.slice(idx + separator.length).trim()
+            };
+        }
+
+        return {
+            titulo: (texto || "").trim(),
+            detalle: ""
+        };
+    }
+
+    function updateRevistas(game) {
+        const section = document.getElementById("revistas-section");
+        const container = document.getElementById("ficha-revistas");
+        if (!section || !container) return;
+
+        const revistas = Array.isArray(game.revistas)
+            ? game.revistas
+            : parseRevistasList(game.revistasTexto);
+
+        const revistasValidas = (revistas || []).filter(entry => entry && entry.texto);
+
+        if (!revistasValidas.length) {
+            section.style.display = "none";
+            container.innerHTML = "";
+            return;
+        }
+
+        container.innerHTML = "";
+
+        revistasValidas.forEach((entry) => {
+            const { titulo, detalle } = splitRevistaTexto(entry.texto || "");
+
+            const linea = document.createElement("p");
+            linea.className = "ficha-revista-item";
+
+            const enlace = entry.url ? document.createElement("a") : document.createElement("span");
+            enlace.className = "ficha-revista-link";
+            if (entry.url) {
+                enlace.href = entry.url;
+                enlace.target = "_blank";
+                enlace.rel = "noopener noreferrer";
+            }
+
+            enlace.appendChild(document.createTextNode("· "));
+
+            const strong = document.createElement("strong");
+            strong.textContent = titulo;
+            enlace.appendChild(strong);
+
+            if (detalle) {
+                enlace.appendChild(document.createTextNode(` – ${detalle}`));
+            }
+
+            linea.appendChild(enlace);
+            container.appendChild(linea);
+        });
+
+        section.style.display = "block";
+    }
+
+    // ============================================
+    // ÚTILES (solo Instrucciones y Enlace, centrados)
+    // ============================================
+    function updateUtiles(game) {
+        const section = document.getElementById("utiles-section");
+        const container = document.getElementById("ficha-utiles");
+        if (!section || !container) return;
+
+        const items = [
+            { key: "instrucciones", label: "INSTRUCCIONES", url: game.instruccionesUrl },
+            { key: "enlace", label: "ENLACE", url: game.enlaceUrl }
+        ];
+
+        container.innerHTML = "";
+
+        const row = document.createElement("div");
+        row.className = "utiles-buttons-row";
+        row.style.justifyContent = "center";
+
+        items.forEach(item => {
+            const hasUrl = !!(item.url && item.url.trim());
+            const element = document.createElement(hasUrl ? "a" : "div");
+            element.className = "utiles-button " + (hasUrl ? "utiles-button--active" : "utiles-button--inactive");
+            element.dataset.type = item.key;
+
+            if (hasUrl) {
+                element.href = item.url;
+                element.target = "_blank";
+                element.rel = "noopener noreferrer";
+            }
+
+            const circle = document.createElement("div");
+            circle.className = "utiles-icon";
+
+            const label = document.createElement("div");
+            label.className = "utiles-label";
+            label.textContent = item.label;
+
+            element.appendChild(circle);
+            element.appendChild(label);
+            row.appendChild(element);
+            
+            if (hasUrl) {
+                const setPressed = () => element.classList.add("is-pressed");
+                const clearPressed = () => {
+                    element.classList.remove("is-pressed");
+                    element.blur();
+                };
+
+                element.addEventListener("pointerdown", setPressed);
+                ["pointerup", "pointerleave", "pointercancel", "lostpointercapture", "blur"].forEach(evt => {
+                    element.addEventListener(evt, clearPressed);
+                });
+
+                element.addEventListener("click", () => {
+                    setTimeout(() => {
+                        element.classList.remove("is-pressed");
+                        element.blur();
+                    }, 100);
+                });
+            }
+        });
+
+        container.appendChild(row);
+        section.style.display = "block";
+    }
+
+    function showError(message) {
+        const h1 = document.getElementById("ficha-title");
+        if (h1) {
+            h1.textContent = message;
+        }
+    }
+
+    // ============================================
+    // NAVEGACIÓN
+    // ============================================
+
+    function computeGroupLabel() {
+        const filterField = (getQueryParam("filterField") || "").toLowerCase();
+        const filterValue = (getQueryParam("filterValue") || "").trim();
+        const searchQuery = getQueryParam("search");
+        const fromColeccion = getQueryParam("from") === "coleccion";
+
+        if (fromColeccion) {
+            if (searchQuery) {
+                const qNorm = normalizeText(searchQuery);
+                const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+                if (singleCharMatch) {
+                    return `Letra ${searchQuery.toUpperCase()}`;
+                }
+                if (qNorm === "fav") return "Favoritos";
+                if (qNorm === "terminado") return "Terminados";
+                
+                return `"${searchQuery}"`;
+            }
+            return "Mi Colección";
+        }
+
+        if (filterField === "subgenero" && filterValue) {
+            return `Subgénero ${filterValue}`;
+        }
+
+        if (searchQuery) {
+            const singleCharMatch = searchQuery.match(/^([a-zA-ZñÑáéíóúüÁÉÍÓÚÜ0-9])$/);
+            if (singleCharMatch) {
+                return `Letra ${searchQuery.toUpperCase()}`;
+            }
+            return `"${searchQuery}"`;
+        }
+
+        return "Juegos Commodore 64";
+    }
+
+    function getFichaPageForPlatform(platform) {
+        const normalized = (platform || "").toString().trim().toUpperCase();
+
+        if (normalized === "C64" || normalized === "COMMODORE64" || normalized === "COMMODORE 64") {
+            return "c64-ficha.html";
+        }
+
+        if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZX SPECTRUM" || normalized === "ZX_SPECTRUM") {
+            return "spectrum-ficha.html";
+        }
+
+        return "igdb-ficha.html";
+    }
+
+    function buildNavigationUrl(targetPlatform, targetId) {
+        const page = getFichaPageForPlatform(targetPlatform || "C64");
+        const params = new URLSearchParams();
+
+        if (page === "igdb-ficha.html") {
+            params.set("platform", targetPlatform || "C64");
+        }
+
+        params.set("id", targetId);
+
+        const searchQuery = getQueryParam("search");
+        const filterField = getQueryParam("filterField");
+        const filterValue = getQueryParam("filterValue");
+        const fromColeccion = getQueryParam("from");
+
+        if (searchQuery) {
+            params.set("search", searchQuery);
+        }
+        if (filterField) {
+            params.set("filterField", filterField);
+        }
+        if (filterValue) {
+            params.set("filterValue", filterValue);
+        }
+        if (fromColeccion) {
+            params.set("from", fromColeccion);
+        }
+
+        return `${page}?${params.toString()}`;
+    }
+
+    function updateNavCounter() {
+        const counterEl = document.querySelector(".game-nav-counter");
+        const titleEl = document.querySelector(".game-nav-title");
+        
+        if (counterEl && currentGameIndex >= 0) {
+            const position = currentGameIndex + 1;
+            const total = sortedGamesList.length;
+            const counterText = `${position.toLocaleString("es-ES")}/${total.toLocaleString("es-ES")}`;
+            counterEl.textContent = counterText;
+            sessionStorage.setItem("navCounter", counterText);
+            
+            const fromColeccion = getQueryParam("from") === "coleccion";
+            const searchQuery = getQueryParam("search") || "";
+            const filterField = getQueryParam("filterField") || "";
+            const navContextKey = fromColeccion 
+                ? `coleccion_${searchQuery}_${filterField}`
+                : `c64_${searchQuery}_${filterField}`;
+            sessionStorage.setItem("navContext", navContextKey);
+        } else if (counterEl) {
+            counterEl.textContent = "- / -";
+        }
+        
+        if (titleEl) {
+            const label = currentGroupLabel || computeGroupLabel();
+            titleEl.textContent = label;
+        }
+    }
+
+    function setupNavigation() {
+        const prevArrow = document.querySelector(".game-nav-arrow--prev");
+        const nextArrow = document.querySelector(".game-nav-arrow--next");
+        const counterEl = document.querySelector(".game-nav-counter");
+
+        if (prevArrow) {
+            prevArrow.addEventListener("click", () => {
+                if (currentGameIndex > 0) {
+                    const newPosition = currentGameIndex;
+                    const total = sortedGamesList.length;
+                    const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                    if (counterEl) {
+                        counterEl.textContent = counterText;
+                    }
+                    sessionStorage.setItem("navCounter", counterText);
+                    const prevGame = sortedGamesList[currentGameIndex - 1];
+                    const url = buildNavigationUrl(prevGame.plataforma, prevGame.id);
+                    window.location.href = url;
+                }
+            });
+            prevArrow.style.cursor = "pointer";
+        }
+
+        if (nextArrow) {
+            nextArrow.addEventListener("click", () => {
+                if (currentGameIndex < sortedGamesList.length - 1) {
+                    const newPosition = currentGameIndex + 2;
+                    const total = sortedGamesList.length;
+                    const counterText = `${newPosition.toLocaleString("es-ES")} / ${total.toLocaleString("es-ES")}`;
+                    if (counterEl) {
+                        counterEl.textContent = counterText;
+                    }
+                    sessionStorage.setItem("navCounter", counterText);
+                    const nextGame = sortedGamesList[currentGameIndex + 1];
+                    const url = buildNavigationUrl(nextGame.plataforma, nextGame.id);
+                    window.location.href = url;
+                }
+            });
+            nextArrow.style.cursor = "pointer";
+        }
+    }
+
+    async function loadGamesList(gameId) {
+        try {
+            const fromColeccion = getQueryParam("from") === "coleccion";
+            const searchQuery = getQueryParam("search");
+            const filterField = (getQueryParam("filterField") || "").toLowerCase();
+            const filterValue = (getQueryParam("filterValue") || "").trim();
+
+            let games;
+            
+            if (fromColeccion) {
+                const cacheKey = `coleccion_${CACHE_VERSION}`;
+                games = getCachedData(cacheKey);
+                if (!games) {
+                    const response = await fetch(COLECCION_CSV_URL);
+                    if (!response.ok) throw new Error("No se pudo cargar colección");
+                    const text = await response.text();
+                    games = parseColeccionCSV(text);
+                    setCachedData(cacheKey, games);
+                }
+            } else {
+                const cacheKey = `c64_lista_${CACHE_VERSION}`;
+                games = getCachedData(cacheKey);
+                
+                if (!games) {
+                    const response = await fetch(C64_LISTA_CSV_URL);
+                    if (!response.ok) throw new Error("No se pudo cargar la lista");
+                    
+                    const text = await response.text();
+                    games = parseC64ListaCSV(text);
+                    setCachedData(cacheKey, games);
+                } 
+            }
+
+            games = games.filter(g => g.id && g.titulo);
+            games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
+
+            let filteredGames = games;
+            currentGroupLabel = "";
+
+            if (fromColeccion) {
+                currentGroupLabel = "Mi Colección";
+
+                if (searchQuery) {
+                    const qNorm = normalizeText(searchQuery);
+                    const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
+
+                    if (singleCharMatch) {
+                        const char = normalizeText(singleCharMatch[1]);
+                        filteredGames = games.filter(game => {
+                            const titleNorm = normalizeText(game.sortKey || "");
+                            return titleNorm.startsWith(char);
+                        });
+                        currentGroupLabel = `Letra ${searchQuery.toUpperCase()}`;
+                    } else if (qNorm === "fav") {
+                        filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+                        currentGroupLabel = "Favoritos";
+                    } else if (qNorm === "terminado") {
+                        filteredGames = games.filter(game => normalizeText(game.terminado || "") === "si");
+                        currentGroupLabel = "Terminados";
+                    } else {
+                        filteredGames = games.filter(game => {
+                            const titleNorm = normalizeText(game.sortKey || "");
+                            return titleNorm.includes(qNorm);
+                        });
+                        currentGroupLabel = `"${searchQuery}"`;
+                    }
+                }
+            } else if (filterField === "subgenero" && filterValue) {
+                const qNorm = normalizeText(filterValue);
+                filteredGames = games.filter(game => normalizeText(game.subgenero || "").includes(qNorm));
+                currentGroupLabel = `Subgénero ${filterValue}`;
+            } else if (filterField === "favorito") {
+                filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
+                currentGroupLabel = `Favoritos`;
+            } else if (searchQuery) {
+                const qNorm = normalizeText(searchQuery);
+                const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
+                
+                if (singleCharMatch) {
+                    const char = normalizeText(singleCharMatch[1]);
+                    filteredGames = games.filter(game => {
+                        const titleNorm = normalizeText(game.sortKey || "");
+                        return titleNorm.startsWith(char);
+                    });
+                } else {
+                    filteredGames = games.filter(game => {
+                        const titleNorm = normalizeText(game.sortKey || "");
+                        return titleNorm.includes(qNorm);
+                    });
+                    currentGroupLabel = `"${searchQuery}"`;
+                }
+            } else {
+                currentGroupLabel = "Juegos Commodore 64";
+            }
+
+            sortedGamesList = filteredGames;
+
+            const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || "c64");
+            if (fromColeccion) {
+                currentGameIndex = filteredGames.findIndex(g =>
+                    normalizeText(g.plataforma || "") === normalizedCurrentPlatform && g.id === gameId
+                );
+            } else {
+                currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
+            }
+            updateNavCounter();
+            setupNavigation();
+
+        } catch (err) {
+            console.error("Error cargando lista para navegación:", err);
+        }
+    }
+
+    async function prefetchAdjacentGames() {
+        setTimeout(() => {
+            const prevIndex = currentGameIndex - 1;
+            const nextIndex = currentGameIndex + 1;
+            
+            if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
+                const prevGame = sortedGamesList[prevIndex];
+                prefetchGameData(prevGame.id);
+            }
+            
+            if (nextIndex >= 0 && nextIndex < sortedGamesList.length) {
+                const nextGame = sortedGamesList[nextIndex];
+                prefetchGameData(nextGame.id);
+            }
+        }, PREFETCH_DELAY);
+    }
+
+    async function prefetchGameData(gameId) {
+        const cached = getCachedFicha(gameId);
+        if (cached) return;
+        
+        try {
+            const response = await fetch(C64_CSV_URL);
+            if (!response.ok) return;
+            
+            const text = await response.text();
+            const games = parseCSV(text);
+            
+            const game = games.find(row => row.id === gameId);
+            if (game) {
+                setCachedFicha(gameId, game);
+            }
+            
+        } catch (err) {
+            console.warn(`Error precargando ${gameId}:`, err);
+        }
+    }
+
+    // ============================================
+    // CARGA PRINCIPAL
+    // ============================================
+    
+    async function loadC64Ficha() {
+        const gameId = (getQueryParam("id") || "").trim();
+        
+        if (!gameId) {
+            showError("ID no especificado");
+            return;
+        }
+
+        try {
+            let game = getCachedFicha(gameId);
+            
+            if (!game) {
+                const response = await fetch(C64_CSV_URL);
+                if (!response.ok) throw new Error("No se pudo cargar el CSV");
+                
+                const text = await response.text();
+                const games = parseCSV(text);
+                
+                game = games.find(row => row.id === gameId);
+                
+                if (game) {
+                    setCachedFicha(gameId, game);
+                }
+            }
+            
+            if (game) {
+                updateTitle(game);
+                updateCover(game);
+                updatePuntuacion(game);
+                updateScreenshots(game);
+                updateFichaDatos(game);
+                updateSinopsis(game);
+                updateDatosTecnicos(game);
+                updateGameplay(game);
+                updateImagenesAdicionales(game);
+                updateRevistas(game);
+                updateUtiles(game);
+            } else {
+                showError("Juego no encontrado");
+            }
+
+            await loadGamesList(gameId);
+            prefetchAdjacentGames();
+
+        } catch (err) {
+            console.error("Error cargando C64:", err);
+            showError("Error cargando datos");
+        }
+    }
+
+    // ============================================
+    // MODAL CARÁTULA
+    // ============================================
+
+    function setupCoverModal() {
+        const coverImg = document.getElementById("ficha-cover");
+        const modal = document.getElementById("cover-modal");
+        const modalImg = document.getElementById("cover-modal-img");
+        const closeBtn = document.querySelector(".cover-modal-close");
+
+        if (!coverImg || !modal || !modalImg || !closeBtn) return;
+
+        coverImg.addEventListener("click", function() {
+            modalImg.src = coverImg.src;
+            modal.classList.add("active");
+            modalAbierta = true;
+        });
+
+        closeBtn.addEventListener("click", function() {
+            modal.classList.remove("active");
+            modalAbierta = false;
+        });
+
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) {
+                modal.classList.remove("active");
+                modalAbierta = false;
+            }
+        });
+        ["touchstart", "touchmove", "touchend"].forEach(eventName => {
+            modal.addEventListener(eventName, (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape" && modal.classList.contains("active")) {
+                modal.classList.remove("active");
+                modalAbierta = false;
+            }
+        });
+    }
+
+    // ============================================
+    // SWIPE NAVEGACIÓN
+    // ============================================
+
+    function setupSwipeNavigation() {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+        let touchStartTime = 0;
+        
+        const minSwipeDistance = 100;
+        const maxSwipeTime = 500;
+        const maxVerticalRatio = 0.5;
+
+        document.addEventListener("touchstart", function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            touchStartTime = Date.now();
+        }, { passive: true });
+
+        document.addEventListener("touchend", function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            if (modalAbierta) return;
+            
+            const distanceX = touchEndX - touchStartX;
+            const distanceY = touchEndY - touchStartY;
+            const elapsedTime = Date.now() - touchStartTime;
+            
+            if (Math.abs(distanceX) < minSwipeDistance) return;
+            if (elapsedTime > maxSwipeTime) return;
+            if (Math.abs(distanceY) > Math.abs(distanceX) * maxVerticalRatio) return;
+
+            if (distanceX < 0) {
+                if (currentGameIndex < sortedGamesList.length - 1) {
+                    const nextGame = sortedGamesList[currentGameIndex + 1];
+                    const url = buildNavigationUrl(nextGame.plataforma, nextGame.id);
+                    window.location.href = url;
+                }
+            } else {
+                if (currentGameIndex > 0) {
+                    const prevGame = sortedGamesList[currentGameIndex - 1];
+                    const url = buildNavigationUrl(prevGame.plataforma, prevGame.id);
+                    window.location.href = url;
+                }
+            }
+        }
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        const titleEl = document.querySelector(".game-nav-title");
+        if (titleEl) {
+            titleEl.textContent = computeGroupLabel();
+        }
+
+        const fromColeccion = getQueryParam("from") === "coleccion";
+        const searchQuery = getQueryParam("search") || "";
+        const filterField = getQueryParam("filterField") || "";
+        const navContextKey = fromColeccion 
+            ? `coleccion_${searchQuery}_${filterField}`
+            : `c64_${searchQuery}_${filterField}`;
+        
+        const savedContext = sessionStorage.getItem("navContext");
+        const savedCounter = sessionStorage.getItem("navCounter");
+        
+        if (savedCounter && savedContext === navContextKey) {
+            const counterEl = document.querySelector(".game-nav-counter");
+            if (counterEl) {
+                counterEl.textContent = savedCounter;
+            }
+        }
+        
+        sessionStorage.setItem("navContext", navContextKey);
+        
+        loadC64Ficha();
+        setupCoverModal();
+        setupSwipeNavigation();
+    });
+</script>
+
+<!-- MODAL CARÁTULA -->
+<div id="cover-modal" class="cover-modal">
+    <span class="cover-modal-close">&times;</span>
+    <img class="cover-modal-img" id="cover-modal-img" alt="Carátula ampliada">
+</div>
+    
+<!-- MODAL IMÁGENES ADICIONALES -->
+<div id="imagenes-modal" class="imagenes-modal">
+    <span class="imagenes-modal-close">&times;</span>
+    <img class="imagenes-modal-img" id="imagenes-modal-img" alt="Imagen adicional ampliada">
+    <img src="assets/img/ic_back.svg" class="imagenes-modal-arrow imagenes-modal-arrow--prev" alt="Anterior">
+    <img src="assets/img/ic_back.svg" class="imagenes-modal-arrow imagenes-modal-arrow--next" alt="Siguiente">
+</div>
+</body>
+</html>
