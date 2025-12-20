@@ -810,6 +810,10 @@ function menuRellenarIdFilaActual() {
   if (nombreHoja.toUpperCase() === 'ZX_SPECTRUM') {
     return rellenarIdsZXLista();
   }
+
+  if (nombreHoja.toUpperCase() === 'C64' || /commodore.*64/i.test(nombreHoja)) {
+    return rellenarIdIGDBFilaActual_(shActiva, 'C64');
+  }
   
   if (nombreHoja.toUpperCase().includes('PS3')) {
     return rellenarIdIGDBFilaActual_(shActiva, 'PS3');
