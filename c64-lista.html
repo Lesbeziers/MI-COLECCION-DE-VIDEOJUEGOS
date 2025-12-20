@@ -123,10 +123,40 @@
   // =========================================
   // UTILIDAD PARA PARSEAR EL CSV COMPLETO
   // =========================================
-  function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (lines.length === 0) return [];
+function parseCSV(text) {
+    // Parser mejorado que respeta saltos de línea dentro de comillas
+    const lines = [];
+    let currentLine = "";
+    let inQuotes = false;
 
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+
+      if (ch === '"') {
+        if (inQuotes && text[i + 1] === '"') {
+          currentLine += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        currentLine += ch;
+      } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+        if (ch === '\r' && text[i + 1] === '\n') {
+          i++;
+        }
+        if (currentLine.trim()) {
+          lines.push(currentLine);
+        }
+        currentLine = "";
+      } else {
+        currentLine += ch;
+      }
+    }
+    if (currentLine.trim()) {
+      lines.push(currentLine);
+    }
+
+    if (lines.length === 0) return [];
     const header = parseCSVLine(lines[0]);
     const rows = [];
 
