@@ -188,8 +188,8 @@ function parseCSV(text) {
       const titulo= (idxTitulo >= 0 && cols[idxTitulo] !== undefined) ? cols[idxTitulo].trim() : "";
       const pub   = (idxPub    >= 0 && cols[idxPub]    !== undefined) ? cols[idxPub].trim()    : "";
       const anio  = (idxAnio   >= 0 && cols[idxAnio]   !== undefined) ? cols[idxAnio].trim()   : "";
-  const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) 
-        ? cols[idxThumb].replace(/[\r\n]+/g, ' ').trim()  
+const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined) 
+        ? cols[idxThumb].replace(/[\r\n]+/g, ' ').trim().split(/\s+/)[0]
         : "";
 
       const autores = (idxAutores >= 0 && cols[idxAutores] !== undefined) ? cols[idxAutores].trim() : "";
