@@ -1133,8 +1133,28 @@ if (isPS3) {
     
     if (!titulo) return uiAlert_('Falta el campo "TÍTULO" en la fila.');
 
-    const link = get('LINK');
-    if (!link) return uiAlert_('Falta el campo "LINK".');
+let link = get('LINK');
+    
+    // Si no hay LINK, construir automáticamente desde título
+    if (!link) {
+      const slug = makeLemon64Slug_(titulo);
+      link = `https://www.lemon64.com/game/${slug}`;
+      Logger.log('[C64] LINK construido automáticamente: ' + link);
+      
+      // Verificar si existe (con timeout corto)
+      try {
+        const testRes = UrlFetchApp.fetch(link, { 
+          muteHttpExceptions: true,
+          followRedirects: false
+        });
+        
+        if (testRes.getResponseCode() === 404) {
+          return uiAlert_('No se encontró el juego en Lemon64.\n\nURL intentada: ' + link + '\n\nPor favor, añade el LINK manualmente.');
+        }
+      } catch (e) {
+        Logger.log('[C64] Error verificando URL: ' + e);
+      }
+    }
 
     // ====================================
     // LEER DATOS TÉCNICOS DESDE LA HOJA
@@ -1780,11 +1800,17 @@ function fetchC64_fromLemon64_(titulo, link, overrides) {
     const idMatch = html.match(/Game ID:\s*(\d+)/i);
     data.idLemon64 = idMatch ? idMatch[1] : '';
 
-    // ====================================
+// ====================================
     // AÑO
     // ====================================
     const yearHtml = findRow('Year|Released');
-    const yearMatch = yearHtml.match(/list_year=(\d{4})/);
+    let yearMatch = yearHtml.match(/list_year=(\d{4})/);
+    
+    // Si no encuentra con el patrón de enlace, buscar cualquier año de 4 dígitos
+    if (!yearMatch) {
+      yearMatch = yearHtml.match(/\b(19\d{2}|20\d{2})\b/);
+    }
+    
     data.anio = yearMatch ? yearMatch[1] : '';
 
     // ====================================
@@ -2050,15 +2076,18 @@ function fetchC64_fromLemon64_(titulo, link, overrides) {
 function extractLemon64MagazineReviews_(html) {
   const revistas = [];
   
-  // Buscar tabla de revistas
+  // Buscar tabla de revistas (debe tener "Magazine" o "Review" en algún lugar cercano)
   const magazineTableRegex = /<table[^>]*class=["'][^"']*table-common[^"']*table-stripes[^"']*["'][^>]*>([\s\S]*?)<\/table>/gi;
   let tableMatch;
   
   while ((tableMatch = magazineTableRegex.exec(html)) !== null) {
     const tableHtml = tableMatch[1];
     
-    // Verificar que es la tabla de revistas (debe tener "Magazine" o enlaces a revistas)
-    if (!/<strong>/.test(tableHtml) && !tableHtml.includes('magazine')) continue;
+    // Verificar que es tabla de revistas (debe tener "Magazine" o enlaces con "magazine")
+    if (!tableHtml.includes('Magazine') && !tableHtml.includes('magazine')) continue;
+    
+    // NO procesar si tiene "Longplay" o "video" (son tablas de vídeos)
+    if (/Longplay|video/i.test(tableHtml)) continue;
     
     // Extraer cada fila <tr>
     const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
@@ -2070,12 +2099,19 @@ function extractLemon64MagazineReviews_(html) {
       // Ignorar fila de promedio
       if (/average.*rating/i.test(rowHtml)) continue;
       
+      // Ignorar filas sin enlaces (cabeceras)
+      if (!/<a[^>]+href/.test(rowHtml)) continue;
+      
       // Extraer enlace y nombre de revista
       const linkMatch = rowHtml.match(/<a[^>]+href=["']([^"']+)["'][^>]*>\s*(?:<[^>]+>)*\s*<strong>([^<]+)<\/strong>/i);
       
       if (linkMatch) {
         const url = linkMatch[1];
         const nombre = stripTags_(linkMatch[2]).trim();
+        
+        // Validar que es una revista real (tiene nombre reconocible)
+        if (!nombre || nombre.length < 2) continue;
+        if (/^(Info|photo|Longplay|video)$/i.test(nombre)) continue;
         
         // Extraer detalles adicionales (número, fecha)
         const fullText = stripTags_(rowHtml).replace(/\s+/g, ' ').trim();
@@ -2594,6 +2630,19 @@ function makeZxartSlug_(title) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/--+/g, '-');
+}
+
+// ====================================
+// HELPER: GENERAR SLUG PARA LEMON64
+// ====================================
+
+function makeLemon64Slug_(titulo) {
+  return String(titulo || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
+    .replace(/[^a-z0-9]+/g, '-') // todo excepto letras/números → guión
+    .replace(/^-+|-+$/g, '') // quitar guiones al inicio/final
+    .replace(/--+/g, '-'); // múltiples guiones → uno solo
 }
 
 // ====================================
@@ -3314,14 +3363,15 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
   // ====================================
   // DATOS TÉCNICOS (ADAPTADO A ZX / PS3)
   // ====================================
-  const isIGDBFicha = (plataforma && !plataforma.toLowerCase().includes('spectrum'));
+// Detectar tipo de plataforma
+  const isPS3 = (plataforma && plataforma.toLowerCase().includes('playstation'));
+  const isC64 = (plataforma && plataforma.toLowerCase().includes('commodore'));
+  const isZX = !isPS3 && !isC64;
   
   let tecnicosLines = '';
 
-  if (isIGDBFicha) {
-    // Datos técnicos para PS3 (sin masInfo, que va en sección aparte)
-    // Ubicación: solo si NO es "--"
-    // Favorito: solo si
+  if (isPS3) {
+    // Datos técnicos para PS3
     tecnicosLines = [
       renderLineLinks('Modos de juego', d.jugadoresAnchors),
       (tecnicos && tecnicos.ubicacion && tecnicos.ubicacion !== '--') ? renderLineText('Ubicación', tecnicos.ubicacion) : '',
@@ -3329,7 +3379,25 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
       (tecnicos && tecnicos.favorito && tecnicos.favorito.toUpperCase() === 'SI') ? renderLineText('Favorito', tecnicos.favorito) : '',
       tecnicos && tecnicos.terminado ? renderLineText('Terminado', tecnicos.terminado) : ''
     ].filter(Boolean).join('');
+  } else if (isC64) {
+    // Datos técnicos para Commodore 64
+    tecnicosLines = [
+      renderLineLinks('Modos de juego', d.jugadoresAnchors),
+      tecnicos && tecnicos.formato ? renderLineText('Formato', tecnicos.formato) : '',
+      tecnicos && tecnicos.funciona ? renderLineText('Funciona', tecnicos.funciona) : '',
+      (tecnicos && tecnicos.favorito && tecnicos.favorito.toUpperCase() === 'SI') ? renderLineText('Favorito', tecnicos.favorito) : '',
+      tecnicos && tecnicos.terminado ? renderLineText('Terminado', tecnicos.terminado) : ''
+    ].filter(Boolean).join('');
   } else {
+    // Datos técnicos para ZX Spectrum
+    tecnicosLines = [
+      renderLineLinks('Modos de juego', d.jugadoresAnchors),
+      renderLineLinks('Formato', makeLocalAnchors(tecnicos && tecnicos.formato)),
+      renderLineLinks('ZX +2A', makeLocalAnchors(tecnicos && tecnicos.zx2a)),
+      renderLineLinks('TSPEC', makeLocalAnchors(tecnicos && tecnicos.tspec)),
+      renderLineText('Terminado', tecnicos && tecnicos.terminado)
+    ].filter(Boolean).join('');
+  }
     // Datos técnicos para ZX Spectrum
     tecnicosLines = [
       renderLineLinks('Modos de juego', d.jugadoresAnchors),
@@ -3890,15 +3958,29 @@ function parseAnchors_(htmlInner, baseUrl) {
   // Buscar todos los enlaces <a>
   for (const m of s.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/ig)) {
     const href = absolutize_(baseUrl, m[1]);
-    const text = stripTags_(m[2]).replace(/\s+/g, ' ').trim();
-    if (text) out.push({ text, href });
+    let text = stripTags_(m[2]).replace(/\s+/g, ' ').trim();
+    
+    // LIMPIEZA: Eliminar patrones comunes de basura en Lemon64
+    text = text.replace(/\bInfo\s*\/\s*\d+\s*logos?\b/gi, '').trim();
+    text = text.replace(/\bInfo\s*\/\s*\d+\s*photos?\b/gi, '').trim();
+    text = text.replace(/\bphoto\b/gi, '').trim();
+    text = text.replace(/\bInfo\b$/gi, '').trim();
+    text = text.replace(/^\/\s*/, '').trim(); // Eliminar "/" al inicio
+    
+    if (text && text.length > 1) out.push({ text, href });
   }
   
   if (out.length) return out;
 
   // Si no hay enlaces, crear anchors desde texto plano
-  const plain = stripTags_(s).replace(/\s*\n\s*/g, '|').replace(/\s*[,;]\s*/g, '|');
-  const parts = plain.split('|').map(x => x.trim()).filter(Boolean);
+  let plain = stripTags_(s).replace(/\s*\n\s*/g, '|').replace(/\s*[,;]\s*/g, '|');
+  
+  // Limpiar basura del texto plano también
+  plain = plain.replace(/\bInfo\s*\/\s*\d+\s*logos?\b/gi, '');
+  plain = plain.replace(/\bInfo\s*\/\s*\d+\s*photos?\b/gi, '');
+  plain = plain.replace(/\bphoto\b/gi, '');
+  
+  const parts = plain.split('|').map(x => x.trim()).filter(x => x.length > 1);
   
   for (const p of parts) {
     const href = `${rootOf_(baseUrl)}/list?quick=s&text=${encodeURIComponent(p)}`;
