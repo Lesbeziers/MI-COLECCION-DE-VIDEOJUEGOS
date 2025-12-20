@@ -75,6 +75,12 @@
     </main>
 
     <script>
+<script>
+  // =========================================
+  // URL DEL FEED CSV C64_LISTA
+  // =========================================
+  const DEBUG = true;  // ← AÑADE ESTA LÍNEA
+  const C64_LISTA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1289630212&single=true&output=csv&nocache=1";
   // =========================================
   // URL DEL FEED CSV C64_LISTA
   // =========================================
@@ -169,6 +175,13 @@
       const terminado = (idxTerminado >= 0 && cols[idxTerminado] !== undefined) ? cols[idxTerminado].trim() : "";
       const favorito  = (idxFavorito  >= 0 && cols[idxFavorito]  !== undefined) ? cols[idxFavorito].trim()  : "";
       const funciona  = (idxFunciona  >= 0 && cols[idxFunciona]  !== undefined) ? cols[idxFunciona].trim()  : "";
+
+  const funciona  = (idxFunciona  >= 0 && cols[idxFunciona]  !== undefined) ? cols[idxFunciona].trim()  : "";
+
+      // DEBUG: ver qué datos se están parseando
+      if (DEBUG && i <= 5) {
+        console.log(`Fila ${i}: TITULO="${titulo}", PUB="${pub}", AUTORES="${autores}"`);
+      }
 
       // Si no hay título, descartamos la fila
       if (!titulo) continue;
