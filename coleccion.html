@@ -788,11 +788,13 @@ function getFichaUrl(game) {
 
 allGames = games;
 
-            // DEBUG - borrar después
-            const plataformas = [...new Set(games.map(g => g.plataforma))];
-            console.log("=== DEBUG PLATAFORMAS ===");
-            console.log("Plataformas encontradas:", plataformas);
-            console.log("Juegos por plataforma:", plataformas.map(p => `${p}: ${games.filter(g => g.plataforma === p).length}`));
+            // DEBUG THUMBS C64 - borrar después
+            const c64Games = games.filter(g => g.plataforma === "C64");
+            console.log("=== DEBUG THUMBS C64 ===");
+            console.log("Juegos C64 encontrados:", c64Games.length);
+            c64Games.slice(0, 3).forEach(g => {
+                console.log(`${g.titulo}: caratula="${g.caratula}"`);
+            });
   
             if (DEBUG) {
                 console.log("CSV URL final:", COLECCION_CSV_URL);
