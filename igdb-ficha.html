@@ -1817,10 +1817,14 @@ function updateImagenesAdicionales(game) {
 }
 
 function getFichaPageForPlatform(platform) {
-    const normalized = (platform || "").toString().trim().toUpperCase();
+    const normalized = (platform || "").toString().trim().toUpperCase().replace(/\s+/g, "");
 
-    if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZX SPECTRUM") {
+    if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZXSPECTRUM") {
         return "spectrum-ficha.html";
+    }
+
+    if (normalized === "C64" || normalized === "COMMODORE64") {
+        return "c64-ficha.html";
     }
 
     return "igdb-ficha.html";
