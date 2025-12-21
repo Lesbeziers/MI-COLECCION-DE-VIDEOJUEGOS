@@ -553,6 +553,23 @@ const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined)
     });
   }
 
+// =========================================
+  // APLICAR FILTROS DESDE URL
+  // =========================================
+  function applyUrlFilters() {
+    const params = new URLSearchParams(window.location.search);
+    const searchQuery = params.get("search");
+    
+    if (searchQuery) {
+      const searchInput = document.querySelector(".c64-search-input");
+      if (searchInput) {
+        searchInput.value = searchQuery;
+        // Disparar el evento input para aplicar el filtro
+        searchInput.dispatchEvent(new Event("input"));
+      }
+    }
+  }
+        
   // =========================================
   // CARGA INICIAL DE LA LISTA
   // =========================================
@@ -590,8 +607,11 @@ const thumb = (idxThumb  >= 0 && cols[idxThumb]  !== undefined)
       // Pintamos la lista completa (estado inicial, sin filtro)
       renderGames(allGames, "");
 
-      // Configuramos el buscador (una sola vez)
+// Configuramos el buscador (una sola vez)
       setupSearch();
+      
+      // Aplicar filtros desde URL si existen
+      applyUrlFilters();
 
     } catch (err) {
       console.error("Error al cargar la lista C64:", err);
