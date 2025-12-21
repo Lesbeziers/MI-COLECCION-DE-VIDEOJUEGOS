@@ -651,6 +651,7 @@ function parseAdditionalImagesList(text) {
     }
 
     // Parser colección (para navegación desde coleccion.html)
+    // Parser colección (para navegación desde coleccion.html)
     function parseColeccionCSV(text) {
         const rows = [];
         let currentRow = [];
@@ -703,6 +704,10 @@ function parseAdditionalImagesList(text) {
         const idxAnio = header.indexOf("AÑO_MOSTRAR");
         const idxFavorito = header.indexOf("FAVORITO");
         const idxTerminado = header.indexOf("TERMINADO");
+        const idxPublisher = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxGenero = header.indexOf("GENERO_MOSTRAR");
+        const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+        const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
 
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i];
@@ -721,7 +726,11 @@ function parseAdditionalImagesList(text) {
                 plataforma: idxPlataforma >= 0 && cols[idxPlataforma] ? cols[idxPlataforma].trim() : "",
                 anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
                 favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
-                terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : ""
+                terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : "",
+                pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
+                genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
+                subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
+                desarrollo: idxDesarrollo >= 0 && cols[idxDesarrollo] ? cols[idxDesarrollo].trim() : ""
             });
         }
 
