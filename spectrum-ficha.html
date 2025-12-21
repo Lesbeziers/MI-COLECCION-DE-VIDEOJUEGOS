@@ -218,6 +218,58 @@
         }
     }
 
+    // ============================================
+    // CACHÉ DE LISTA DE NAVEGACIÓN
+    // ============================================
+    
+    function getNavListCacheKey() {
+        const params = new URLSearchParams(window.location.search);
+        const fromColeccion = params.get("from") === "coleccion";
+        const searchQuery = params.get("search") || "";
+        const filterField = params.get("filterField") || "";
+        const filterValue = params.get("filterValue") || "";
+        
+        if (fromColeccion) {
+            return `navList_coleccion_${searchQuery}_${filterField}_${filterValue}`;
+        }
+        return `navList_spectrum_${searchQuery}_${filterField}_${filterValue}`;
+    }
+    
+    function getCachedNavList() {
+        try {
+            const key = getNavListCacheKey();
+            const cached = sessionStorage.getItem(key);
+            if (!cached) return null;
+            
+            const data = JSON.parse(cached);
+            // Caché de navegación válida por 10 minutos
+            if (Date.now() - data.timestamp > 10 * 60 * 1000) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+            return data.list;
+        } catch {
+            return null;
+        }
+    }
+    
+    function setCachedNavList(list) {
+        try {
+            const key = getNavListCacheKey();
+            // Guardar solo id y plataforma (mínimo necesario para navegar)
+            const minimalList = list.map(g => ({
+                id: g.id,
+                plataforma: g.plataforma || "SPECTRUM"
+            }));
+            sessionStorage.setItem(key, JSON.stringify({
+                timestamp: Date.now(),
+                list: minimalList
+            }));
+        } catch (e) {
+            console.warn("No se pudo guardar lista de navegación:", e);
+        }
+    }
+
     // Caché de fichas individuales (estas sí caben)
     function getCachedFicha(gameId) {
         const key = `ficha_spectrum_${gameId}`;
@@ -1795,8 +1847,51 @@ function attachVoiceStopToNavigation() {
     // ============================================
     // CARGA DE LISTA PARA NAVEGACIÓN (usa CSV ligero)
     // ============================================
-    async function loadGamesList(gameId) {
+   async function loadGamesList(gameId) {
     try {
+        const fromColeccion = getQueryParam("from") === "coleccion";
+        const searchQuery = getQueryParam("search");
+        const filterField = (getQueryParam("filterField") || "").toLowerCase();
+        const filterValue = (getQueryParam("filterValue") || "").trim();
+
+        // PASO 1: Intentar usar lista cacheada para navegación inmediata
+        const cachedNavList = getCachedNavList();
+        if (cachedNavList && cachedNavList.length > 0) {
+            console.log(`[Nav] Lista cacheada encontrada: ${cachedNavList.length} juegos ⚡`);
+            sortedGamesList = cachedNavList;
+            currentGameIndex = cachedNavList.findIndex(g => g.id === gameId);
+            if (currentGameIndex >= 0) {
+                currentGroupLabel = computeGroupLabel();
+                updateNavCounter();
+                setupNavigation();
+                // Navegación lista inmediatamente, refrescar en background
+                refreshNavListInBackground(gameId);
+                return;
+            }
+            // Si no encuentra el juego, recargar lista completa
+            console.log(`[Nav] Juego ${gameId} no encontrado en caché, recargando...`);
+        }
+
+        // PASO 2: Cargar lista completa si no hay caché válido
+        await loadFullGamesList(gameId);
+
+    } catch (err) {
+        console.error("Error cargando lista para navegación:", err);
+    }
+}
+
+    async function refreshNavListInBackground(gameId) {
+        // Refresco silencioso en background para mantener caché actualizado
+        setTimeout(async () => {
+            try {
+                await loadFullGamesList(gameId, true);
+            } catch (e) {
+                console.warn("[Nav] Error en refresco background:", e);
+            }
+        }, 3000);
+    }
+
+    async function loadFullGamesList(gameId, isBackground = false) {
         const fromColeccion = getQueryParam("from") === "coleccion";
         const searchQuery = getQueryParam("search");
         const filterField = (getQueryParam("filterField") || "").toLowerCase();
@@ -1805,7 +1900,6 @@ function attachVoiceStopToNavigation() {
         let games;
         
         if (fromColeccion) {
-            // Cargar CSV de colección completo
             const cacheKey = `coleccion_${CACHE_VERSION}`;
             games = getCachedData(cacheKey);
             if (!games) {
@@ -1816,27 +1910,22 @@ function attachVoiceStopToNavigation() {
                 setCachedData(cacheKey, games);
             }
         } else {
-            // OPTIMIZACIÓN: Usar CSV ligero para navegación
             const cacheKey = `spectrum_lista_${CACHE_VERSION}`;
             games = getCachedData(cacheKey);
             
             if (!games) {
-                console.log("[Nav] Cargando lista ligera para navegación...");
+                if (!isBackground) console.log("[Nav] Cargando lista ligera para navegación...");
                 const response = await fetch(SPECTRUM_LISTA_CSV_URL);
                 if (!response.ok) throw new Error("No se pudo cargar la lista");
                 
                 const text = await response.text();
                 games = parseSpectrumListaCSV(text);
                 setCachedData(cacheKey, games);
-                console.log(`[Nav] Lista cacheada: ${games.length} juegos`);
-            } else {
-                console.log(`[Nav] Lista cargada desde caché: ${games.length} juegos`);
+                if (!isBackground) console.log(`[Nav] Lista cacheada: ${games.length} juegos`);
             }
         }
 
-        // Filtrar filas vacías antes de ordenar
         games = games.filter(g => g.id && g.titulo);
-        
         games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
 
         let filteredGames = games;
@@ -1866,7 +1955,6 @@ function attachVoiceStopToNavigation() {
                     filteredGames = games.filter(game => normalizeText(game.formato || "").includes("fisico"));
                     currentGroupLabel = "Formato Físico";
                 } else if (qNorm === "spectrum" || qNorm === "zx") {
-                    // Ya están filtrados, mantener todos
                     currentGroupLabel = "Mi Colección";
                 } else {
                     filteredGames = games.filter(game => {
@@ -1930,6 +2018,9 @@ function attachVoiceStopToNavigation() {
 
         sortedGamesList = filteredGames;
 
+        // Guardar lista filtrada en caché para navegación inmediata
+        setCachedNavList(filteredGames);
+
         const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || "spectrum");
         if (fromColeccion) {
             currentGameIndex = filteredGames.findIndex(g =>
@@ -1938,13 +2029,12 @@ function attachVoiceStopToNavigation() {
         } else {
             currentGameIndex = filteredGames.findIndex(g => g.id === gameId);
         }
+        
         updateNavCounter();
-        setupNavigation();
-
-    } catch (err) {
-        console.error("Error cargando lista para navegación:", err);
+        if (!isBackground) {
+            setupNavigation();
+        }
     }
-}
 
     // ============================================
     // CARGA PRINCIPAL
