@@ -657,156 +657,90 @@ function parseSpectrumListaCSV(text) {
     return games;
 }
 
-// ============================================
-// PARSER CSV - COLECCIÓN (para navegación desde coleccion.html)
-// ============================================
-function parseColeccionCSV(text) {
-    const rows = [];
-    let currentRow = [];
-    let currentField = "";
-    let inQuotes = false;
+// Parser colección (para navegación desde coleccion.html)
+    function parseColeccionCSV(text) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = "";
+        let inQuotes = false;
 
-    for (let i = 0; i < text.length; i++) {
-        const ch = text[i];
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
 
-        if (ch === '"') {
-            if (inQuotes && text[i + 1] === '"') {
-                currentField += '"';
-                i++;
+            if (ch === '"') {
+                if (inQuotes && text[i + 1] === '"') {
+                    currentField += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === "," && !inQuotes) {
+                currentRow.push(currentField.trim());
+                currentField = "";
+            } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+                if (ch === "\r" && text[i + 1] === "\n") {
+                    i++;
+                }
+                currentRow.push(currentField.trim());
+                if (currentRow.some(v => v !== "")) {
+                    rows.push(currentRow);
+                }
+                currentRow = [];
+                currentField = "";
             } else {
-                inQuotes = !inQuotes;
+                currentField += ch;
             }
-        } else if (ch === "," && !inQuotes) {
-            currentRow.push(currentField.trim());
-            currentField = "";
-        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
-            if (ch === "\r" && text[i + 1] === "\n") {
-                i++;
-            }
+        }
+
+        if (currentField.length > 0 || currentRow.length > 0) {
             currentRow.push(currentField.trim());
             if (currentRow.some(v => v !== "")) {
                 rows.push(currentRow);
             }
-            currentRow = [];
-            currentField = "";
-        } else {
-            currentField += ch;
         }
-    }
 
-    if (currentField.length > 0 || currentRow.length > 0) {
-        currentRow.push(currentField.trim());
-        if (currentRow.some(v => v !== "")) {
-            rows.push(currentRow);
-        }
-    }
+        if (rows.length === 0) return [];
 
-    if (rows.length === 0) return [];
+        const header = rows[0];
+        const games = [];
 
-    const header = rows[0];
-    const games = [];
+        const idxID = header.indexOf("ID");
+        const idxTitulo = header.indexOf("TITULO_MOSTRAR");
+        const idxPlataforma = header.indexOf("PLATAFORMA");
+        const idxAnio = header.indexOf("AÑO_MOSTRAR");
+        const idxFavorito = header.indexOf("FAVORITO");
+        const idxTerminado = header.indexOf("TERMINADO");
+        const idxPublisher = header.indexOf("PUBLISHER_MOSTRAR");
+        const idxGenero = header.indexOf("GENERO_MOSTRAR");
+        const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
+        const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
 
-    const idxID = header.indexOf("ID");
-    const idxTitulo = header.indexOf("TITULO_MOSTRAR");
-    const idxPlataforma = header.indexOf("PLATAFORMA");
-    const idxAnio = header.indexOf("AÑO_MOSTRAR");
-    const idxFavorito = header.indexOf("FAVORITO");
-    const idxTerminado = header.indexOf("TERMINADO");
-    const idxFormato = header.indexOf("FORMATO_MOSTRAR");
-    const idxGenero = header.indexOf("GENERO_MOSTRAR");
-    const idxSubgenero = header.indexOf("SUBGENERO_MOSTRAR");
-    const idxPublisher = header.indexOf("PUBLISHER_MOSTRAR");
-    const idxDesarrollo = header.indexOf("DESARROLLO_MOSTRAR");
+        for (let i = 1; i < rows.length; i++) {
+            const cols = rows[i];
+            const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
+            const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
 
-    for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i];
-        const id = idxID >= 0 && cols[idxID] ? cols[idxID].trim() : "";
-        const titulo = idxTitulo >= 0 && cols[idxTitulo] ? cols[idxTitulo].trim() : "";
+            if (!titulo) continue;
 
-        if (!titulo) continue;
+            const displayTitulo = formatTitleWithArticle(titulo);
 
-        const displayTitulo = formatTitleWithArticle(titulo);
-
-        games.push({
-            id,
-            titulo,
-            displayTitulo,
-            sortKey: displayTitulo.toLowerCase(),
-            plataforma: idxPlataforma >= 0 && cols[idxPlataforma] ? cols[idxPlataforma].trim() : "",
-            anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
-            favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
-            terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : "",
-            formato: idxFormato >= 0 && cols[idxFormato] ? cols[idxFormato].trim() : "",
-            genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
-            subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
-            pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
-            desarrollo: idxDesarrollo >= 0 && cols[idxDesarrollo] ? cols[idxDesarrollo].trim() : ""
-        });
-    }
-
-    return games;
-}
-
-    // ============================================
-    // EXTRACCIÓN DE CARÁTULA
-    // ============================================
-    
-    function extractURLs(text) {
-        const urlRegex = /https?:\/\/[^\s,]+/g;
-        const urls = [];
-        let match;
-
-        while ((match = urlRegex.exec(text)) !== null) {
-            const cleanUrl = match[0].replace(/["',]+$/g, "");
-            urls.push({
-                url: cleanUrl,
-                index: match.index
+            games.push({
+                id,
+                titulo,
+                displayTitulo,
+                sortKey: displayTitulo.toLowerCase(),
+                plataforma: idxPlataforma >= 0 && cols[idxPlataforma] ? cols[idxPlataforma].trim() : "",
+                anio: idxAnio >= 0 && cols[idxAnio] ? cols[idxAnio].trim() : "",
+                favorito: idxFavorito >= 0 && cols[idxFavorito] ? cols[idxFavorito].trim() : "",
+                terminado: idxTerminado >= 0 && cols[idxTerminado] ? cols[idxTerminado].trim() : "",
+                pub: idxPublisher >= 0 && cols[idxPublisher] ? cols[idxPublisher].trim() : "",
+                genero: idxGenero >= 0 && cols[idxGenero] ? cols[idxGenero].trim() : "",
+                subgenero: idxSubgenero >= 0 && cols[idxSubgenero] ? cols[idxSubgenero].trim() : "",
+                desarrollo: idxDesarrollo >= 0 && cols[idxDesarrollo] ? cols[idxDesarrollo].trim() : ""
             });
         }
 
-        return urls;
-    }
-
-    function findBestCover(imagenesText) {
-        const urls = extractURLs(imagenesText);
-        if (urls.length === 0) return "";
-
-        let bestUrl = urls[0].url;
-
-        for (const item of urls) {
-            const contextStart = Math.max(0, item.index - 80);
-            const context = imagenesText
-                .slice(contextStart, item.index)
-                .toLowerCase();
-
-            if (context.includes("inlay") && context.includes("front")) {
-                bestUrl = item.url;
-                break;
-            }
-        }
-
-        return bestUrl;
-    }
-
-    function getCoverURL(game) {
-        if (game.caratula) {
-            return game.caratula;
-        }
-
-        if (game.imagenesAdicionales) {
-            return findBestCover(game.imagenesAdicionales);
-        }
-
-        return "";
-    }
-
-       function getYouTubeThumbnail(embedUrl) {
-        if (!embedUrl) return "";
-        const match = embedUrl.match(/embed\/([^?&#\/]+)/);
-        if (match && match[1]) {
-            return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
-        }
-        return "";
+        return games;
     }
 
 
