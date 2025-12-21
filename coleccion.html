@@ -390,27 +390,19 @@ const PLATFORM_DISPLAY_NAMES = {
     // - Una sola URL: "https://..."
     // - Dos URLs: "https://..., https://..."
     // - Primera es placeholder: "--, https://..."
-    function getValidThumbUrl(rawUrl) {
+function getValidThumbUrl(rawUrl) {
         if (!rawUrl || rawUrl.trim() === "" || rawUrl.trim() === "--") {
             return "";
         }
 
-        // Si contiene coma, puede haber múltiples URLs
-        if (rawUrl.includes(",")) {
-            const parts = rawUrl.split(",").map(u => u.trim());
-            
-            // Buscar la primera URL válida (que no sea "--")
-            for (const part of parts) {
-                if (part && part !== "--" && part.startsWith("http")) {
-                    return part;
-                }
+        // Dividir por coma, salto de línea o ambos
+        const parts = rawUrl.split(/[,\n\r]+/).map(u => u.trim());
+        
+        // Buscar la primera URL válida (que no sea "--")
+        for (const part of parts) {
+            if (part && part !== "--" && part.startsWith("http")) {
+                return part;
             }
-        }
-
-        // Si no tiene coma, verificar que no sea "--"
-        const trimmed = rawUrl.trim();
-        if (trimmed !== "--" && trimmed.startsWith("http")) {
-            return trimmed;
         }
 
         return "";
