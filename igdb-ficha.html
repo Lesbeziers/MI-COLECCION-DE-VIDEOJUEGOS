@@ -170,6 +170,54 @@
     const CACHE_VERSION = "v1"; // Cambia esto si actualizas estructura de datos
     const PREFETCH_DELAY = 2000; // 2 segundos - tiempo para que usuario empiece a leer
 
+// ============================================
+    // COLORES POR FAMILIA DE PLATAFORMA
+    // ============================================
+    const PLATFORM_FAMILY_COLORS = {
+      // MICROORDENADORES
+      SPECTRUM: "#7e00ff", ZX_SPECTRUM: "#7e00ff", C64: "#7e00ff", 
+      COMMODORE64: "#7e00ff", AMIGA: "#7e00ff", AMSTRAD: "#7e00ff", MSX: "#7e00ff",
+      
+      // NINTENDO
+      NES: "#e64545", SNES: "#e64545", N64: "#e64545", GAMECUBE: "#e64545",
+      WII: "#e64545", WIIU: "#e64545", SWITCH: "#e64545", SWITCHII: "#e64545",
+      GAMEBOY: "#e64545", GBCOLOR: "#e64545", GBA: "#e64545", DS: "#e64545", "3DS": "#e64545",
+      
+      // SONY
+      PSX: "#3ec5f1", PS1: "#3ec5f1", PS2: "#3ec5f1", PS3: "#3ec5f1", 
+      PS4: "#3ec5f1", PS5: "#3ec5f1", PSP: "#3ec5f1", PSVITA: "#3ec5f1",
+      
+      // SEGA
+      MSYSTEM: "#003087", MASTERSYSTEM: "#003087", MEGADRIVE: "#003087", 
+      GENESIS: "#003087", SATURN: "#003087", DREAMCAST: "#003087", GAMEGEAR: "#003087",
+      
+      // ATARI
+      ATARI2600: "#41bc61", ATARI5200: "#41bc61", ATARI7800: "#41bc61", JAGUAR: "#41bc61",
+      
+      // OTROS
+      PC: "#e96eee", ARCADE: "#e96eee"
+    };
+
+    function getPlatformColor(platform) {
+      return PLATFORM_FAMILY_COLORS[platform] || "#e5a728";
+    }
+
+    function applyPlatformColors() {
+      const color = getPlatformColor(CURRENT_PLATFORM);
+      
+      // Título cabecera ("Juegos PS3")
+      const navTitle = document.querySelector(".game-nav-title");
+      if (navTitle) navTitle.style.color = color;
+      
+      // Título del juego
+      const gameTitle = document.getElementById("ficha-title");
+      if (gameTitle) gameTitle.style.color = color;
+      
+      // Títulos de secciones (FICHA, SINOPSIS, DATOS TÉCNICOS, etc.)
+      const sectionTitles = document.querySelectorAll(".ficha-section-title");
+      sectionTitles.forEach(title => title.style.color = color);
+    }
+
     // ============================================
     // FUNCIONES DE CACHÉ
     // ============================================
@@ -2160,6 +2208,7 @@ function attachVoiceStopToNavigation() {
     // Guardar el contexto actual
     sessionStorage.setItem("navContext", navContextKey);
     
+    applyPlatformColors();
     loadPS3Ficha();
     setupCoverModal();
     setupSwipeNavigation();
