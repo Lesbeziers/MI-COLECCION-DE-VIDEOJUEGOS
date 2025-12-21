@@ -490,9 +490,29 @@ DREAMCAST: {
       const params = new URLSearchParams(window.location.search);
       const fromColeccion = params.get("from") === "coleccion";
       
-      // Si viene de colección, volver a coleccion.html
-      if (fromColeccion) {
-        window.location.href = "coleccion.html";
+if (fromColeccion) {
+        let url = "coleccion.html";
+        
+        const searchQuery = params.get("search");
+        const filterField = params.get("filterField");
+        const filterValue = params.get("filterValue");
+        
+        const queryParams = [];
+        if (searchQuery) {
+          queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+        }
+        if (filterField) {
+          queryParams.push(`filterField=${encodeURIComponent(filterField)}`);
+        }
+        if (filterValue) {
+          queryParams.push(`filterValue=${encodeURIComponent(filterValue)}`);
+        }
+        
+        if (queryParams.length > 0) {
+          url += "?" + queryParams.join("&");
+        }
+        
+        window.location.href = url;
         return;
       }
       
