@@ -538,6 +538,9 @@
 
       // Configuramos el buscador (una sola vez)
       setupSearch();
+      
+      // Aplicar filtros desde URL si existen
+      applyUrlFilters();
 
     } catch (err) {
       console.error("Error al cargar la lista ZX:", err);
