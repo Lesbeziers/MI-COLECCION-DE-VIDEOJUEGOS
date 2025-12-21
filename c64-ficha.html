@@ -1772,7 +1772,7 @@ async function loadGamesList(gameId) {
         } else if (filterField === "favorito") {
             filteredGames = games.filter(game => normalizeText(game.favorito || "") === "si");
             currentGroupLabel = `Favoritos`;
-        } else if (searchQuery) {
+} else if (searchQuery) {
             const qNorm = normalizeText(searchQuery);
             const singleCharMatch = searchQuery.match(/^([a-zñáéíóúü0-9])$/i);
             
@@ -1785,7 +1785,18 @@ async function loadGamesList(gameId) {
             } else {
                 filteredGames = games.filter(game => {
                     const titleNorm = normalizeText(game.sortKey || "");
-                    return titleNorm.includes(qNorm);
+                    const pubNorm = normalizeText(game.pub || "");
+                    const yearNorm = normalizeText(game.anio || "");
+                    const generoNorm = normalizeText(game.genero || "");
+                    const subgeneroNorm = normalizeText(game.subgenero || "");
+
+                    return (
+                        titleNorm.includes(qNorm) ||
+                        pubNorm.includes(qNorm) ||
+                        yearNorm.includes(qNorm) ||
+                        generoNorm.includes(qNorm) ||
+                        subgeneroNorm.includes(qNorm)
+                    );
                 });
                 currentGroupLabel = `"${searchQuery}"`;
             }
