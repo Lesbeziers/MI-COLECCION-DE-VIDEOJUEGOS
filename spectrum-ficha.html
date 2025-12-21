@@ -1664,7 +1664,11 @@ function updateRevistas(game) {
 function getFichaPageForPlatform(platform) {
     const normalized = (platform || "").toString().trim().toUpperCase();
 
-    if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZX SPECTRUM") {
+    if (normalized === "C64" || normalized === "COMMODORE64" || normalized === "COMMODORE 64") {
+        return "c64-ficha.html";
+    }
+
+    if (normalized === "SPECTRUM" || normalized === "ZX" || normalized === "ZX SPECTRUM" || normalized === "ZX_SPECTRUM") {
         return "spectrum-ficha.html";
     }
 
