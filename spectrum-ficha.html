@@ -270,14 +270,14 @@
         }
     }
 
-    // Caché de fichas individuales (estas sí caben)
-    function getCachedFicha(gameId) {
-        const key = `ficha_spectrum_${gameId}`;
+    // Caché de fichas individuales (universal cross-platform)
+    function getCachedFicha(platform, gameId) {
+        const key = `ficha_${platform}_${gameId}`;
         return getCachedData(key);
     }
 
-    function setCachedFicha(gameId, gameData) {
-        const key = `ficha_spectrum_${gameId}`;
+    function setCachedFicha(platform, gameId, gameData) {
+        const key = `ficha_${platform}_${gameId}`;
         setCachedData(key, gameData);
     }
 
@@ -1591,44 +1591,109 @@ function updateRevistas(game) {
             
             if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
                 const prevGame = sortedGamesList[prevIndex];
-                prefetchGameData(prevGame.id);
+                const prevPlatform = normalizePlatformKey(prevGame.plataforma || "SPECTRUM");
+                prefetchGameData(prevPlatform, prevGame.id);
             }
             
             if (nextIndex >= 0 && nextIndex < sortedGamesList.length) {
                 const nextGame = sortedGamesList[nextIndex];
-                prefetchGameData(nextGame.id);
+                const nextPlatform = normalizePlatformKey(nextGame.plataforma || "SPECTRUM");
+                prefetchGameData(nextPlatform, nextGame.id);
             }
         }, PREFETCH_DELAY);
     }
 
-    async function prefetchGameData(gameId) {
-        // Verificar si ya está cacheada la ficha individual
-        const cached = getCachedFicha(gameId);
+    function normalizePlatformKey(platform) {
+        const p = (platform || "").toUpperCase().replace(/\s+/g, "");
+        if (p === "ZXSPECTRUM" || p === "ZX" || p === "SPECTRUM") return "SPECTRUM";
+        if (p === "COMMODORE64" || p === "C64") return "C64";
+        return p;
+    }
+
+    async function prefetchGameData(platform, gameId) {
+        const cached = getCachedFicha(platform, gameId);
         if (cached) {
-            console.log(`[Prefetch] Ficha ${gameId} ya en caché ✓`);
+            console.log(`[Prefetch] Ficha ${platform}/${gameId} ya en caché ✓`);
             return;
         }
         
         try {
-            // Descargar CSV completo y buscar solo este juego
-            // NO cacheamos el CSV entero porque es demasiado grande
-            const response = await fetch(ZX_SPECTRUM_CSV_URL);
+            const csvUrl = CROSS_PLATFORM_CSV[platform];
+            if (!csvUrl) {
+                console.log(`[Prefetch] Plataforma ${platform} no soportada para prefetch`);
+                return;
+            }
+            
+            const response = await fetch(csvUrl);
             if (!response.ok) return;
             
             const text = await response.text();
-            const games = parseSpectrumCSV(text);
+            const games = (platform === "SPECTRUM") ? parseSpectrumCSV(text) : parseC64CSV(text);
             
-            // Buscar el juego específico
             const game = games.find(row => row.id === gameId);
             if (game) {
-                // Cachear solo la ficha individual (esto SÍ cabe)
-                setCachedFicha(gameId, game);
-                console.log(`[Prefetch] Ficha ${gameId} precargada ✓`);
+                setCachedFicha(platform, gameId, game);
+                console.log(`[Prefetch] Ficha ${platform}/${gameId} precargada ✓`);
             }
             
         } catch (err) {
-            console.warn(`[Prefetch] Error precargando ${gameId}:`, err);
+            console.warn(`[Prefetch] Error precargando ${platform}/${gameId}:`, err);
         }
+    }
+
+    // Parser C64 simplificado para prefetch
+    function parseC64CSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (!lines.length) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
+        const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
+        const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
+        const idxScreenshots = findColumnIndex(header, ["SCREENSHOTS"]);
+        const idxAnioFicha = findColumnIndex(header, ["AÑO"]);
+        const idxEditor = findColumnIndex(header, ["PUBLISHER"]);
+        const idxDesarrollo = findColumnIndex(header, ["DESARROLLADOR"]);
+        const idxGenero = findColumnIndex(header, ["GÉNERO", "GENERO"]);
+        const idxSubgenero = findColumnIndex(header, ["SUBGÉNERO", "SUBGENERO"]);
+        const idxSinopsis = findColumnIndex(header, ["SINOPSIS"]);
+        const idxJugadores = findColumnIndex(header, ["JUGADORES"]);
+        const idxControles = findColumnIndex(header, ["CONTROLES"]);
+        const idxFormato = findColumnIndex(header, ["FORMATO"]);
+        const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
+        const idxFavorito = findColumnIndex(header, ["FAVORITO"]);
+        const idxVideo = findColumnIndex(header, ["VIDEO"]);
+
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            const cols = parseCSVLine(lines[i]);
+            const thisId = getColumnValue(cols, idxID);
+            if (!thisId) continue;
+
+            rows.push({
+                id: thisId,
+                titulo: getColumnValue(cols, idxTit),
+                caratula: getColumnValue(cols, idxCaratula),
+                puntuacion: getColumnValue(cols, idxPuntuacion),
+                screenshots: getColumnValue(cols, idxScreenshots),
+                anioFicha: getColumnValue(cols, idxAnioFicha),
+                editor: getColumnValue(cols, idxEditor),
+                desarrollo: getColumnValue(cols, idxDesarrollo),
+                genero: getColumnValue(cols, idxGenero),
+                subgenero: getColumnValue(cols, idxSubgenero),
+                sinopsis: getColumnValue(cols, idxSinopsis),
+                jugadores: getColumnValue(cols, idxJugadores),
+                controles: getColumnValue(cols, idxControles),
+                formato: getColumnValue(cols, idxFormato),
+                terminado: getColumnValue(cols, idxTerminado),
+                favorito: getColumnValue(cols, idxFavorito),
+                videoUrl: getColumnValue(cols, idxVideo)
+            });
+        }
+        return rows;
     }
 
     // ============================================
