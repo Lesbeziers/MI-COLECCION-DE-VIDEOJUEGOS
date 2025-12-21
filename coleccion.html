@@ -757,6 +757,23 @@ function getFichaUrl(game) {
         });
     }
 
+// =========================================
+    // APLICAR FILTROS DESDE URL
+    // =========================================
+    function applyUrlFilters() {
+        const params = new URLSearchParams(window.location.search);
+        const searchQuery = params.get("search");
+        
+        if (searchQuery) {
+            const searchInput = document.querySelector(".spectrum-search-input");
+            if (searchInput) {
+                searchInput.value = searchQuery;
+                // Disparar el evento input para aplicar el filtro
+                searchInput.dispatchEvent(new Event("input"));
+            }
+        }
+    }
+        
     // =========================================
     // CARGA INICIAL DE LA LISTA
     // =========================================
@@ -804,6 +821,7 @@ allGames = games;
             renderGames(allGames, "");
             setupSearch();
             setupInfiniteScroll();
+            applyUrlFilters();
 
         } catch (err) {
             console.error("Error al cargar la colección:", err);
