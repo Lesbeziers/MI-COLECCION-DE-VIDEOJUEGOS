@@ -187,6 +187,14 @@
     // CSV de colección completa
     const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
 
+    // URLs de otras plataformas para prefetch cross-platform
+    const CROSS_PLATFORM_CSV = {
+        C64: C64_CSV_URL,
+        SPECTRUM: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1890916807&single=true&output=csv"
+    };
+
+    let sortedGamesList = [];
+
     let sortedGamesList = [];
     let currentGameIndex = -1;
     let additionalImages = [];
@@ -285,13 +293,13 @@ if (fromColeccion) {
         }
     }
 
-    function getCachedFicha(gameId) {
-        const key = `ficha_c64_${gameId}`;
+    function getCachedFicha(platform, gameId) {
+        const key = `ficha_${platform}_${gameId}`;
         return getCachedData(key);
     }
 
-    function setCachedFicha(gameId, gameData) {
-        const key = `ficha_c64_${gameId}`;
+    function setCachedFicha(platform, gameId, gameData) {
+        const key = `ficha_${platform}_${gameId}`;
         setCachedData(key, gameData);
     }
 
@@ -1867,42 +1875,116 @@ async function loadGamesList(gameId) {
         }
     }
 
-    async function prefetchAdjacentGames() {
+async function prefetchAdjacentGames() {
         setTimeout(() => {
             const prevIndex = currentGameIndex - 1;
             const nextIndex = currentGameIndex + 1;
             
             if (prevIndex >= 0 && prevIndex < sortedGamesList.length) {
                 const prevGame = sortedGamesList[prevIndex];
-                prefetchGameData(prevGame.id);
+                const prevPlatform = normalizePlatformKey(prevGame.plataforma || "C64");
+                prefetchGameData(prevPlatform, prevGame.id);
             }
             
             if (nextIndex >= 0 && nextIndex < sortedGamesList.length) {
                 const nextGame = sortedGamesList[nextIndex];
-                prefetchGameData(nextGame.id);
+                const nextPlatform = normalizePlatformKey(nextGame.plataforma || "C64");
+                prefetchGameData(nextPlatform, nextGame.id);
             }
         }, PREFETCH_DELAY);
     }
 
-    async function prefetchGameData(gameId) {
-        const cached = getCachedFicha(gameId);
-        if (cached) return;
+    function normalizePlatformKey(platform) {
+        const p = (platform || "").toUpperCase().replace(/\s+/g, "");
+        if (p === "ZXSPECTRUM" || p === "ZX" || p === "SPECTRUM") return "SPECTRUM";
+        if (p === "COMMODORE64" || p === "C64") return "C64";
+        return p;
+    }
+
+    async function prefetchGameData(platform, gameId) {
+        const cached = getCachedFicha(platform, gameId);
+        if (cached) {
+            console.log(`[Prefetch] Ficha ${platform}/${gameId} ya en caché ✓`);
+            return;
+        }
         
         try {
-            const response = await fetch(C64_CSV_URL);
+            const csvUrl = CROSS_PLATFORM_CSV[platform];
+            if (!csvUrl) {
+                console.log(`[Prefetch] Plataforma ${platform} no soportada para prefetch`);
+                return;
+            }
+            
+            const response = await fetch(csvUrl);
             if (!response.ok) return;
             
             const text = await response.text();
-            const games = parseCSV(text);
+            const games = (platform === "C64") ? parseCSV(text) : parseSpectrumCSV(text);
             
             const game = games.find(row => row.id === gameId);
             if (game) {
-                setCachedFicha(gameId, game);
+                setCachedFicha(platform, gameId, game);
+                console.log(`[Prefetch] Ficha ${platform}/${gameId} precargada ✓`);
             }
             
         } catch (err) {
-            console.warn(`Error precargando ${gameId}:`, err);
+            console.warn(`[Prefetch] Error precargando ${platform}/${gameId}:`, err);
         }
+    }
+
+    // Parser Spectrum simplificado para prefetch
+    function parseSpectrumCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (!lines.length) return [];
+
+        const header = parseCSVLine(lines[0]);
+        const rows = [];
+
+        const idxID = header.indexOf("ID");
+        const idxTit = findColumnIndex(header, ["TITULO_MOSTRAR", "TÍTULO", "TITULO"]);
+        const idxCaratula = findColumnIndex(header, ["CARÁTULA", "CARATULA"]);
+        const idxPuntuacion = findColumnIndex(header, ["PUNTUACIÓN", "PUNTUACION"]);
+        const idxScreenshots = findColumnIndex(header, ["SCREENSHOTS"]);
+        const idxAnioFicha = findColumnIndex(header, ["AÑO"]);
+        const idxEditor = findColumnIndex(header, ["PUBLISHER"]);
+        const idxDesarrollo = findColumnIndex(header, ["DESARROLLADOR"]);
+        const idxGenero = findColumnIndex(header, ["GÉNERO", "GENERO"]);
+        const idxSubgenero = findColumnIndex(header, ["SUBGÉNERO", "SUBGENERO"]);
+        const idxSinopsis = findColumnIndex(header, ["SINOPSIS"]);
+        const idxJugadores = findColumnIndex(header, ["JUGADORES"]);
+        const idxControles = findColumnIndex(header, ["CONTROLES"]);
+        const idxFormato = findColumnIndex(header, ["FORMATO"]);
+        const idxTerminado = findColumnIndex(header, ["TERMINADO"]);
+        const idxFavorito = findColumnIndex(header, ["FAVORITO"]);
+        const idxVideo = findColumnIndex(header, ["VIDEO"]);
+
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            const cols = parseCSVLine(lines[i]);
+            const thisId = getColumnValue(cols, idxID);
+            if (!thisId) continue;
+
+            rows.push({
+                id: thisId,
+                titulo: getColumnValue(cols, idxTit),
+                caratula: getColumnValue(cols, idxCaratula),
+                puntuacion: getColumnValue(cols, idxPuntuacion),
+                screenshots: getColumnValue(cols, idxScreenshots),
+                anioFicha: getColumnValue(cols, idxAnioFicha),
+                editor: getColumnValue(cols, idxEditor),
+                desarrollo: getColumnValue(cols, idxDesarrollo),
+                genero: getColumnValue(cols, idxGenero),
+                subgenero: getColumnValue(cols, idxSubgenero),
+                sinopsis: getColumnValue(cols, idxSinopsis),
+                jugadores: getColumnValue(cols, idxJugadores),
+                controles: getColumnValue(cols, idxControles),
+                formato: getColumnValue(cols, idxFormato),
+                terminado: getColumnValue(cols, idxTerminado),
+                favorito: getColumnValue(cols, idxFavorito),
+                videoUrl: getColumnValue(cols, idxVideo)
+            });
+        }
+        return rows;
     }
 
     // ============================================
@@ -1918,7 +2000,7 @@ async function loadGamesList(gameId) {
         }
 
         try {
-            let game = getCachedFicha(gameId);
+            let game = getCachedFicha("C64", gameId);
             
             if (!game) {
                 const response = await fetch(C64_CSV_URL);
@@ -1930,7 +2012,7 @@ async function loadGamesList(gameId) {
                 game = games.find(row => row.id === gameId);
                 
                 if (game) {
-                    setCachedFicha(gameId, game);
+                    setCachedFicha("C64", gameId, game);
                 }
             }
             
