@@ -485,7 +485,7 @@ DREAMCAST: {
     // URLs dinámicas según plataforma
     const PS3_CSV_URL = CONFIG.csvUrl;
 
-    // Función para volver a la lista
+// Función para volver a la lista
     function goBackToList() {
       const params = new URLSearchParams(window.location.search);
       const fromColeccion = params.get("from") === "coleccion";
@@ -496,8 +496,23 @@ DREAMCAST: {
         return;
       }
       
-      // Si no, volver a la lista de la plataforma
+      // Volver a la lista de la plataforma CON los filtros
       let url = `${CONFIG.listaPage}?platform=${CURRENT_PLATFORM}`;
+      
+      const searchQuery = params.get("search");
+      const filterField = params.get("filterField");
+      const filterValue = params.get("filterValue");
+      
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      if (filterField) {
+        url += `&filterField=${encodeURIComponent(filterField)}`;
+      }
+      if (filterValue) {
+        url += `&filterValue=${encodeURIComponent(filterValue)}`;
+      }
+      
       window.location.href = url;
     }
 
