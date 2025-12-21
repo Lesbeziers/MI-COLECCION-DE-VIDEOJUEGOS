@@ -310,6 +310,8 @@ const PLATFORM_DISPLAY_NAMES = {
             let plataforma = (idxPlataforma >= 0 && cols[idxPlataforma]) ? cols[idxPlataforma].trim().toUpperCase() : "";
             if (plataforma === "ZX SPECTRUM") plataforma = "ZX_SPECTRUM";
             if (plataforma === "SPECTRUM") plataforma = "ZX_SPECTRUM";
+            if (plataforma === "COMMODORE 64") plataforma = "C64";
+            if (plataforma === "COMMODORE64") plataforma = "C64";
             const anio       = (idxAnio >= 0 && cols[idxAnio]) ? cols[idxAnio].trim() : "";
             const caratulaRaw = (idxCaratula >= 0 && cols[idxCaratula]) ? cols[idxCaratula].trim() : "";
             const caratula   = getValidThumbUrl(caratulaRaw);  // Procesar URLs múltiples
