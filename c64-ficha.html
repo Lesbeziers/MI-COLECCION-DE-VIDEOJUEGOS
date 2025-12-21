@@ -1779,7 +1779,6 @@ async function loadGamesList(gameId) {
                     filteredGames = games.filter(game => normalizeText(game.terminado || "") === "si");
                     currentGroupLabel = "Terminados";
                 } else {
-} else {
                     filteredGames = games.filter(game => {
                         const titleNorm = normalizeText(game.sortKey || "");
                         const pubNorm = normalizeText(game.pub || "");
