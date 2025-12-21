@@ -666,6 +666,7 @@ csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYN
       allGames = games;
       renderGames(allGames, "");
       setupSearch();
+      applyUrlFilters();
 
     } catch (err) {
       console.error("Error al cargar la lista:", err);
