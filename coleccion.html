@@ -786,7 +786,13 @@ function getFichaUrl(game) {
             // Ordenar alfabéticamente
             games.sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || "", "es-ES"));
 
-            allGames = games;
+allGames = games;
+
+            // DEBUG - borrar después
+            const plataformas = [...new Set(games.map(g => g.plataforma))];
+            console.log("=== DEBUG PLATAFORMAS ===");
+            console.log("Plataformas encontradas:", plataformas);
+            console.log("Juegos por plataforma:", plataformas.map(p => `${p}: ${games.filter(g => g.plataforma === p).length}`));
   
             if (DEBUG) {
                 console.log("CSV URL final:", COLECCION_CSV_URL);
