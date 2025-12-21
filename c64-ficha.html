@@ -1779,9 +1779,25 @@ async function loadGamesList(gameId) {
                     filteredGames = games.filter(game => normalizeText(game.terminado || "") === "si");
                     currentGroupLabel = "Terminados";
                 } else {
+} else {
                     filteredGames = games.filter(game => {
                         const titleNorm = normalizeText(game.sortKey || "");
-                        return titleNorm.includes(qNorm);
+                        const pubNorm = normalizeText(game.pub || "");
+                        const yearNorm = normalizeText(game.anio || "");
+                        const generoNorm = normalizeText(game.genero || "");
+                        const subgeneroNorm = normalizeText(game.subgenero || "");
+                        const plataformaNorm = normalizeText(game.plataforma || "");
+                        const desarrolloNorm = normalizeText(game.desarrollo || "");
+
+                        return (
+                            titleNorm.includes(qNorm) ||
+                            pubNorm.includes(qNorm) ||
+                            yearNorm.includes(qNorm) ||
+                            generoNorm.includes(qNorm) ||
+                            subgeneroNorm.includes(qNorm) ||
+                            plataformaNorm.includes(qNorm) ||
+                            desarrolloNorm.includes(qNorm)
+                        );
                     });
                     currentGroupLabel = `"${searchQuery}"`;
                 }
