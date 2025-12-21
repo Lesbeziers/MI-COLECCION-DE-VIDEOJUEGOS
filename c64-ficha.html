@@ -1676,11 +1676,18 @@ function getYouTubeThumbnail(url) {
                     });
                     currentGroupLabel = `"${searchQuery}"`;
                 }
-            } else {
+} else {
                 currentGroupLabel = "Juegos Commodore 64";
             }
 
             sortedGamesList = filteredGames;
+
+            // DEBUG - borrar después
+            console.log("=== DEBUG NAVEGACIÓN ===");
+            console.log("Total juegos filtrados:", filteredGames.length);
+            console.log("Buscando ID:", gameId);
+            console.log("Primeros 25 IDs:", filteredGames.slice(0, 25).map(g => g.id).join(", "));
+            console.log("currentGameIndex:", filteredGames.findIndex(g => g.id === gameId));
 
             const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || "c64");
             if (fromColeccion) {
