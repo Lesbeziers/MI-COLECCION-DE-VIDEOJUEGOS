@@ -1121,11 +1121,6 @@ function getYouTubeThumbnail(url) {
     // IMÁGENES ADICIONALES
     // ============================================
     function renderAdditionalImage() {
-        // DEBUG - borrar después
-        console.log("=== DEBUG RENDER IMAGEN ===");
-        console.log("additionalImages:", additionalImages);
-        console.log("additionalImageIndex:", additionalImageIndex);
-        console.log("URL a cargar:", additionalImages[additionalImageIndex]);
         if (!additionalImages.length) return;
 
         const imgEl = document.getElementById("ficha-imagenes-img");
@@ -1251,10 +1246,6 @@ function getYouTubeThumbnail(url) {
     }
 
     function updateImagenesAdicionales(game) {
-        // DEBUG - borrar después
-        console.log("=== DEBUG IMÁGENES ===");
-        console.log("game.imagenesAdicionales:", game.imagenesAdicionales);
-        console.log("game.imagenesArray:", game.imagenesArray);
         const section = document.getElementById("imagenes-section");
         const nav = document.getElementById("ficha-imagenes-nav");
         const imgEl = document.getElementById("ficha-imagenes-img");
@@ -1690,13 +1681,6 @@ function getYouTubeThumbnail(url) {
             }
 
             sortedGamesList = filteredGames;
-
-            // DEBUG - borrar después
-            console.log("=== DEBUG NAVEGACIÓN ===");
-            console.log("Total juegos filtrados:", filteredGames.length);
-            console.log("Buscando ID:", gameId);
-            console.log("Primeros 25 IDs:", filteredGames.slice(0, 25).map(g => g.id).join(", "));
-            console.log("currentGameIndex:", filteredGames.findIndex(g => g.id === gameId));
 
             const normalizedCurrentPlatform = normalizeText(getQueryParam("platform") || "c64");
             if (fromColeccion) {
