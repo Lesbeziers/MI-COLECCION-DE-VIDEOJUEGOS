@@ -1983,6 +1983,7 @@ function attachVoiceStopToNavigation() {
                         const yearNorm = normalizeText(game.anio || "");
                         const generoNorm = normalizeText(game.genero || "");
                         const subgeneroNorm = normalizeText(game.subgenero || "");
+                        const plataformaNorm = normalizeText(game.plataforma || "");
                         const desarrolloNorm = normalizeText(game.desarrollo || "");
 
                         return (
@@ -1991,6 +1992,7 @@ function attachVoiceStopToNavigation() {
                             yearNorm.includes(qNorm) ||
                             generoNorm.includes(qNorm) ||
                             subgeneroNorm.includes(qNorm) ||
+                            plataformaNorm.includes(qNorm) ||
                             desarrolloNorm.includes(qNorm)
                         );
                     });
