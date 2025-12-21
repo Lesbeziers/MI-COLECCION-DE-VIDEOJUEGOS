@@ -1246,6 +1246,10 @@ function getYouTubeThumbnail(url) {
     }
 
     function updateImagenesAdicionales(game) {
+        // DEBUG - borrar después
+        console.log("=== DEBUG IMÁGENES ===");
+        console.log("game.imagenesAdicionales:", game.imagenesAdicionales);
+        console.log("game.imagenesArray:", game.imagenesArray);
         const section = document.getElementById("imagenes-section");
         const nav = document.getElementById("ficha-imagenes-nav");
         const imgEl = document.getElementById("ficha-imagenes-img");
