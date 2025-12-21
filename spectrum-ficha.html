@@ -293,8 +293,13 @@
     const SPECTRUM_LISTA_CSV_URL = 
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1313999074&single=true&output=csv";
 
-    // URL del CSV de colección completa (para navegación desde coleccion.html)
-    const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
+const COLECCION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1929298971&single=true&output=csv";
+
+    // URLs de otras plataformas para prefetch cross-platform
+    const CROSS_PLATFORM_CSV = {
+        SPECTRUM: ZX_SPECTRUM_CSV_URL,
+        C64: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbmbDObrrqQMmeAM2zMIYNzMFRW8Hqf3_lEfmQh-K1carYW-Q7s66Wvum2XEepYJMVaJGswnUuxG4w/pub?gid=1251405676&single=true&output=csv"
+    };
 
     // Lista ordenada de juegos para navegación
     let sortedGamesList = [];
