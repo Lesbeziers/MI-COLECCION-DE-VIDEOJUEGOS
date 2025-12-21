@@ -1121,6 +1121,11 @@ function getYouTubeThumbnail(url) {
     // IMÁGENES ADICIONALES
     // ============================================
     function renderAdditionalImage() {
+        // DEBUG - borrar después
+        console.log("=== DEBUG RENDER IMAGEN ===");
+        console.log("additionalImages:", additionalImages);
+        console.log("additionalImageIndex:", additionalImageIndex);
+        console.log("URL a cargar:", additionalImages[additionalImageIndex]);
         if (!additionalImages.length) return;
 
         const imgEl = document.getElementById("ficha-imagenes-img");
