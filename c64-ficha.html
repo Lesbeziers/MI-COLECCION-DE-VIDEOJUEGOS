@@ -450,11 +450,11 @@
         return rows;
     }
 
-    function parseAdditionalImagesList(text) {
+function parseAdditionalImagesList(text) {
     if (!text) return [];
     
-    // Extraer todas las URLs válidas
-    const urlRegex = /https?:\/\/[^\s]+/g;
+    // Extraer todas las URLs válidas (excluyendo comas)
+    const urlRegex = /https?:\/\/[^\s,]+/g;
     const matches = text.match(urlRegex);
     
     if (!matches) return [];
