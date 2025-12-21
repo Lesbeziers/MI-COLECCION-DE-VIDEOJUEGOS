@@ -2090,7 +2090,7 @@ function attachVoiceStopToNavigation() {
 
         try {
             // PASO 1: Intentar obtener ficha individual cacheada
-            let game = getCachedFicha(gameId);
+            let game = getCachedFicha("SPECTRUM", gameId);
             
             if (game) {
                 console.log(`[Caché] Ficha ${gameId} cargada desde caché ⚡`);
@@ -2108,7 +2108,7 @@ function attachVoiceStopToNavigation() {
                 
                 // Cachear solo la ficha individual (esto SÍ cabe)
                 if (game) {
-                    setCachedFicha(gameId, game);
+                    setCachedFicha("SPECTRUM", gameId, game);
                     console.log(`[Caché] Ficha ${gameId} guardada en caché`);
                 }
             }
