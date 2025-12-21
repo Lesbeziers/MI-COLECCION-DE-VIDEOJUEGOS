@@ -777,7 +777,7 @@ function updateCover(game) {
     if (!coverImg || !wrapper) return;
 
   const fallbackCover = "assets/img/CaratulaNoDisponible.png";
-    const coverUrl = (getCoverURL(game) || "").trim();
+const coverUrl = (game.caratula || "").trim();
     const hasValidCover = coverUrl && coverUrl.toLowerCase() !== "null";
     const finalCoverUrl = hasValidCover ? coverUrl : fallbackCover;
 
