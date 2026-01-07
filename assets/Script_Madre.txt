@@ -26,6 +26,30 @@ const IGDB_ACCESS_TOKEN = '2a2pcx8h9e36umavdk8eikzi1pr8ic';
 const FALLBACK_COVER_URL = 'https://raw.githubusercontent.com/Lesbeziers/MI-COLECCION-DE-VIDEOJUEGOS/main/assets/img/CaratulaNoDisponible.png';
 
 // ============================================
+// FUNCIÓN PROXY PARA IMÁGENES CON HOTLINKING
+// ============================================
+function getProxiedImageUrl(originalUrl) {
+  if (!originalUrl || typeof originalUrl !== 'string') {
+    return FALLBACK_COVER_URL;
+  }
+  
+  const url = originalUrl.trim();
+  if (!url) return FALLBACK_COVER_URL;
+  
+  // Para gb64.com usar proxy que bypasea hotlinking
+  if (url.includes('gb64.com')) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=600&h=400&fit=inside&we&default=${encodeURIComponent(FALLBACK_COVER_URL)}`;
+  }
+  
+  // Para lemon64.com y otros sitios con restricciones
+  if (url.includes('lemon64.com') || url.includes('c64games.de')) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=600&h=400&fit=inside&we&default=${encodeURIComponent(FALLBACK_COVER_URL)}`;
+  }
+  
+  return url;
+}
+
+// ============================================
 // BLOQUE NUEVO v3.0: MOTOR IGDB GENÉRICO
 // ============================================
 // ============================================
