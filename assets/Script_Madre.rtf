@@ -1659,6 +1659,20 @@ data.imagenesAdicionales = Array.from(addImgs.values());
  */
 
 function fetchC64_fromLemon64_(titulo, link, overrides) {
+  /**
+   * Scrapea datos desde Lemon64.com para Commodore 64
+   * 
+   * PRIORIDADES DE DATOS:
+   * - CARÁTULA: Manual > LaunchBox > Lemon64 > Fallback
+   * - SINOPSIS: Manual > LaunchBox traducido > Vacío (Lemon64 no tiene)
+   * - PUNTUACIÓN: Manual > Lemon64 (LaunchBox no tiene)
+   * - REVISTAS: Manual > Lemon64 (LaunchBox no tiene)
+   * - JUGADORES: Manual > Lemon64 > LaunchBox convertido
+   * - RESTO CAMPOS: Manual > Lemon64 > LaunchBox
+   * 
+   * NOTA: Esta función se complementa con LaunchBox cuando Lemon64 no tiene datos.
+   * El flujo de cascada se maneja en menuPreviewFichaActual().
+   */
   try {
     const res = UrlFetchApp.fetch(link, { muteHttpExceptions: true });
     const html = res.getContentText();
@@ -2916,6 +2930,23 @@ function slugifyForZXArt_(title) {
  */
 
 function writeBackC64RowFromData_(sh, row, headers, data, extras) {
+// ========== LOGS DE DEBUGGING C64 ==========
+  Logger.log('[C64 WRITE] ========================================');
+  Logger.log('[C64 WRITE] Escribiendo datos en fila ' + row);
+  Logger.log('[C64 WRITE] Título: ' + (data.titulo || 'N/A'));
+  Logger.log('[C64 WRITE] Año: ' + (data.anio || 'N/A'));
+  Logger.log('[C64 WRITE] Publisher: ' + (Array.isArray(data.publisherAnchors) && data.publisherAnchors.length > 0 ? data.publisherAnchors.map(a => a.text).join(', ') : 'N/A'));
+  Logger.log('[C64 WRITE] Desarrollador: ' + (Array.isArray(data.desarrolladorAnchors) && data.desarrolladorAnchors.length > 0 ? data.desarrolladorAnchors.map(a => a.text).join(', ') : 'N/A'));
+  Logger.log('[C64 WRITE] Géneros: ' + (Array.isArray(data.generoAnchors) && data.generoAnchors.length > 0 ? data.generoAnchors.map(a => a.text).join(', ') : 'N/A'));
+  Logger.log('[C64 WRITE] Puntuación: ' + (data.ratingDisplay || 'N/A'));
+  Logger.log('[C64 WRITE] Carátula: ' + (data.caratula || 'VACÍO'));
+  Logger.log('[C64 WRITE] Screenshots: ' + (Array.isArray(data.screenshots) ? data.screenshots.length + ' imágenes' : 'N/A'));
+  Logger.log('[C64 WRITE] Imágenes adicionales: ' + (Array.isArray(data.imagenesAdicionales) ? data.imagenesAdicionales.length + ' imágenes' : 'N/A'));
+  Logger.log('[C64 WRITE] Video: ' + (data.video ? 'SÍ (' + data.video.substring(0, 50) + '...)' : 'NO'));
+  Logger.log('[C64 WRITE] Instrucciones: ' + (data.instrucciones ? 'SÍ' : 'NO'));
+  Logger.log('[C64 WRITE] Revistas: ' + (Array.isArray(data.revistas) ? data.revistas.length + ' revistas' : 'N/A'));
+  Logger.log('[C64 WRITE] Sinopsis: ' + (extraOpts && extraOpts.sinopsis ? extraOpts.sinopsis.substring(0, 80) + '...' : 'VACÍO'));
+  Logger.log('[C64 WRITE] ========================================');
   if (!data) return;
 
   // ====================================
@@ -4744,52 +4775,51 @@ function crearDataC64Vacia_(titulo, overrides) {
  */
 function buscarJuegoEnLaunchBox_(titulo) {
   try {
-    // Normalizar título para búsqueda
-    const tituloNorm = titulo
+    // LaunchBox carga resultados con JavaScript, así que intentamos acceso directo
+    Logger.log('[LAUNCHBOX] Intentando acceso directo para: ' + titulo);
+    
+    // Crear slug a partir del título
+    const slug = titulo
       .toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, '+');
+      .replace(/[^a-z0-9\s]/g, '')  // Solo letras y números
+      .replace(/\s+/g, '-')          // Espacios a guiones
+      .trim();
     
-    // CRÍTICO: platform=24 es Commodore 64 en LaunchBox
-    const searchUrl = 'https://gamesdb.launchbox-app.com/games/results?name=' + 
-                      encodeURIComponent(tituloNorm) + '&platform=24';
+    Logger.log('[LAUNCHBOX] Slug generado: ' + slug);
     
-    Logger.log('[LAUNCHBOX] Buscando en C64: ' + searchUrl);
+    // Intentar acceso directo sin ID (a veces funciona)
+    const directUrl = 'https://gamesdb.launchbox-app.com/games/details/' + slug;
+    Logger.log('[LAUNCHBOX] Probando URL directa: ' + directUrl);
     
-    const res = UrlFetchApp.fetch(searchUrl, { muteHttpExceptions: true });
+    const res = UrlFetchApp.fetch(directUrl, { 
+      muteHttpExceptions: true,
+      followRedirects: true 
+    });
     
-    if (res.getResponseCode() !== 200) {
-      Logger.log('[LAUNCHBOX] Error HTTP en búsqueda: ' + res.getResponseCode());
-      return null;
+    if (res.getResponseCode() === 200) {
+      const html = res.getContentText();
+      
+      // Extraer ID de la URL final (después de redirecciones)
+      const finalUrl = res.getResponseCode() === 200 ? directUrl : null;
+      
+      // Buscar el ID en el HTML de la página de detalles
+      const idMatch = html.match(/\/games\/details\/(\d+)[-\w]*/);
+      if (idMatch) {
+        const gameId = idMatch[1];
+        Logger.log('[LAUNCHBOX] Juego encontrado con acceso directo, ID: ' + gameId);
+        
+        // Verificar que sea C64
+        if (verificarPlataformaEnDetalles_(gameId, 'Commodore 64')) {
+          return gameId;
+        } else {
+          Logger.log('[LAUNCHBOX] El juego NO es de C64');
+          return null;
+        }
+      }
     }
     
-    const html = res.getContentText();
-    
-    // Extraer todos los resultados
-    const resultados = [];
-    const resultRegex = /<a[^>]+href=["']\/games\/details\/(\d+)[-\w]*["'][^>]*>/gi;
-    let match;
-    
-    while ((match = resultRegex.exec(html)) !== null) {
-      const gameId = match[1];
-      resultados.push(gameId);
-    }
-    
-    if (resultados.length === 0) {
-      Logger.log('[LAUNCHBOX] No se encontraron resultados para C64');
-      return null;
-    }
-    
-    // Tomar el primer resultado y verificar que sea C64
-    const primeraId = resultados[0];
-    
-    if (verificarPlataformaEnDetalles_(primeraId, 'Commodore 64')) {
-      Logger.log('[LAUNCHBOX] Resultado verificado como C64: ID ' + primeraId);
-      return primeraId;
-    } else {
-      Logger.log('[LAUNCHBOX] El resultado NO es C64, descartando');
-      return null;
-    }
+    Logger.log('[LAUNCHBOX] No se pudo acceder directamente al juego');
+    return null;
     
   } catch (e) {
     Logger.log('[ERROR] buscarJuegoEnLaunchBox_: ' + e);
@@ -4815,6 +4845,24 @@ function verificarPlataformaEnDetalles_(gameId, plataformaEsperada) {
     }
     
     const html = res.getContentText();
+       // ===== LOGS TEMPORALES DE DEBUGGING =====
+    Logger.log('[LAUNCHBOX DEBUG] Response code: ' + res.getResponseCode());
+    Logger.log('[LAUNCHBOX DEBUG] HTML length: ' + html.length + ' caracteres');
+    Logger.log('[LAUNCHBOX DEBUG] Primeros 1000 caracteres del HTML:');
+    Logger.log(html.substring(0, 1000));
+    
+    // Buscar manualmente si existe "crillion" en el HTML
+    const contieneJuego = html.toLowerCase().indexOf('crillion') > -1;
+    Logger.log('[LAUNCHBOX DEBUG] ¿HTML contiene "crillion"? ' + contieneJuego);
+    
+    // Buscar si existe "games/details"
+    const contieneDetails = html.indexOf('games/details') > -1;
+    Logger.log('[LAUNCHBOX DEBUG] ¿HTML contiene "games/details"? ' + contieneDetails);
+    
+    // Buscar el ID específico de Crillion
+    const contieneId = html.indexOf('94984') > -1;
+    Logger.log('[LAUNCHBOX DEBUG] ¿HTML contiene ID "94984"? ' + contieneId);
+    // ===== FIN LOGS TEMPORALES =====
     
     // Buscar el campo "Platform" en los detalles
     const platformMatch = html.match(/Platform\s*:\s*<dd[^>]*>[\s\S]*?>([^<]+)<\/a>/i);
@@ -5233,4 +5281,3 @@ function parseSheetRevistas_(revistasText) {
   
   return revistas;
 }
-
