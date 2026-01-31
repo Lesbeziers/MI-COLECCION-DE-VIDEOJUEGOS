@@ -16,7 +16,7 @@
 // IGDB CONFIG — RELLENAR CON TUS DATOS
 // =====================================
 const IGDB_CLIENT_ID = '690ect4klrsg9vr5g2vaub27wjjo5i';
-const IGDB_ACCESS_TOKEN = '2a2pcx8h9e36umavdk8eikzi1pr8ic';
+const IGDB_ACCESS_TOKEN = '03d5tlzawfvcvtkihocan6q0bitib9';
 
 
 // ============================================
@@ -1042,30 +1042,32 @@ function menuPreviewFichaActual() {
         data = fetchC64_fromLemon64_(titulo, link, overrides);
         fuenteDatos = 'LEMON64';
         
-        // MEJORA: Obtener sinopsis de LaunchBox si Lemon64 no la tiene
-        if (!overrides.sinopsis && (!data.sinopsis || !data.sinopsis.trim())) {
-          Logger.log('[C64] Lemon64 sin sinopsis, intentando LaunchBox como complemento...');
-          
-          const lbSinopsis = fetchC64_fromLaunchBox_SOLO_SINOPSIS_(titulo);
-          
-          if (lbSinopsis && lbSinopsis.sinopsis) {
-            data.sinopsis = lbSinopsis.sinopsis;
-            Logger.log('[C64] ✓ Sinopsis obtenida de LaunchBox (complementaria)');
-          } else {
-            Logger.log('[C64] LaunchBox tampoco tiene sinopsis');
-          }
-        }
+        // ====================================
+        // FALLBACK A LAUNCHBOX PARA DATOS FALTANTES
+        // ====================================
+        const necesitaSinopsis = !overrides.sinopsis && (!data.sinopsis || !data.sinopsis.trim());
+        const necesitaCaratula = !overrides.caratula && (!data.caratula || data.caratula === FALLBACK_COVER_URL_C64);
         
-        // MEJORA: Priorizar carátula de LaunchBox si es mejor
-        if (!overrides.caratula) {
-          Logger.log('[C64] Buscando carátula de LaunchBox para mejor calidad...');
+        if (necesitaSinopsis || necesitaCaratula) {
+          Logger.log('[C64] Lemon64 incompleto - Sinopsis: ' + (necesitaSinopsis ? 'FALTA' : 'OK') + ', Carátula: ' + (necesitaCaratula ? 'FALTA' : 'OK'));
+          Logger.log('[C64] Buscando datos complementarios en LaunchBox...');
           
-          const lbCaratula = fetchC64_fromLaunchBox_(titulo, null, null);
+          const lbData = fetchC64_fromLaunchBox_(titulo, null, null);
           
-          if (lbCaratula && lbCaratula.encontrado && lbCaratula.caratula && 
-              lbCaratula.caratula !== FALLBACK_COVER_URL_C64) {
-            Logger.log('[C64] ✓ Usando carátula de LaunchBox (mejor calidad)');
-            data.caratula = lbCaratula.caratula;
+          if (lbData && lbData.encontrado) {
+            // Sinopsis de LaunchBox si falta
+            if (necesitaSinopsis && lbData.sinopsis && lbData.sinopsis.trim()) {
+              data.sinopsis = lbData.sinopsis;
+              Logger.log('[C64] ✓ Sinopsis obtenida de LaunchBox');
+            }
+            
+            // Carátula de LaunchBox si falta
+            if (necesitaCaratula && lbData.caratula && lbData.caratula !== FALLBACK_COVER_URL_C64) {
+              data.caratula = lbData.caratula;
+              Logger.log('[C64] ✓ Carátula obtenida de LaunchBox');
+            }
+          } else {
+            Logger.log('[C64] LaunchBox no encontró el juego');
           }
         }
       }
@@ -2945,7 +2947,7 @@ function writeBackC64RowFromData_(sh, row, headers, data, extras) {
   Logger.log('[C64 WRITE] Video: ' + (data.video ? 'SÍ (' + data.video.substring(0, 50) + '...)' : 'NO'));
   Logger.log('[C64 WRITE] Instrucciones: ' + (data.instrucciones ? 'SÍ' : 'NO'));
   Logger.log('[C64 WRITE] Revistas: ' + (Array.isArray(data.revistas) ? data.revistas.length + ' revistas' : 'N/A'));
-  Logger.log('[C64 WRITE] Sinopsis: ' + (extraOpts && extraOpts.sinopsis ? extraOpts.sinopsis.substring(0, 80) + '...' : 'VACÍO'));
+  Logger.log('[C64 WRITE] Sinopsis: ' + (extras && extras.sinopsis ? extras.sinopsis.substring(0, 80) + '...' : 'VACÍO'));
   Logger.log('[C64 WRITE] ========================================');
   if (!data) return;
 
@@ -3402,9 +3404,9 @@ function buildPreviewHtml_(titulo, plataforma, fuenteUrl, d, tecnicos, sinopsisT
     ? `<div class="row">
          <div class="section-title">Útiles</div>
          <div class="info">
-           ${d.mapa ? `<div class="line">· <a href="${escapeAttr_(d.mapa)}" target="_blank">🗺️ Mapa</a></div>` : ''}
-           ${d.instrucciones ? `<div class="line">· <a href="${escapeAttr_(d.instrucciones)}" target="_blank">📄 Instrucciones</a></div>` : ''}
-           ${fuenteUrl ? `<div class="line">· <a href="${escapeAttr_(fuenteUrl)}" target="_blank">🔗 Enlace fuente</a></div>` : ''}
+           ${d.mapa ? `<div class="line">· <a href="${escapeAttr_(d.mapa)}" target="_blank">??️ Mapa</a></div>` : ''}
+           ${d.instrucciones ? `<div class="line">· <a href="${escapeAttr_(d.instrucciones)}" target="_blank">?? Instrucciones</a></div>` : ''}
+           ${fuenteUrl ? `<div class="line">· <a href="${escapeAttr_(fuenteUrl)}" target="_blank">?? Enlace fuente</a></div>` : ''}
          </div>
        </div>`
     : '';
@@ -4401,11 +4403,11 @@ function fetchRatingByName_(gameName) {
 
       if (parsedLink.id) {
         query = fieldsBlock + ' where id = ' + parsedLink.id + '; limit 1;';
-        Logger.log('[IGDB-PS3] 🔗 Usando URL por ID: ' + parsedLink.id);
+        Logger.log('[IGDB-PS3] ?? Usando URL por ID: ' + parsedLink.id);
       } else if (parsedLink.slug) {
         var safeSlug = parsedLink.slug.replace(/"/g, '\\"');
         query = fieldsBlock + ' where slug = "' + safeSlug + '"; limit 1;';
-        Logger.log('[IGDB-PS3] 🔗 Usando URL por slug: ' + safeSlug);
+        Logger.log('[IGDB-PS3] ?? Usando URL por slug: ' + safeSlug);
       }
 
       if (query) {
@@ -4435,7 +4437,7 @@ function fetchRatingByName_(gameName) {
     // Búsqueda amplia (limit 20 para tener más candidatos)
     var searchQuery = fieldsBlock + ' search "' + safeTitle + '"; limit 20;';
     
-    Logger.log('[IGDB-PS3] 🔍 Buscando por título: "' + titleStr + '" (año hoja: ' + (hasDesiredYear ? desiredYear : 'N/A') + ')');
+    Logger.log('[IGDB-PS3] ?? Buscando por título: "' + titleStr + '" (año hoja: ' + (hasDesiredYear ? desiredYear : 'N/A') + ')');
     
     var results = executeIgdbQuery_(searchQuery);
     
@@ -4775,50 +4777,95 @@ function crearDataC64Vacia_(titulo, overrides) {
  */
 function buscarJuegoEnLaunchBox_(titulo) {
   try {
-    // LaunchBox carga resultados con JavaScript, así que intentamos acceso directo
-    Logger.log('[LAUNCHBOX] Intentando acceso directo para: ' + titulo);
+    Logger.log('[LAUNCHBOX] Buscando juego: ' + titulo);
     
-    // Crear slug a partir del título
-    const slug = titulo
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')  // Solo letras y números
-      .replace(/\s+/g, '-')          // Espacios a guiones
-      .trim();
+    // ====================================
+    // ESTRATEGIA 1: Página de plataforma C64 con búsqueda de letra
+    // ====================================
+    const primeraLetra = titulo.charAt(0).toUpperCase();
+    const letraUrl = /[A-Z]/.test(primeraLetra) ? primeraLetra : '0';
     
-    Logger.log('[LAUNCHBOX] Slug generado: ' + slug);
+    // URL de la lista de juegos C64 por letra
+    const platformUrl = 'https://gamesdb.launchbox-app.com/platforms/games/14-Commodore-64?letter=' + letraUrl;
+    Logger.log('[LAUNCHBOX] Buscando en lista C64, letra ' + letraUrl + ': ' + platformUrl);
     
-    // Intentar acceso directo sin ID (a veces funciona)
-    const directUrl = 'https://gamesdb.launchbox-app.com/games/details/' + slug;
-    Logger.log('[LAUNCHBOX] Probando URL directa: ' + directUrl);
-    
-    const res = UrlFetchApp.fetch(directUrl, { 
+    const platformRes = UrlFetchApp.fetch(platformUrl, { 
       muteHttpExceptions: true,
       followRedirects: true 
     });
     
-    if (res.getResponseCode() === 200) {
-      const html = res.getContentText();
+    if (platformRes.getResponseCode() === 200) {
+      const platformHtml = platformRes.getContentText();
       
-      // Extraer ID de la URL final (después de redirecciones)
-      const finalUrl = res.getResponseCode() === 200 ? directUrl : null;
+      // Normalizar título para comparación
+      const tituloNorm = titulo.toLowerCase().replace(/[^a-z0-9]/g, '');
       
-      // Buscar el ID en el HTML de la página de detalles
-      const idMatch = html.match(/\/games\/details\/(\d+)[-\w]*/);
-      if (idMatch) {
-        const gameId = idMatch[1];
-        Logger.log('[LAUNCHBOX] Juego encontrado con acceso directo, ID: ' + gameId);
+      // Buscar enlaces a juegos: /games/details/94984-crillion
+      const gameRegex = /href=["']\/games\/details\/(\d+)-([^"']+)["']/gi;
+      let match;
+      
+      while ((match = gameRegex.exec(platformHtml)) !== null) {
+        const gameId = match[1];
+        const slug = match[2];
+        const slugNorm = slug.toLowerCase().replace(/[^a-z0-9]/g, '');
         
-        // Verificar que sea C64
-        if (verificarPlataformaEnDetalles_(gameId, 'Commodore 64')) {
+        // Comparación exacta o muy cercana
+        if (slugNorm === tituloNorm || 
+            slugNorm.includes(tituloNorm) || 
+            tituloNorm.includes(slugNorm)) {
+          Logger.log('[LAUNCHBOX] ✓ Juego encontrado en lista C64: ID=' + gameId + ', slug=' + slug);
           return gameId;
-        } else {
-          Logger.log('[LAUNCHBOX] El juego NO es de C64');
-          return null;
+        }
+      }
+      
+      Logger.log('[LAUNCHBOX] Juego no encontrado en lista de letra ' + letraUrl);
+    }
+    
+    // ====================================
+    // ESTRATEGIA 2: Probar variantes del slug directamente
+    // ====================================
+    const slugVariants = [
+      titulo.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').trim(),
+      titulo.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      titulo.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    ];
+    
+    for (const slug of slugVariants) {
+      if (!slug) continue;
+      
+      // Intentar con diferentes formatos de URL
+      const urlsToTry = [
+        'https://gamesdb.launchbox-app.com/games/details/' + slug
+      ];
+      
+      for (const testUrl of urlsToTry) {
+        Logger.log('[LAUNCHBOX] Probando URL directa: ' + testUrl);
+        
+        try {
+          const res = UrlFetchApp.fetch(testUrl, { 
+            muteHttpExceptions: true,
+            followRedirects: true 
+          });
+          
+          if (res.getResponseCode() === 200) {
+            const html = res.getContentText();
+            
+            // Verificar que sea C64
+            if (/Platform\s*:\s*[\s\S]*?Commodore\s*64/i.test(html)) {
+              const idMatch = html.match(/\/games\/details\/(\d+)/);
+              if (idMatch) {
+                Logger.log('[LAUNCHBOX] ✓ Juego encontrado con URL directa: ID=' + idMatch[1]);
+                return idMatch[1];
+              }
+            }
+          }
+        } catch (e) {
+          // Ignorar errores de URLs inválidas
         }
       }
     }
     
-    Logger.log('[LAUNCHBOX] No se pudo acceder directamente al juego');
+    Logger.log('[LAUNCHBOX] No se encontró el juego');
     return null;
     
   } catch (e) {
@@ -5033,35 +5080,69 @@ function fetchC64_fromLaunchBox_(titulo, overrides, gameIdDirecto) {
     // ====================================
     // CARÁTULA (BOX - FRONT) - PRIORIZAR MAYOR RESOLUCIÓN
     // ====================================
-    const boxFrontRegex = /###\s*Box\s*-\s*Front[\s\S]*?!\[([^\]]*)\]\(([^)]+)\)/gi;
+    // Formato en HTML: ### Box - Front seguido de ![alt](url)
+    // O también: <img> tags con "Box - Front" en alt
     const covers = [];
-    let coverMatch;
     
+    // Método 1: Formato Markdown ### Box - Front ... ![](url)
+    const boxFrontRegex = /###\s*Box\s*-\s*Front[\s\S]*?!\[([^\]]*)\]\(([^)]+)\)/gi;
+    let coverMatch;
     while ((coverMatch = boxFrontRegex.exec(html)) !== null) {
       const altText = coverMatch[1];
       const url = coverMatch[2];
-      
       const resMatch = altText.match(/(\d+)\s*x\s*(\d+)/);
       const width = resMatch ? parseInt(resMatch[1]) : 0;
-      
       covers.push({ url: url, width: width });
+    }
+    
+    // Método 2: Buscar imágenes de launchbox-app.com asociadas a "Box - Front"
+    if (covers.length === 0) {
+      const imgRegex = /Box\s*-\s*Front[\s\S]*?(https:\/\/images\.launchbox-app\.com\/[^\s"'<>]+)/gi;
+      while ((coverMatch = imgRegex.exec(html)) !== null) {
+        covers.push({ url: coverMatch[1], width: 1000 });
+      }
+    }
+    
+    // Método 3: Cualquier imagen de launchbox-app.com que parezca carátula
+    if (covers.length === 0) {
+      const anyImgRegex = /(https:\/\/images\.launchbox-app\.com\/[^\s"'<>]+\.(?:png|jpg|jpeg))/gi;
+      let imgMatch;
+      while ((imgMatch = anyImgRegex.exec(html)) !== null) {
+        const url = imgMatch[1];
+        // Priorizar las que NO sean screenshots
+        if (!/screenshot/i.test(url)) {
+          covers.push({ url: url, width: 500 });
+        }
+      }
     }
     
     // Ordenar por resolución descendente
     covers.sort(function(a, b) { return b.width - a.width; });
     data.caratula = covers.length > 0 ? covers[0].url : FALLBACK_COVER_URL_C64;
     
-    Logger.log('[LAUNCHBOX] Carátula: ' + data.caratula);
+    Logger.log('[LAUNCHBOX] Carátula encontrada: ' + (covers.length > 0 ? 'SÍ' : 'NO'));
+    Logger.log('[LAUNCHBOX] Carátula URL: ' + data.caratula);
     
     // ====================================
     // SCREENSHOTS
     // ====================================
-    const screenshotRegex = /###\s*Screenshot\s*-\s*Gameplay[\s\S]*?!\[[^\]]*\]\(([^)]+)\)/gi;
     const screenshots = [];
-    let ssMatch;
     
+    // Método 1: Formato Markdown
+    const screenshotRegex = /###\s*Screenshot\s*-\s*Gameplay[\s\S]*?!\[[^\]]*\]\(([^)]+)\)/gi;
+    let ssMatch;
     while ((ssMatch = screenshotRegex.exec(html)) !== null) {
       screenshots.push(ssMatch[1]);
+    }
+    
+    // Método 2: URLs directas de screenshots
+    if (screenshots.length === 0) {
+      const ssUrlRegex = /Screenshot[\s\S]*?(https:\/\/images\.launchbox-app\.com\/[^\s"'<>]+)/gi;
+      while ((ssMatch = ssUrlRegex.exec(html)) !== null) {
+        if (!screenshots.includes(ssMatch[1])) {
+          screenshots.push(ssMatch[1]);
+        }
+      }
     }
     
     data.screenshots = screenshots.slice(0, 2);
@@ -5070,31 +5151,60 @@ function fetchC64_fromLaunchBox_(titulo, overrides, gameIdDirecto) {
     // ====================================
     // VIDEO (YOUTUBE)
     // ====================================
-    const videoMatch = html.match(/Video\s*:\s*<(https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^>]+)>/i);
-    data.video = videoMatch ? videoMatch[1] : '';
+    // Formato: Video : <https://www.youtube.com/watch?v=xxx>
+    let videoUrl = '';
+    const videoMatch1 = html.match(/Video\s*:?\s*<(https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^>]+)>/i);
+    if (videoMatch1) {
+      videoUrl = videoMatch1[1];
+    } else {
+      // Alternativa: buscar cualquier enlace de YouTube
+      const videoMatch2 = html.match(/(https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^\s"'<>]+)/i);
+      if (videoMatch2) videoUrl = videoMatch2[1];
+    }
+    data.video = videoUrl;
     
     // ====================================
     // OVERVIEW (SINOPSIS) - TRADUCIR AL CASTELLANO
     // ====================================
-    const overviewMatch = html.match(/##\s*Overview[\s\S]{0,200}?<p[^>]*>([\s\S]*?)<\/p>/i);
+    let overviewIngles = '';
     
-    if (overviewMatch) {
-      const overviewIngles = stripTags_(overviewMatch[1])
-        .replace(/\s+/g, ' ')
-        .trim();
-      
-      if (overviewIngles && overviewIngles.length > 20) {
-        Logger.log('[LAUNCHBOX] Overview original (inglés): ' + overviewIngles.substring(0, 100) + '...');
-        Logger.log('[LAUNCHBOX] Traduciendo Overview al castellano...');
-        
-        data.sinopsis = translateTextToSpanish_(overviewIngles);
-        
-        Logger.log('[LAUNCHBOX] Overview traducido: ' + data.sinopsis.substring(0, 100) + '...');
-      } else {
-        data.sinopsis = '';
+    // Método 1: Buscar texto después de "## Overview" hasta el siguiente ##
+    const overviewMatch1 = html.match(/##\s*Overview[\s\S]*?(?:Edit)?\s*\n+([\s\S]*?)(?=##|Developers|Publishers|Platform\s*:|Genre\s*:|$)/i);
+    if (overviewMatch1 && overviewMatch1[1]) {
+      overviewIngles = stripTags_(overviewMatch1[1]).replace(/\s+/g, ' ').trim();
+    }
+    
+    // Método 2: Buscar en tag <p> si existe
+    if (!overviewIngles || overviewIngles.length < 20) {
+      const overviewMatch2 = html.match(/Overview[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>/i);
+      if (overviewMatch2 && overviewMatch2[1]) {
+        overviewIngles = stripTags_(overviewMatch2[1]).replace(/\s+/g, ' ').trim();
       }
+    }
+    
+    // Método 3: Buscar párrafo largo que parezca descripción
+    if (!overviewIngles || overviewIngles.length < 20) {
+      const descMatch = html.match(/(?:is a|is an|was a|was an|are|were)[^.]*\.[^.]*\./i);
+      if (descMatch) {
+        overviewIngles = stripTags_(descMatch[0]).replace(/\s+/g, ' ').trim();
+      }
+    }
+    
+    // Limpiar texto
+    overviewIngles = overviewIngles
+      .replace(/^\s*Edit\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    if (overviewIngles && overviewIngles.length > 20) {
+      Logger.log('[LAUNCHBOX] Overview encontrado: ' + overviewIngles.substring(0, 100) + '...');
+      Logger.log('[LAUNCHBOX] Traduciendo al castellano...');
+      
+      data.sinopsis = translateTextToSpanish_(overviewIngles);
+      
+      Logger.log('[LAUNCHBOX] Sinopsis traducida: ' + (data.sinopsis ? data.sinopsis.substring(0, 100) + '...' : 'ERROR'));
     } else {
-      Logger.log('[LAUNCHBOX] No se encontró Overview');
+      Logger.log('[LAUNCHBOX] No se encontró Overview válido');
       data.sinopsis = '';
     }
     
@@ -5281,3 +5391,4 @@ function parseSheetRevistas_(revistasText) {
   
   return revistas;
 }
+
