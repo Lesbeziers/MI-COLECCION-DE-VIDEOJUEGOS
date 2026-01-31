@@ -986,107 +986,191 @@ function menuPreviewFichaActual() {
     };
 
     // ====================================
-    // DETECTAR FUENTE: LEMON64 O LAUNCHBOX
+    // DETECTAR URLs EN LINK (LEMON64 / LAUNCHBOX)
     // ====================================
-    let link = get('LINK');
-    const fuenteLink = detectarFuenteDeLink_(link);
+    const linkCell = get('LINK');
+    const linkInfo = parseLinkUrls_(linkCell);
+    const lemonUrl = linkInfo.lemonUrl;
+    const launchboxUrl = linkInfo.launchboxUrl;
+    const detectedUrls = linkInfo.urls;
+    const launchboxFieldsFilled = [];
+    let caseApplied = 0;
     let data = null;
     let fuenteDatos = 'MANUAL';
-    
+    let writeMode = 'NONE';
+    let link = lemonUrl || launchboxUrl || '';
+
     Logger.log('[C64] Título: ' + titulo);
-    Logger.log('[C64] Link manual: ' + (link || '[vacío]'));
-    Logger.log('[C64] Fuente detectada: ' + fuenteLink);
+    Logger.log('[C64] Link manual: ' + (linkCell || '[vacío]'));
+    Logger.log('[C64] URLs detectadas: ' + (detectedUrls.length ? detectedUrls.join(' | ') : '[ninguna]'));
+
+    if (!lemonUrl && !launchboxUrl) {
+      caseApplied = 1;
+    } else if (lemonUrl && launchboxUrl) {
+      caseApplied = 3;
+    } else if (lemonUrl) {
+      caseApplied = 2;
+    } else if (launchboxUrl) {
+      caseApplied = 4;
+    }
+
+    Logger.log('[C64] Caso aplicado: ' + caseApplied);
 
     // ====================================
-    // CASO 1: URL MANUAL DE LAUNCHBOX
+    // CASO 1: LINK VACÍO → LEMON64 POR BÚSQUEDA
     // ====================================
-    if (fuenteLink === 'LAUNCHBOX') {
-      const gameId = extraerIdDeLaunchBoxUrl_(link);
-      
-      if (gameId) {
-        Logger.log('[C64] Usando LaunchBox con ID directo: ' + gameId);
-        data = fetchC64_fromLaunchBox_(titulo, overrides, gameId);
-        
-        if (data && data.encontrado) {
-          fuenteDatos = 'LAUNCHBOX';
-        } else {
-          Logger.log('[C64] Error al obtener datos de LaunchBox, usando datos manuales');
-          data = crearDataC64Vacia_(titulo, overrides);
-          fuenteDatos = 'MANUAL';
-        }
+    if (caseApplied === 1) {
+      const slug = makeLemon64Slug_(titulo);
+      link = 'https://www.lemon64.com/game/' + slug;
+      Logger.log('[C64] Link construido automáticamente: ' + link);
+
+      const lemon64Disponible = verificarLemon64Disponible_(link);
+      Logger.log('[C64] Lemon64 disponible: ' + (lemon64Disponible ? 'SÍ' : 'NO'));
+
+      if (lemon64Disponible) {
+        Logger.log('[C64] Scrapeando de Lemon64: ' + link);
+        data = fetchC64_fromLemon64_(titulo, link, overrides);
+        fuenteDatos = 'LEMON64';
+        writeMode = 'FULL';
       } else {
-        Logger.log('[C64] No se pudo extraer ID de LaunchBox, usando datos manuales');
+        Logger.log('[C64] Sin match en Lemon64, manteniendo datos manuales');
         data = crearDataC64Vacia_(titulo, overrides);
         fuenteDatos = 'MANUAL';
       }
     }
     
     // ====================================
-    // CASO 2: URL MANUAL DE LEMON64 O VACÍA
+    // CASO 2: LINK = SOLO LEMON64
     // ====================================
-    else {
-      // Si no hay link, construir automáticamente
-      if (!link || fuenteLink === 'NONE') {
-        const slug = makeLemon64Slug_(titulo);
-        link = 'https://www.lemon64.com/game/' + slug;
-        Logger.log('[C64] Link construido automáticamente: ' + link);
+    if (caseApplied === 2) {
+      const lemon64Disponible = verificarLemon64Disponible_(lemonUrl);
+      Logger.log('[C64] Lemon64 disponible: ' + (lemon64Disponible ? 'SÍ' : 'NO'));
+
+      if (lemon64Disponible) {
+        Logger.log('[C64] Scrapeando de Lemon64: ' + lemonUrl);
+        data = fetchC64_fromLemon64_(titulo, lemonUrl, overrides);
+        fuenteDatos = 'LEMON64';
+        writeMode = 'FULL';
+      } else {
+        Logger.log('[C64] Lemon64 no disponible, manteniendo datos manuales');
+        data = crearDataC64Vacia_(titulo, overrides);
+        fuenteDatos = 'MANUAL';
       }
       
-      // Verificar disponibilidad de Lemon64
-      const lemon64Disponible = verificarLemon64Disponible_(link);
+    }
+
+    // ====================================
+    // CASO 3: LINK = LEMON64 + LAUNCHBOX
+    // ====================================
+    if (caseApplied === 3) {
+      const lemon64Disponible = verificarLemon64Disponible_(lemonUrl);
       Logger.log('[C64] Lemon64 disponible: ' + (lemon64Disponible ? 'SÍ' : 'NO'));
-      
-      // SUBCASO 2A: LEMON64 DISPONIBLE
+
       if (lemon64Disponible) {
-        Logger.log('[C64] Scrapeando de Lemon64: ' + link);
-        data = fetchC64_fromLemon64_(titulo, link, overrides);
+        Logger.log('[C64] Scrapeando de Lemon64: ' + lemonUrl);
+        data = fetchC64_fromLemon64_(titulo, lemonUrl, overrides);
         fuenteDatos = 'LEMON64';
         
         // ====================================
         // FALLBACK A LAUNCHBOX PARA DATOS FALTANTES
         // ====================================
+        writeMode = 'FULL';
+
         const necesitaSinopsis = !overrides.sinopsis && (!data.sinopsis || !data.sinopsis.trim());
         const necesitaCaratula = !overrides.caratula && (!data.caratula || data.caratula === FALLBACK_COVER_URL_C64);
         
-        if (necesitaSinopsis || necesitaCaratula) {
-          Logger.log('[C64] Lemon64 incompleto - Sinopsis: ' + (necesitaSinopsis ? 'FALTA' : 'OK') + ', Carátula: ' + (necesitaCaratula ? 'FALTA' : 'OK'));
+        const necesitaVideo = !overrides.video && (!data.video || !data.video.trim());
+
+        if (necesitaSinopsis || necesitaCaratula || necesitaVideo) {
+          Logger.log('[C64] Lemon64 incompleto - Sinopsis: ' + (necesitaSinopsis ? 'FALTA' : 'OK') + ', Carátula: ' + (necesitaCaratula ? 'FALTA' : 'OK') + ', Video: ' + (necesitaVideo ? 'FALTA' : 'OK'));
           Logger.log('[C64] Buscando datos complementarios en LaunchBox...');
           
-          const lbData = fetchC64_fromLaunchBox_(titulo, null, null);
+          const lbData = fetchC64_fromLaunchBox_(titulo, null, extraerIdDeLaunchBoxUrl_(launchboxUrl), launchboxUrl);
           
           if (lbData && lbData.encontrado) {
-            // Sinopsis de LaunchBox si falta
             if (necesitaSinopsis && lbData.sinopsis && lbData.sinopsis.trim()) {
               data.sinopsis = lbData.sinopsis;
+              launchboxFieldsFilled.push('SINOPSIS');
               Logger.log('[C64] ✓ Sinopsis obtenida de LaunchBox');
             }
-            
-            // Carátula de LaunchBox si falta
+
             if (necesitaCaratula && lbData.caratula && lbData.caratula !== FALLBACK_COVER_URL_C64) {
               data.caratula = lbData.caratula;
+              launchboxFieldsFilled.push('CARÁTULA');
               Logger.log('[C64] ✓ Carátula obtenida de LaunchBox');
+            }
+           if (necesitaVideo && lbData.video && lbData.video.trim()) {
+              data.video = lbData.video;
+              launchboxFieldsFilled.push('VIDEO');
+              Logger.log('[C64] ✓ Video obtenido de LaunchBox');
             }
           } else {
             Logger.log('[C64] LaunchBox no encontró el juego');
           }
         }
-      }
-      
-      // SUBCASO 2B: LEMON64 NO DISPONIBLE → FALLBACK A LAUNCHBOX
-      else {
-        Logger.log('[C64] Lemon64 no disponible, buscando en LaunchBox...');
-        data = fetchC64_fromLaunchBox_(titulo, overrides, null);
-        
-        if (data && data.encontrado) {
+      } else {
+        Logger.log('[C64] Lemon64 no disponible, probando LaunchBox para campos mínimos');
+        data = crearDataC64Vacia_(titulo, overrides);
+        const lbData = fetchC64_fromLaunchBox_(titulo, null, extraerIdDeLaunchBoxUrl_(launchboxUrl), launchboxUrl);
+
+        if (lbData && lbData.encontrado) {
           fuenteDatos = 'LAUNCHBOX';
-          Logger.log('[C64] ✓ Datos obtenidos de LaunchBox');
+          if (!overrides.sinopsis && lbData.sinopsis && lbData.sinopsis.trim()) {
+            data.sinopsis = lbData.sinopsis;
+            launchboxFieldsFilled.push('SINOPSIS');
+          }
+          if (!overrides.caratula && lbData.caratula && lbData.caratula !== FALLBACK_COVER_URL_C64) {
+            data.caratula = lbData.caratula;
+            launchboxFieldsFilled.push('CARÁTULA');
+          }
+          if (!overrides.video && lbData.video && lbData.video.trim()) {
+            data.video = lbData.video;
+            launchboxFieldsFilled.push('VIDEO');
+          }
+          writeMode = 'LAUNCHBOX_FIELDS';
         } else {
-          Logger.log('[C64] Juego no encontrado en ninguna fuente, usando solo datos manuales');
-          data = crearDataC64Vacia_(titulo, overrides);
+          Logger.log('[C64] LaunchBox no encontró el juego');
           fuenteDatos = 'MANUAL';
         }
       }
+      
     }
+
+    // ====================================
+    // CASO 4: LINK = SOLO LAUNCHBOX
+    // ====================================
+    if (caseApplied === 4) {
+      const gameId = extraerIdDeLaunchBoxUrl_(launchboxUrl);
+      if (gameId || launchboxUrl) {
+        Logger.log('[C64] Usando LaunchBox con URL directa: ' + launchboxUrl);
+        data = fetchC64_fromLaunchBox_(titulo, overrides, gameId, launchboxUrl);
+
+        
+        if (data && data.encontrado) {
+          fuenteDatos = 'LAUNCHBOX';
+          writeMode = 'LAUNCHBOX_FIELDS';
+          if (!overrides.sinopsis && data.sinopsis && data.sinopsis.trim()) {
+            launchboxFieldsFilled.push('SINOPSIS');
+          }
+          if (!overrides.caratula && data.caratula && data.caratula !== FALLBACK_COVER_URL_C64) {
+            launchboxFieldsFilled.push('CARÁTULA');
+          }
+          if (!overrides.video && data.video && data.video.trim()) {
+            launchboxFieldsFilled.push('VIDEO');
+          }
+        } else {
+          Logger.log('[C64] Error al obtener datos de LaunchBox, usando datos manuales');
+          data = crearDataC64Vacia_(titulo, overrides);
+          fuenteDatos = 'MANUAL';
+        }
+      } else {
+        Logger.log('[C64] No se pudo leer URL de LaunchBox, usando datos manuales');
+        data = crearDataC64Vacia_(titulo, overrides);
+        fuenteDatos = 'MANUAL';
+      }
+    }
+    Logger.log('[C64] Campos rellenados desde LaunchBox: ' + (launchboxFieldsFilled.length ? launchboxFieldsFilled.join(', ') : '[ninguno]'));
+
 
     // ====================================
     // PROCESAR IMÁGENES ADICIONALES
@@ -1122,10 +1206,16 @@ function menuPreviewFichaActual() {
     // ====================================
     // ESCRIBIR DATOS EN LA HOJA (SOLO CELDAS VACÍAS)
     // ====================================
-    if (fuenteDatos !== 'MANUAL') {
+    const shouldWriteFullData = writeMode === 'FULL';
+    const shouldWriteLaunchboxOnly = writeMode === 'LAUNCHBOX_FIELDS';
+
+    if (shouldWriteFullData) {
       writeBackC64RowFromData_(sh, row, headers, data, {
         sinopsis: sinopsisText
       });
+    }
+        if (shouldWriteLaunchboxOnly) {
+      writeBackC64LaunchBoxFields_(sh, row, headers, data);
     }
 
     // ====================================
@@ -2986,7 +3076,7 @@ function writeBackC64RowFromData_(sh, row, headers, data, extras) {
   // ====================================
   // HELPER: ESCRIBIR SI ESTÁ VACÍO
   // ====================================
-  function writeIfEmpty_(colName, value) {
+  function setIfEmpty_(colName, value) {
     const col = colIndex_(colName);
     const v = cleanValue_(value);
     if (!col || !v) return;
@@ -3032,75 +3122,133 @@ function writeBackC64RowFromData_(sh, row, headers, data, extras) {
   // ====================================
 
   // ID Lemon64
-  writeIfEmpty_('ID_LEMON64', data.idLemon64);
+  setIfEmpty_('ID_LEMON64', data.idLemon64);
 
   // Año
-  writeIfEmpty_('AÑO', data.anio);
-  writeIfEmpty_('ANO', data.anio); // Por si acaso sin tilde
+  setIfEmpty_('AÑO', data.anio);
+  setIfEmpty_('ANO', data.anio); // Por si acaso sin tilde
 
   // Publisher
-  writeIfEmpty_('PUBLISHER', anchorsToText_(data.publisherAnchors));
+  setIfEmpty_('PUBLISHER', anchorsToText_(data.publisherAnchors));
 
   // Desarrollador
-  writeIfEmpty_('DESARROLLADOR', anchorsToText_(data.desarrolladorAnchors));
+  setIfEmpty_('DESARROLLADOR', anchorsToText_(data.desarrolladorAnchors));
 
   // Autores (ya viene como texto con roles)
-  writeIfEmpty_('AUTORES', data.autores);
+  setIfEmpty_('AUTORES', data.autores);
 
   // Género
-  writeIfEmpty_('GÉNERO', anchorsToText_(data.generoAnchors));
-  writeIfEmpty_('GENERO', anchorsToText_(data.generoAnchors));
+  setIfEmpty_('GÉNERO', anchorsToText_(data.generoAnchors));
+  setIfEmpty_('GENERO', anchorsToText_(data.generoAnchors));
 
   // Subgénero
   writeIfEmpty_('SUBGÉNERO', anchorsToText_(data.subgeneroAnchors));
   writeIfEmpty_('SUBGENERO', anchorsToText_(data.subgeneroAnchors));
 
   // Jugadores
-  writeIfEmpty_('JUGADORES', anchorsToText_(data.jugadoresAnchors));
+  setIfEmpty_('JUGADORES', anchorsToText_(data.jugadoresAnchors));
 
   // Controles
-  writeIfEmpty_('CONTROLES', anchorsToText_(data.controlesAnchors));
+  setIfEmpty_('CONTROLES', anchorsToText_(data.controlesAnchors));
 
   // Carátula
-  writeIfEmpty_('CARÁTULA', data.caratula);
-  writeIfEmpty_('CARATULA', data.caratula);
+  setIfEmpty_('CARÁTULA', data.caratula);
+  setIfEmpty_('CARATULA', data.caratula);
 
   // Screenshots (primeras 2, separadas por salto de línea)
   if (Array.isArray(data.screenshots) && data.screenshots.length) {
-    writeIfEmpty_('SCREENSHOTS', data.screenshots.join('\n'));
+    setIfEmpty_('SCREENSHOTS', data.screenshots.join('\n'));
   }
 
   // Imágenes adicionales (desde 3ª, separadas por ", ")
   if (Array.isArray(data.imagenesAdicionales) && data.imagenesAdicionales.length) {
-    writeIfEmpty_('IMÁGENES', data.imagenesAdicionales.join(', '));
-    writeIfEmpty_('IMAGENES', data.imagenesAdicionales.join(', '));
+    setIfEmpty_('IMÁGENES', data.imagenesAdicionales.join(', '));
+    setIfEmpty_('IMAGENES', data.imagenesAdicionales.join(', '));
   }
 
   // Video
-  writeIfEmpty_('VIDEO', data.video);
+  setIfEmpty_('VIDEO', data.video);
 
   // Revistas (formato Markdown con enlaces)
   const revistasMarkdown = revistasToMarkdown_(data.revistas);
   if (revistasMarkdown) {
-    writeIfEmpty_('REVISTAS', revistasMarkdown);
+    setIfEmpty_('REVISTAS', revistasMarkdown);
   }
 
   // Instrucciones
-  writeIfEmpty_('INSTRUCCIONES', data.instrucciones);
+  setIfEmpty_('INSTRUCCIONES', data.instrucciones);
 
   // Puntuación
-  writeIfEmpty_('PUNTUACIÓN', data.ratingDisplay);
-  writeIfEmpty_('PUNTUACION', data.ratingDisplay);
+  setIfEmpty_('PUNTUACIÓN', data.ratingDisplay);
+  setIfEmpty_('PUNTUACION', data.ratingDisplay);
 
   // ====================================
   // EXTRAS (sinopsis si viene en extras)
   // ====================================
   if (extras && extras.sinopsis) {
-    writeIfEmpty_('SINOPSIS', extras.sinopsis);
-  }
+    setIfEmpty_('SINOPSIS', extras.sinopsis);
 
   Logger.log('[C64] Escritura completada en fila ' + row);
 }
+
+/**
+ * ============================================
+ * ESCRIBIR SOLO CAMPOS LAUNCHBOX (C64)
+ * ============================================
+ * Rellena únicamente SINOPSIS, CARÁTULA y VIDEO.
+ */
+function writeBackC64LaunchBoxFields_(sh, row, headers, data) {
+  if (!data) return;
+
+  Logger.log('[C64 WRITE LB] ========================================');
+  Logger.log('[C64 WRITE LB] Escribiendo campos LaunchBox en fila ' + row);
+
+  function normalizeHeaderKey_(s) {
+    let t = String(s || '').toLowerCase().trim();
+    t = t.replace(/[áàäâ]/g, 'a').replace(/[éèëê]/g, 'e').replace(/[íìïî]/g, 'i')
+         .replace(/[óòöô]/g, 'o').replace(/[úùüû]/g, 'u').replace(/ñ/g, 'n');
+    return t.replace(/\s+/g, ' ');
+  }
+
+  function colIndex_(name) {
+    const target = normalizeHeaderKey_(name || '');
+    for (let i = 0; i < headers.length; i++) {
+      if (normalizeHeaderKey_(headers[i]) === target) return i + 1;
+    }
+    return 0;
+  }
+
+  function cleanValue_(v) {
+    if (v == null) return '';
+    let t = String(v).trim();
+    if (!t || t === '????' || /^dato no disponible$/i.test(t)) return '';
+    return t;
+  }
+
+  function setIfEmpty_(colName, value) {
+    const col = colIndex_(colName);
+    const v = cleanValue_(value);
+    if (!col || !v) return;
+
+    const rng = sh.getRange(row, col);
+    const currentValue = String(rng.getValue() || '').trim();
+
+    if (!currentValue) {
+      rng.setValue(v);
+      Logger.log('[C64 WRITE LB] Escrito en ' + colName + ': ' + v.substring(0, 50));
+    } else {
+      Logger.log('[C64 WRITE LB] Respetado valor manual en ' + colName);
+    }
+  }
+
+  setIfEmpty_('SINOPSIS', data.sinopsis);
+  setIfEmpty_('CARÁTULA', data.caratula);
+  setIfEmpty_('CARATULA', data.caratula);
+  setIfEmpty_('VIDEO', data.video);
+
+  Logger.log('[C64 WRITE LB] Escritura completada en fila ' + row);
+}
+
 
 /**
  * ============================================
@@ -4694,6 +4842,8 @@ function detectarFuenteDeLink_(link) {
   return 'UNKNOWN';
 }
 
+
+
 /**
  * Extrae el ID de juego de una URL de LaunchBox
  * Ejemplo: https://gamesdb.launchbox-app.com/games/details/12345 → "12345"
@@ -4963,8 +5113,14 @@ function fetchC64_fromLaunchBox_(titulo, overrides, gameIdDirecto) {
     // PASO 1: OBTENER ID DEL JUEGO
     // ====================================
     let gameId = gameIdDirecto;
+    let gameUrl = '';
     
-    if (!gameId) {
+    if (launchboxUrlDirecta) {
+      gameUrl = String(launchboxUrlDirecta).trim();
+      if (!gameId) {
+        gameId = extraerIdDeLaunchBoxUrl_(gameUrl) || '';
+      }
+    } else if (!gameId) {
       gameId = buscarJuegoEnLaunchBox_(titulo);
       
       if (!gameId) {
@@ -4973,12 +5129,14 @@ function fetchC64_fromLaunchBox_(titulo, overrides, gameIdDirecto) {
       }
     }
     
-    Logger.log('[LAUNCHBOX] Juego C64 verificado, ID: ' + gameId);
+    Logger.log('[LAUNCHBOX] Juego C64 verificado, ID: ' + (gameId || 'N/A'));
     
     // ====================================
     // PASO 2: OBTENER PÁGINA DE DETALLES
     // ====================================
-    const gameUrl = 'https://gamesdb.launchbox-app.com/games/details/' + gameId;
+    if (!gameUrl) {
+      gameUrl = 'https://gamesdb.launchbox-app.com/games/details/' + gameId;
+    }
     const res = UrlFetchApp.fetch(gameUrl, { muteHttpExceptions: true });
     
     if (res.getResponseCode() !== 200) {
@@ -5391,4 +5549,3 @@ function parseSheetRevistas_(revistasText) {
   
   return revistas;
 }
-
