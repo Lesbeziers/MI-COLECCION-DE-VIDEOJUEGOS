@@ -4842,6 +4842,35 @@ function detectarFuenteDeLink_(link) {
   return 'UNKNOWN';
 }
 
+/**
+ * Extrae URLs del texto y clasifica Lemon64 / LaunchBox.
+ */
+function parseLinkUrls_(linkText) {
+  const text = String(linkText || '');
+  const matches = text.match(/https?:\/\/[^\s]+/gi) || [];
+  const urls = matches.map(function(url) {
+    return url.replace(/[),.;]+$/g, '');
+  });
+
+  let lemonUrl = null;
+  let launchboxUrl = null;
+
+  urls.forEach(function(url) {
+    const lower = String(url).toLowerCase();
+    if (!lemonUrl && lower.includes('lemon64.com')) {
+      lemonUrl = url;
+    }
+    if (!launchboxUrl && lower.includes('gamesdb.launchbox-app.com/games/details/')) {
+      launchboxUrl = url;
+    }
+  });
+
+  return {
+    lemonUrl: lemonUrl,
+    launchboxUrl: launchboxUrl,
+    urls: urls
+  };
+}
 
 
 /**
